@@ -108,7 +108,7 @@ Patch6: postgresql-perl-rpath.patch
 Patch8: postgresql-prefer-ncurses.patch
 Patch9: postgresql-use-zoneinfo.patch
 
-BuildRequires: perl glibc-devel bison flex autoconf
+BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex autoconf
 Prereq: /sbin/ldconfig initscripts
 
 %if %python || %plpython
@@ -829,6 +829,7 @@ rm -rf $RPM_BUILD_ROOT
   postgresql-server need not be turned for routine timezone updates
 - Don't remove postgres user/group during RPM uninstall, per Fedora
   packaging guidelines
+- Recent perl changes in rawhide mean we need a more specific BuildRequires
 
 * Wed Jun 20 2007 Tom Lane <tgl@redhat.com> 8.2.4-2
 - Fix oversight in postgresql-test makefile: pg_regress isn't a shell script
