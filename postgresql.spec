@@ -80,8 +80,8 @@
 
 Summary: PostgreSQL client programs and libraries
 Name: postgresql
-Version: 8.2.4
-Release: 2%{?dist}
+Version: 8.2.5
+Release: 1%{?dist}
 License: BSD
 Group: Applications/Databases
 Url: http://www.postgresql.org/ 
@@ -91,13 +91,14 @@ Source3: postgresql.init
 Source4: Makefile.regress
 Source5: pg_config.h
 Source6: README.rpm-dist
+Source7: ecpg_config.h
 Source14: postgresql.pam
 Source15: postgresql-bashprofile
 Source16: filter-requires-perl-Pg.sh
 Source17: http://www.postgresql.org/docs/manuals/postgresql-8.2.1-US.pdf
 Source18: ftp://ftp.pygresql.org/pub/distrib/PyGreSQL-3.8.1.tgz
-Source19: http://pgfoundry.org/projects/pgtclng/pgtcl1.5.3.tar.gz
-Source20: http://pgfoundry.org/projects/pgtclng/pgtcldocs-20060909.zip
+Source19: http://pgfoundry.org/projects/pgtclng/pgtcl1.6.0.tar.gz
+Source20: http://pgfoundry.org/projects/pgtclng/pgtcldocs-20070115.zip
 
 Patch1: rpm-pgsql.patch
 Patch3: postgresql-logging.patch
@@ -105,6 +106,7 @@ Patch4: postgresql-test.patch
 Patch5: pgtcl-no-rpath.patch
 Patch6: postgresql-perl-rpath.patch
 Patch8: postgresql-prefer-ncurses.patch
+Patch9: postgresql-use-zoneinfo.patch
 
 BuildRequires: perl glibc-devel bison flex autoconf
 Prereq: /sbin/ldconfig initscripts
@@ -342,6 +344,7 @@ system, including regression tests and benchmarks.
 # patch5 is applied later
 %patch6 -p1
 %patch8 -p1
+%patch9 -p1
 
 #call autoconf 2.53 or greater
 %aconfver
@@ -482,6 +485,8 @@ case `uname -i` in
     install -m 644 %{SOURCE5} $RPM_BUILD_ROOT/usr/include/
     mv $RPM_BUILD_ROOT/usr/include/pgsql/server/pg_config.h $RPM_BUILD_ROOT/usr/include/pgsql/server/pg_config_`uname -i`.h
     install -m 644 %{SOURCE5} $RPM_BUILD_ROOT/usr/include/pgsql/server/
+    mv $RPM_BUILD_ROOT/usr/include/ecpg_config.h $RPM_BUILD_ROOT/usr/include/ecpg_config_`uname -i`.h
+    install -m 644 %{SOURCE7} $RPM_BUILD_ROOT/usr/include/
     ;;
   *)
     ;;
@@ -601,10 +606,6 @@ fi
 /sbin/ldconfig 
 if [ $1 -ge 1 ] ; then
 	/sbin/service postgresql condrestart >/dev/null 2>&1 || :
-fi
-if [ $1 = 0 ] ; then
-	userdel postgres >/dev/null 2>&1 || :
-	groupdel postgres >/dev/null 2>&1 || : 
 fi
 
 %if %plperl
@@ -745,7 +746,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/pgsql/postgres.shdescription
 %{_datadir}/pgsql/system_views.sql
 %{_datadir}/pgsql/*.sample
-%{_datadir}/pgsql/timezone/
 %{_datadir}/pgsql/timezonesets/
 %{_libdir}/pgsql/plpgsql.so
 %dir %{_datadir}/pgsql
@@ -822,6 +822,14 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Thu Sep 20 2007 Tom Lane <tgl@redhat.com> 8.2.5-1
+- Update to PostgreSQL 8.2.5 and pgtcl 1.6.0
+- Fix multilib problem for /usr/include/ecpg_config.h (which is new in 8.2.x)
+- Use tzdata package's data files instead of private copy, so that
+  postgresql-server need not be turned for routine timezone updates
+- Don't remove postgres user/group during RPM uninstall, per Fedora
+  packaging guidelines
+
 * Wed Jun 20 2007 Tom Lane <tgl@redhat.com> 8.2.4-2
 - Fix oversight in postgresql-test makefile: pg_regress isn't a shell script
   anymore.  Per upstream bug 3398.
