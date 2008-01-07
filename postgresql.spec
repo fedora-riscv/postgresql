@@ -80,7 +80,7 @@
 
 Summary: PostgreSQL client programs and libraries
 Name: postgresql
-Version: 8.2.5
+Version: 8.2.6
 Release: 1%{?dist}
 License: BSD
 Group: Applications/Databases
@@ -101,6 +101,7 @@ Source19: http://pgfoundry.org/projects/pgtclng/pgtcl1.6.0.tar.gz
 Source20: http://pgfoundry.org/projects/pgtclng/pgtcldocs-20070115.zip
 
 Patch1: rpm-pgsql.patch
+Patch2: postgresql-ac-version.patch
 Patch3: postgresql-logging.patch
 Patch4: postgresql-test.patch
 Patch5: pgtcl-no-rpath.patch
@@ -108,7 +109,7 @@ Patch6: postgresql-perl-rpath.patch
 Patch8: postgresql-prefer-ncurses.patch
 Patch9: postgresql-use-zoneinfo.patch
 
-BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex autoconf
+BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex autoconf gawk
 Prereq: /sbin/ldconfig initscripts
 
 %if %python || %plpython
@@ -339,6 +340,7 @@ system, including regression tests and benchmarks.
 %prep
 %setup -q 
 %patch1 -p1
+%patch2 -p1
 %patch3 -p1
 %patch4 -p1
 # patch5 is applied later
@@ -822,6 +824,10 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Mon Jan  7 2008 Tom Lane <tgl@redhat.com> 8.2.6-1
+- Update to PostgreSQL 8.2.6 to fix CVE-2007-4769, CVE-2007-4772,
+  CVE-2007-6067, CVE-2007-6600, CVE-2007-6601
+
 * Thu Sep 20 2007 Tom Lane <tgl@redhat.com> 8.2.5-1
 - Update to PostgreSQL 8.2.5 and pgtcl 1.6.0
 - Fix multilib problem for /usr/include/ecpg_config.h (which is new in 8.2.x)
