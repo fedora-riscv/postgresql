@@ -80,7 +80,7 @@
 
 Summary: PostgreSQL client programs and libraries
 Name: postgresql
-Version: 8.2.6
+Version: 8.2.7
 Release: 1%{?dist}
 License: BSD
 Group: Applications/Databases
@@ -818,6 +818,9 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Wed Mar 26 2008 Tom Lane <tgl@redhat.com> 8.2.7-1
+- Update to PostgreSQL 8.2.7
+
 * Mon Jan  7 2008 Tom Lane <tgl@redhat.com> 8.2.6-1
 - Update to PostgreSQL 8.2.6 to fix CVE-2007-4769, CVE-2007-4772,
   CVE-2007-6067, CVE-2007-6600, CVE-2007-6601
