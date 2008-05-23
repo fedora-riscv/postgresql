@@ -82,7 +82,7 @@
 Summary: PostgreSQL client programs and libraries
 Name: postgresql
 Version: 8.3.1
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: BSD
 Group: Applications/Databases
 Url: http://www.postgresql.org/ 
@@ -108,7 +108,6 @@ Patch4: postgresql-test.patch
 Patch5: pgtcl-no-rpath.patch
 Patch6: postgresql-perl-rpath.patch
 Patch8: postgresql-prefer-ncurses.patch
-Patch9: postgresql-8.3.1-sparc64-test.patch
 
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex autoconf gawk
 BuildRequires: perl(ExtUtils::Embed), perl-devel
@@ -354,11 +353,6 @@ system, including regression tests and benchmarks.
 # patch5 is applied later
 %patch6 -p1
 %patch8 -p1
-#sparc64 gives different output for some division by zero errors
-#filed upstream as bug #4190
-%ifarch sparc64
-%patch9 -p1
-%endif
 #call autoconf 2.53 or greater
 %aconfver
 
@@ -846,6 +840,9 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Fri May 22 2008 Dennis Gilmore <dennis@ausil.us> 8.3.1-2
+- at Tom's request remove conditionalised patch letting sparc64 builds fail
+
 * Fri May 22 2008 Dennis Gilmore <dennis@ausil.us> 8.3.1-2
 - apply patch on sparc64 only to cover differences in output 
 - filed upstream as bug #4190
