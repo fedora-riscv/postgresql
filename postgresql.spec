@@ -80,7 +80,7 @@
 
 Summary: PostgreSQL client programs and libraries
 Name: postgresql
-Version: 8.2.7
+Version: 8.2.9
 Release: 1%{?dist}
 License: BSD
 Group: Applications/Databases
@@ -818,6 +818,9 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Wed Jun 11 2008 Tom Lane <tgl@redhat.com> 8.2.9-1
+- Update to PostgreSQL 8.2.9
+
 * Wed Mar 26 2008 Tom Lane <tgl@redhat.com> 8.2.7-1
 - Update to PostgreSQL 8.2.7
 
