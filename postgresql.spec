@@ -68,6 +68,7 @@
 %{!?tcl:%define tcl 1}
 %{!?ssl:%define ssl 1}
 %{!?kerberos:%define kerberos 1}
+%{!?ldap:%define ldap 1}
 %{!?nls:%define nls 1}
 %{!?uuid:%define uuid 1}
 %{!?xml:%define xml 1}
@@ -81,8 +82,8 @@
 
 Summary: PostgreSQL client programs and libraries
 Name: postgresql
-Version: 8.3.1
-Release: 3%{?dist}
+Version: 8.3.3
+Release: 1%{?dist}
 License: BSD
 Group: Applications/Databases
 Url: http://www.postgresql.org/ 
@@ -96,7 +97,7 @@ Source7: ecpg_config.h
 Source14: postgresql.pam
 Source15: postgresql-bashprofile
 Source16: filter-requires-perl-Pg.sh
-Source17: http://www.postgresql.org/docs/manuals/postgresql-8.3.1-US.pdf
+Source17: http://www.postgresql.org/docs/manuals/postgresql-8.3.3-US.pdf
 Source18: ftp://ftp.pygresql.org/pub/distrib/PyGreSQL-3.8.1.tgz
 Source19: http://pgfoundry.org/projects/pgtclng/pgtcl1.6.2.tar.gz
 Source20: http://pgfoundry.org/projects/pgtclng/pgtcldocs-20070115.zip
@@ -107,7 +108,6 @@ Patch3: postgresql-logging.patch
 Patch4: postgresql-test.patch
 Patch5: pgtcl-no-rpath.patch
 Patch6: postgresql-perl-rpath.patch
-Patch8: postgresql-prefer-ncurses.patch
 
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex autoconf gawk
 BuildRequires: perl(ExtUtils::Embed), perl-devel
@@ -137,6 +137,10 @@ BuildRequires: krb5-devel
 BuildRequires: e2fsprogs-devel
 %endif
 
+%if %ldap
+BuildRequires: openldap-devel
+%endif
+
 %if %nls
 BuildRequires: gettext >= 0.10.35
 %endif
@@ -152,6 +156,9 @@ BuildRequires: libxml2-devel libxslt-devel
 %if %pam
 BuildRequires: pam-devel
 %endif
+
+# main package requires -libs subpackage
+Requires: postgresql-libs = %{version}-%{release}
 
 Obsoletes: postgresql-clients
 Obsoletes: postgresql-perl
@@ -194,7 +201,7 @@ PostgreSQL server.
 Summary: The programs needed to create and run a PostgreSQL server
 Group: Applications/Databases
 Prereq: /usr/sbin/useradd /sbin/chkconfig 
-Prereq: postgresql = %{version}-%{release} libpq.so
+Requires: postgresql = %{version}-%{release}
 Obsoletes: rh-postgresql-server
 
 %description server
@@ -212,7 +219,7 @@ to install the postgresql package.
 %package docs
 Summary: Extra documentation for PostgreSQL
 Group: Applications/Databases
-Prereq: postgresql = %{version}-%{release}
+Requires: postgresql = %{version}-%{release}
 Obsoletes: rh-postgresql-docs
 
 %description docs
@@ -224,7 +231,7 @@ the FAQ, and source files for the PostgreSQL tutorial.
 %package contrib
 Summary: Contributed source and binaries distributed with PostgreSQL
 Group: Applications/Databases
-Prereq: postgresql = %{version}-%{release}
+Requires: postgresql = %{version}-%{release}
 Obsoletes: rh-postgresql-contrib
 
 %description contrib
@@ -235,8 +242,7 @@ included in the PostgreSQL distribution.
 %package devel
 Summary: PostgreSQL development header files and libraries
 Group: Development/Libraries
-Prereq: postgresql = %{version}-%{release}
-Requires: postgresql-libs = %{version}-%{release}
+Requires: postgresql = %{version}-%{release}
 Obsoletes: rh-postgresql-devel
 
 %description devel
@@ -251,8 +257,7 @@ develop applications which will interact with a PostgreSQL server.
 %package plperl
 Summary: The Perl procedural language for PostgreSQL
 Group: Applications/Databases
-PreReq: postgresql = %{version}-%{release}
-PreReq: postgresql-server = %{version}-%{release}
+Requires: postgresql-server = %{version}-%{release}
 Obsoletes: rh-postgresql-pl
 Obsoletes: postgresql-pl
 Requires: perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
@@ -268,8 +273,7 @@ procedural language for the backend.
 %package plpython
 Summary: The Python procedural language for PostgreSQL
 Group: Applications/Databases
-PreReq: postgresql = %{version}-%{release}
-PreReq: postgresql-server = %{version}-%{release}
+Requires: postgresql-server = %{version}-%{release}
 Obsoletes: rh-postgresql-pl
 Obsoletes: postgresql-pl
 
@@ -284,8 +288,7 @@ procedural language for the backend.
 %package pltcl
 Summary: The Tcl procedural language for PostgreSQL
 Group: Applications/Databases
-PreReq: postgresql = %{version}-%{release}
-PreReq: postgresql-server = %{version}-%{release}
+Requires: postgresql-server = %{version}-%{release}
 Obsoletes: rh-postgresql-pl
 Obsoletes: postgresql-pl
 
@@ -300,6 +303,7 @@ procedural language for the backend.
 %package tcl
 Summary: A Tcl client library for PostgreSQL
 Group: Applications/Databases
+# this is intentionally not a version-specific Requires:
 Requires: libpq.so
 Requires: tcl >= 8.3
 Obsoletes: rh-postgresql-tcl
@@ -315,6 +319,7 @@ and its documentation.
 %package python
 Summary: Development module for Python code to access a PostgreSQL DB
 Group: Applications/Databases
+# this is intentionally not a version-specific Requires:
 Requires: libpq.so
 Requires: python mx
 Obsoletes: rh-postgresql-python
@@ -331,8 +336,7 @@ database.
 %package test
 Summary: The test suite distributed with PostgreSQL
 Group: Applications/Databases
-PreReq: postgresql = %{version}-%{release}
-PreReq: postgresql-server = %{version}-%{release}
+Requires: postgresql-server = %{version}-%{release}
 Obsoletes: rh-postgresql-test
 
 %description test
@@ -352,7 +356,7 @@ system, including regression tests and benchmarks.
 %patch4 -p1
 # patch5 is applied later
 %patch6 -p1
-%patch8 -p1
+
 #call autoconf 2.53 or greater
 %aconfver
 
@@ -390,6 +394,10 @@ CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS
 # Strip out -ffast-math from CFLAGS....
 CFLAGS=`echo $CFLAGS|xargs -n 1|grep -v ffast-math|xargs -n 100`
 
+# Use --as-needed to eliminate unnecessary link dependencies.
+# Hopefully upstream will do this for itself in some future release.
+LDFLAGS="-Wl,--as-needed"; export LDFLAGS
+
 %configure --disable-rpath \
 %if %beta
 	--enable-debug \
@@ -404,6 +412,9 @@ CFLAGS=`echo $CFLAGS|xargs -n 1|grep -v ffast-math|xargs -n 100`
 %endif
 %if %plpython
 	--with-python \
+%endif
+%if %ldap
+	--with-ldap \
 %endif
 %if %ssl
 	--with-openssl \
@@ -840,6 +851,18 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Wed Jun 11 2008 Tom Lane <tgl@redhat.com> 8.3.3-1
+- Update to PostgreSQL 8.3.3.
+- Remove postgresql-prefer-ncurses.patch, no longer needed in recent
+  Fedora releases because libtermcap is gone.
+- Enable LDAP support
+Resolves: #445315
+- Use -Wl,--as-needed to suppress bogus dependencies for libraries that
+  are really only needed by some of the subpackages
+- Clean up cross-subpackage Requires: to ensure that updating any one
+  subpackage brings in the matching versions of others.
+Resolves: #444271
+
 * Fri May 22 2008 Dennis Gilmore <dennis@ausil.us> 8.3.1-2
 - at Tom's request remove conditionalised patch letting sparc64 builds fail
 
