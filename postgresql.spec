@@ -83,7 +83,7 @@
 Summary: PostgreSQL client programs and libraries
 Name: postgresql
 Version: 8.3.5
-Release: 1%{?dist}
+Release: 1%{?dist}.1
 License: BSD
 Group: Applications/Databases
 Url: http://www.postgresql.org/ 
@@ -393,6 +393,10 @@ CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS
 
 # Strip out -ffast-math from CFLAGS....
 CFLAGS=`echo $CFLAGS|xargs -n 1|grep -v ffast-math|xargs -n 100`
+# use -O1 on sparc64
+%ifarch sparc64
+CFLAGS=`echo $CFLAGS| sed -e "s|-O2|-O1|g" `
+%endif
 
 # Use --as-needed to eliminate unnecessary link dependencies.
 # Hopefully upstream will do this for itself in some future release.
@@ -859,6 +863,9 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Wed Jan 21 2009 Dennis Gilmore <dennis@ausil.us> 8.3.5-1.1
+- use -O1 on sparc64
+
 * Sun Nov  2 2008 Tom Lane <tgl@redhat.com> 8.3.5-1
 - Update to PostgreSQL 8.3.5.
 - Improve display from init script's initdb action, per Michael Schwendt
