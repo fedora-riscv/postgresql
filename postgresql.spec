@@ -76,6 +76,10 @@
 %{!?pgfts:%define pgfts 1}
 %{!?runselftest:%define runselftest 1}
 
+%ifarch alpha
+  %define runselftest 0
+%endif
+
 # Python major version.
 %{!?python_sitearch: %define python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
 
