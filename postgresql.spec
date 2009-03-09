@@ -76,10 +76,6 @@
 %{!?pgfts:%define pgfts 1}
 %{!?runselftest:%define runselftest 1}
 
-%ifarch alpha
-  %define runselftest 0
-%endif
-
 # Python major version.
 %{!?python_sitearch: %define python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
 
@@ -87,7 +83,7 @@
 Summary: PostgreSQL client programs and libraries
 Name: postgresql
 Version: 8.3.6
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD
 Group: Applications/Databases
 Url: http://www.postgresql.org/ 
@@ -397,8 +393,8 @@ CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS
 
 # Strip out -ffast-math from CFLAGS....
 CFLAGS=`echo $CFLAGS|xargs -n 1|grep -v ffast-math|xargs -n 100`
-# use -O1 on sparc64
-%ifarch sparc64
+# use -O1 on sparc64 and alpha
+%ifarch sparc64 alpha
 CFLAGS=`echo $CFLAGS| sed -e "s|-O2|-O1|g" `
 %endif
 
@@ -867,6 +863,10 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Mon Mar  9 2009 Oliver Falk <oliver@linux-kernel.at> 8.3.6-2
+- Use -O1 on alpha, as on sparc64
+- Renable selftests on alpha again
+
 * Sat Feb  7 2009 Tom Lane <tgl@redhat.com> 8.3.6-1
 - Update to PostgreSQL 8.3.6, for various fixes described at
   http://www.postgresql.org/docs/8.3/static/release-8-3-6.html
