@@ -73,6 +73,7 @@
 %{!?uuid:%define uuid 1}
 %{!?xml:%define xml 1}
 %{!?pam:%define pam 1}
+%{!?sdt:%define sdt 0}
 %{!?pgfts:%define pgfts 1}
 %{!?runselftest:%define runselftest 1}
 
@@ -82,8 +83,8 @@
 
 Summary: PostgreSQL client programs and libraries
 Name: postgresql
-Version: 8.3.6
-Release: 2%{?dist}
+Version: 8.3.7
+Release: 1%{?dist}
 License: BSD
 Group: Applications/Databases
 Url: http://www.postgresql.org/ 
@@ -97,7 +98,7 @@ Source7: ecpg_config.h
 Source14: postgresql.pam
 Source15: postgresql-bashprofile
 Source16: filter-requires-perl-Pg.sh
-Source17: http://www.postgresql.org/docs/manuals/postgresql-8.3.6-US.pdf
+Source17: http://www.postgresql.org/docs/manuals/postgresql-8.3.7-US.pdf
 Source18: ftp://ftp.pygresql.org/pub/distrib/PyGreSQL-3.8.1.tgz
 Source19: http://pgfoundry.org/projects/pgtclng/pgtcl1.6.2.tar.gz
 Source20: http://pgfoundry.org/projects/pgtclng/pgtcldocs-20070115.zip
@@ -155,6 +156,10 @@ BuildRequires: libxml2-devel libxslt-devel
 
 %if %pam
 BuildRequires: pam-devel
+%endif
+
+%if %sdt
+BuildRequires: systemtap-sdt-devel
 %endif
 
 # main package requires -libs subpackage
@@ -439,6 +444,9 @@ LDFLAGS="-Wl,--as-needed"; export LDFLAGS
 %endif
 %if %nls
 	--enable-nls \
+%endif
+%if %sdt
+	--enable-dtrace \
 %endif
 %if %pgfts
 	--enable-thread-safety \
@@ -863,6 +871,11 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Sat Mar 21 2009 Tom Lane <tgl@redhat.com> 8.3.7-1
+- Update to PostgreSQL 8.3.7, for various fixes described at
+  http://www.postgresql.org/docs/8.3/static/release-8-3-7.html
+  notably the fix for CVE-2009-0922
+
 * Mon Mar  9 2009 Oliver Falk <oliver@linux-kernel.at> 8.3.6-2
 - Use -O1 on alpha, as on sparc64
 - Renable selftests on alpha again
