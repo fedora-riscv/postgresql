@@ -84,8 +84,8 @@
 Summary: PostgreSQL client programs and libraries
 Name: postgresql
 Version: 8.3.7
-Release: 1%{?dist}
-License: BSD
+Release: 1%{?dist}.1
+License: MIT
 Group: Applications/Databases
 Url: http://www.postgresql.org/ 
 
@@ -871,6 +871,9 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Thu Aug 20 2009 Tom "spot" Callaway <tcallawa@redhat.com> 8.3.7-1.1
+- fix license tag
+
 * Sat Mar 21 2009 Tom Lane <tgl@redhat.com> 8.3.7-1
 - Update to PostgreSQL 8.3.7, for various fixes described at
   http://www.postgresql.org/docs/8.3/static/release-8-3-7.html
