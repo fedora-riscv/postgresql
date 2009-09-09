@@ -1,0 +1,20 @@
+Workaround for broken systemtap dtrace as of 9/2009 --- it puts the
+probes.o output file in the wrong place (bz #520469).  That file is
+just an empty stub anyway in the systemtap implementation, so easiest
+fix is to not ask for it to be generated.
+
+
+diff -Naur postgresql-8.3.7.orig/src/backend/Makefile postgresql-8.3.7/src/backend/Makefile
+--- postgresql-8.3.7.orig/src/backend/Makefile	2008-01-01 14:45:45.000000000 -0500
++++ postgresql-8.3.7/src/backend/Makefile	2009-09-06 13:03:48.000000000 -0400
+@@ -20,10 +20,6 @@
+ 
+ SUBSYSOBJS = $(DIRS:%=%/SUBSYS.o)
+ 
+-ifeq ($(enable_dtrace), yes)
+-LOCALOBJS += utils/probes.o
+-endif
+-
+ OBJS = $(SUBSYSOBJS) $(LOCALOBJS) $(top_builddir)/src/port/libpgport_srv.a
+ 
+ # We put libpgport into OBJS, so remove it from LIBS; also add libldap

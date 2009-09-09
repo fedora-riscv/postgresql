@@ -83,8 +83,9 @@
 
 Summary: PostgreSQL client programs and libraries
 Name: postgresql
-Version: 8.3.7
-Release: 1%{?dist}.1
+Version: 8.3.8
+Release: 1%{?dist}
+# PG considers their license to be simplified BSD, but it's more nearly MIT
 License: MIT
 Group: Applications/Databases
 Url: http://www.postgresql.org/ 
@@ -98,7 +99,7 @@ Source7: ecpg_config.h
 Source14: postgresql.pam
 Source15: postgresql-bashprofile
 Source16: filter-requires-perl-Pg.sh
-Source17: http://www.postgresql.org/docs/manuals/postgresql-8.3.7-US.pdf
+Source17: http://www.postgresql.org/docs/manuals/postgresql-8.3.8-US.pdf
 Source18: ftp://ftp.pygresql.org/pub/distrib/PyGreSQL-3.8.1.tgz
 Source19: http://pgfoundry.org/projects/pgtclng/pgtcl1.6.2.tar.gz
 Source20: http://pgfoundry.org/projects/pgtclng/pgtcldocs-20070115.zip
@@ -109,6 +110,7 @@ Patch3: postgresql-logging.patch
 Patch4: postgresql-test.patch
 Patch5: pgtcl-no-rpath.patch
 Patch6: postgresql-perl-rpath.patch
+Patch7: postgresql-no-probes.patch
 
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex autoconf gawk
 BuildRequires: perl(ExtUtils::Embed), perl-devel
@@ -361,6 +363,7 @@ system, including regression tests and benchmarks.
 %patch4 -p1
 # patch5 is applied later
 %patch6 -p1
+%patch7 -p1
 
 #call autoconf 2.53 or greater
 %aconfver
@@ -871,6 +874,14 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Wed Sep  9 2009 Tom Lane <tgl@redhat.com> 8.3.8-1
+- Update to PostgreSQL 8.3.8, for various fixes described at
+  http://www.postgresql.org/docs/8.3/static/release-8-3-8.html
+  including three security issues
+Related: #522084
+Related: #522085
+Related: #522092
+
 * Thu Aug 20 2009 Tom "spot" Callaway <tcallawa@redhat.com> 8.3.7-1.1
 - fix license tag
 
