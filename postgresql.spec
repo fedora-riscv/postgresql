@@ -84,7 +84,7 @@
 Summary: PostgreSQL client programs and libraries
 Name: postgresql
 Version: 8.3.8
-Release: 1%{?dist}
+Release: 2%{?dist}
 # PG considers their license to be simplified BSD, but it's more nearly MIT
 License: MIT
 Group: Applications/Databases
@@ -874,6 +874,10 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Mon Sep 21 2009 Tom Lane <tgl@redhat.com> 8.3.8-2
+- Ensure pgstartup.log gets the right ownership/permissions during initdb
+Resolves: #498959
+
 * Wed Sep  9 2009 Tom Lane <tgl@redhat.com> 8.3.8-1
 - Update to PostgreSQL 8.3.8, for various fixes described at
   http://www.postgresql.org/docs/8.3/static/release-8-3-8.html
