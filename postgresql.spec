@@ -83,8 +83,8 @@
 
 Summary: PostgreSQL client programs and libraries
 Name: postgresql
-Version: 8.3.8
-Release: 2%{?dist}
+Version: 8.3.9
+Release: 1%{?dist}
 # PG considers their license to be simplified BSD, but it's more nearly MIT
 License: MIT
 Group: Applications/Databases
@@ -99,7 +99,7 @@ Source7: ecpg_config.h
 Source14: postgresql.pam
 Source15: postgresql-bashprofile
 Source16: filter-requires-perl-Pg.sh
-Source17: http://www.postgresql.org/docs/manuals/postgresql-8.3.8-US.pdf
+Source17: http://www.postgresql.org/docs/manuals/postgresql-8.3.9-US.pdf
 Source18: ftp://ftp.pygresql.org/pub/distrib/PyGreSQL-3.8.1.tgz
 Source19: http://pgfoundry.org/projects/pgtclng/pgtcl1.6.2.tar.gz
 Source20: http://pgfoundry.org/projects/pgtclng/pgtcldocs-20070115.zip
@@ -874,6 +874,13 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Wed Dec 16 2009 Tom Lane <tgl@redhat.com> 8.3.9-1
+- Update to PostgreSQL 8.3.9, for various fixes described at
+  http://www.postgresql.org/docs/8.3/static/release-8-3-9.html
+  including two security issues
+Related: #546321
+Related: #547662
+
 * Mon Sep 21 2009 Tom Lane <tgl@redhat.com> 8.3.8-2
 - Ensure pgstartup.log gets the right ownership/permissions during initdb
 Resolves: #498959
