@@ -56,12 +56,13 @@
 %{!?python_sitearch: %define python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
 
 
-Summary: PostgreSQL client programs and libraries
+Summary: PostgreSQL client programs
 Name: postgresql
 %define majorversion 8.4
-Version: 8.4.1
-Release: 3%{?dist}
-# PG considers their license to be simplified BSD, but it's more nearly MIT
+Version: 8.4.2
+Release: 1%{?dist}
+# PostgreSQL calls their license simplified BSD, but the requirements are
+# more similar to other MIT licenses.
 License: MIT
 Group: Applications/Databases
 Url: http://www.postgresql.org/ 
@@ -75,7 +76,7 @@ Source7: ecpg_config.h
 Source14: postgresql.pam
 Source15: postgresql-bashprofile
 Source16: filter-requires-perl-Pg.sh
-Source17: http://www.postgresql.org/docs/manuals/postgresql-8.4.1-US.pdf
+Source17: http://www.postgresql.org/docs/manuals/postgresql-8.4.2-US.pdf
 Source18: ftp://ftp.pygresql.org/pub/distrib/PyGreSQL-3.8.1.tgz
 Source19: http://pgfoundry.org/projects/pgtclng/pgtcl1.6.2.tar.gz
 Source20: http://pgfoundry.org/projects/pgtclng/pgtcldocs-20070115.zip
@@ -89,7 +90,8 @@ Patch6: postgresql-perl-rpath.patch
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex autoconf gawk
 BuildRequires: perl(ExtUtils::Embed), perl-devel
 # for /sbin/ldconfig
-Prereq: glibc initscripts
+Requires(post): glibc initscripts
+Requires(postun): glibc initscripts
 
 %if %python || %plpython
 BuildRequires: python-devel
@@ -140,11 +142,6 @@ BuildRequires: systemtap-sdt-devel
 # main package requires -libs subpackage
 Requires: postgresql-libs = %{version}-%{release}
 
-Obsoletes: postgresql-clients
-Obsoletes: postgresql-perl
-Obsoletes: postgresql-tk
-Obsoletes: rh-postgresql
-
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 %description
@@ -168,8 +165,7 @@ if you're installing the postgresql-server package.
 %package libs
 Summary: The shared libraries required for any PostgreSQL clients
 Group: Applications/Databases
-Provides: libpq.so
-Obsoletes: rh-postgresql-libs
+Provides: libpq.so = %{version}-%{release}
 
 %description libs
 The postgresql-libs package provides the essential shared libraries for any 
@@ -180,9 +176,10 @@ PostgreSQL server.
 %package server
 Summary: The programs needed to create and run a PostgreSQL server
 Group: Applications/Databases
-Prereq: /usr/sbin/useradd /sbin/chkconfig 
 Requires: postgresql = %{version}-%{release}
-Obsoletes: rh-postgresql-server
+Requires(pre): /usr/sbin/useradd
+Requires(post): /sbin/chkconfig
+Requires(preun): /sbin/chkconfig
 
 %description server
 The postgresql-server package includes the programs needed to create
@@ -200,7 +197,6 @@ to install the postgresql package.
 Summary: Extra documentation for PostgreSQL
 Group: Applications/Databases
 Requires: postgresql = %{version}-%{release}
-Obsoletes: rh-postgresql-docs
 
 %description docs
 The postgresql-docs package includes some additional documentation for
@@ -209,10 +205,9 @@ and source files for the PostgreSQL tutorial.
 
 
 %package contrib
-Summary: Contributed source and binaries distributed with PostgreSQL
+Summary: Contributed modules distributed with PostgreSQL
 Group: Applications/Databases
 Requires: postgresql = %{version}-%{release}
-Obsoletes: rh-postgresql-contrib
 
 %description contrib
 The postgresql-contrib package contains contributed packages that are
@@ -223,7 +218,6 @@ included in the PostgreSQL distribution.
 Summary: PostgreSQL development header files and libraries
 Group: Development/Libraries
 Requires: postgresql = %{version}-%{release}
-Obsoletes: rh-postgresql-devel
 
 %description devel
 The postgresql-devel package contains the header files and libraries
@@ -237,8 +231,6 @@ develop applications which will interact with a PostgreSQL server.
 Summary: The Perl procedural language for PostgreSQL
 Group: Applications/Databases
 Requires: postgresql-server = %{version}-%{release}
-Obsoletes: rh-postgresql-pl
-Obsoletes: postgresql-pl
 Requires: perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 
 %description plperl
@@ -252,8 +244,6 @@ procedural language for the backend.
 Summary: The Python procedural language for PostgreSQL
 Group: Applications/Databases
 Requires: postgresql-server = %{version}-%{release}
-Obsoletes: rh-postgresql-pl
-Obsoletes: postgresql-pl
 
 %description plpython
 PostgreSQL is an advanced Object-Relational database management
@@ -266,8 +256,6 @@ procedural language for the backend.
 Summary: The Tcl procedural language for PostgreSQL
 Group: Applications/Databases
 Requires: postgresql-server = %{version}-%{release}
-Obsoletes: rh-postgresql-pl
-Obsoletes: postgresql-pl
 
 %description pltcl
 PostgreSQL is an advanced Object-Relational database management
@@ -282,7 +270,6 @@ Group: Applications/Databases
 # this is intentionally not a version-specific Requires:
 Requires: libpq.so
 Requires: tcl >= 8.5
-Obsoletes: rh-postgresql-tcl
 
 %description tcl
 PostgreSQL is an advanced Object-Relational database management
@@ -297,7 +284,6 @@ Group: Applications/Databases
 # this is intentionally not a version-specific Requires:
 Requires: libpq.so
 Requires: python mx
-Obsoletes: rh-postgresql-python
 
 %description python
 PostgreSQL is an advanced Object-Relational database management
@@ -311,7 +297,6 @@ database.
 Summary: The test suite distributed with PostgreSQL
 Group: Applications/Databases
 Requires: postgresql-server = %{version}-%{release}
-Obsoletes: rh-postgresql-test
 
 %description test
 PostgreSQL is an advanced Object-Relational database management
@@ -478,7 +463,7 @@ make -C contrib DESTDIR=$RPM_BUILD_ROOT install
 # multilib header hack; note pg_config.h is installed in two places!
 # we only apply this to known Red Hat multilib arches, per bug #177564
 case `uname -i` in
-  i386 | x86_64 | ppc | ppc64 | s390 | s390x)
+  i386 | x86_64 | ppc | ppc64 | s390 | s390x | sparc | sparc64 )
     mv $RPM_BUILD_ROOT/usr/include/pg_config.h $RPM_BUILD_ROOT/usr/include/pg_config_`uname -i`.h
     install -m 644 %{SOURCE5} $RPM_BUILD_ROOT/usr/include/
     mv $RPM_BUILD_ROOT/usr/include/pgsql/server/pg_config.h $RPM_BUILD_ROOT/usr/include/pgsql/server/pg_config_`uname -i`.h
@@ -602,15 +587,7 @@ cat psql-%{majorversion}.lang >>main.lst
 
 %pre server
 groupadd -g 26 -o -r postgres >/dev/null 2>&1 || :
-useradd -M -n -g postgres -o -r -d /var/lib/pgsql -s /bin/bash \
-	-c "PostgreSQL Server" -u 26 postgres >/dev/null 2>&1 || :
-
-# If we're upgrading from rh-postgresql, we have to repeat the above actions
-# after rh-postgresql-server is uninstalled, because its postun script runs
-# after our pre script ...
-%triggerpostun -n postgresql-server -- rh-postgresql-server
-groupadd -g 26 -o -r postgres >/dev/null 2>&1 || :
-useradd -M -n -g postgres -o -r -d /var/lib/pgsql -s /bin/bash \
+useradd -M -N -g postgres -o -r -d /var/lib/pgsql -s /bin/bash \
 	-c "PostgreSQL Server" -u 26 postgres >/dev/null 2>&1 || :
 
 %post server
@@ -630,23 +607,18 @@ if [ $1 -ge 1 ] ; then
 fi
 
 %if %plperl
-%post -p /sbin/ldconfig   plperl
-%postun -p /sbin/ldconfig   plperl
+%post -p /sbin/ldconfig plperl
+%postun -p /sbin/ldconfig plperl
 %endif
 
 %if %plpython
-%post -p /sbin/ldconfig   plpython
-%postun -p /sbin/ldconfig   plpython
+%post -p /sbin/ldconfig plpython
+%postun -p /sbin/ldconfig plpython
 %endif
 
 %if %pltcl
-%post -p /sbin/ldconfig   pltcl
-%postun -p /sbin/ldconfig   pltcl
-%endif
-
-%if %test
-%post test
-chown -R postgres:postgres /usr/share/pgsql/test >/dev/null 2>&1 || :
+%post -p /sbin/ldconfig pltcl
+%postun -p /sbin/ldconfig pltcl
 %endif
 
 %clean
@@ -854,6 +826,18 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Wed Dec 16 2009 Tom Lane <tgl@redhat.com> 8.4.2-1
+- Update to PostgreSQL 8.4.2, for various fixes described at
+  http://www.postgresql.org/docs/8.4/static/release-8-4-2.html
+  including two security issues
+Related: #546321
+Related: #547662
+- Use -N not the obsolete -n in useradd call
+Resolves: #495727
+- Clean up specfile to eliminate rpmlint gripes, mainly by removing
+  no-longer-needed provisions for superseding rh-postgresql
+- add sparc/sparc64 to multilib header support
+
 * Mon Sep 21 2009 Tom Lane <tgl@redhat.com> 8.4.1-3
 - Ensure pgstartup.log gets the right ownership/permissions during initdb
 Resolves: #498959
