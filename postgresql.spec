@@ -85,8 +85,9 @@ Summary: PostgreSQL client programs and libraries
 Name: postgresql
 Version: 8.3.9
 Release: 1%{?dist}
-# PG considers their license to be simplified BSD, but it's more nearly MIT
-License: MIT
+# The PostgreSQL license is very similar to other MIT licenses, but the OSI
+# recognizes it as an independent license, so we do as well.
+License: PostgreSQL
 Group: Applications/Databases
 Url: http://www.postgresql.org/ 
 
@@ -874,6 +875,9 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Thu Feb 18 2010 Tom "spot" Callaway <tcallawa@redhat.com>
+- adjust license tag to reflect OSI decision
+
 * Wed Dec 16 2009 Tom Lane <tgl@redhat.com> 8.3.9-1
 - Update to PostgreSQL 8.3.9, for various fixes described at
   http://www.postgresql.org/docs/8.3/static/release-8-3-9.html
