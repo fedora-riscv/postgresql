@@ -54,9 +54,9 @@ Name: postgresql
 %global majorversion 8.4
 Version: 8.4.2
 Release: 6%{?dist}
-# PostgreSQL calls their license simplified BSD, but the requirements are
-# more similar to other MIT licenses.
-License: MIT
+# The PostgreSQL license is very similar to other MIT licenses, but the OSI
+# recognizes it as an independent license, so we do as well.
+License: PostgreSQL
 Group: Applications/Databases
 Url: http://www.postgresql.org/ 
 
@@ -711,6 +711,9 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Thu Feb 18 2010 Tom "spot" Callaway <tcallawa@redhat.com>
+- adjust license tag to reflect OSI decision
+
 * Tue Jan 26 2010 Tom Lane <tgl@redhat.com> 8.4.2-6
 - Emit explicit error message if user tries to build RPM as root
 Related: #558921
