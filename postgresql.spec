@@ -29,37 +29,35 @@
 # The base package, the lib package, the devel package, and the server package
 # always get built.
 
-%define beta 0
-%{?beta:%define __os_install_post /usr/lib/rpm/brp-compress}
+%global beta 0
+%{?beta:%global __os_install_post /usr/lib/rpm/brp-compress}
 
-%{!?aconfver:%define aconfver autoconf}
-
-%{!?tcldevel:%define tcldevel 1}
-%{!?test:%define test 1}
-%{!?plpython:%define plpython 1}
-%{!?pltcl:%define pltcl 1}
-%{!?plperl:%define plperl 1}
-%{!?python:%define python 1}
-%{!?tcl:%define tcl 1}
-%{!?ssl:%define ssl 1}
-%{!?kerberos:%define kerberos 1}
-%{!?ldap:%define ldap 1}
-%{!?nls:%define nls 1}
-%{!?uuid:%define uuid 1}
-%{!?xml:%define xml 1}
-%{!?pam:%define pam 1}
-%{!?sdt:%define sdt 1}
-%{!?pgfts:%define pgfts 1}
-%{!?runselftest:%define runselftest 1}
+%{!?tcldevel:%global tcldevel 1}
+%{!?test:%global test 1}
+%{!?plpython:%global plpython 1}
+%{!?pltcl:%global pltcl 1}
+%{!?plperl:%global plperl 1}
+%{!?python:%global python 1}
+%{!?tcl:%global tcl 1}
+%{!?ssl:%global ssl 1}
+%{!?kerberos:%global kerberos 1}
+%{!?ldap:%global ldap 1}
+%{!?nls:%global nls 1}
+%{!?uuid:%global uuid 1}
+%{!?xml:%global xml 1}
+%{!?pam:%global pam 1}
+%{!?sdt:%global sdt 1}
+%{!?pgfts:%global pgfts 1}
+%{!?runselftest:%global runselftest 1}
 
 # Python major version.
-%{!?python_sitearch: %define python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
+%{!?python_sitearch: %global python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
 
 
 Summary: PostgreSQL client programs
 Name: postgresql
-%define majorversion 8.4
-Version: 8.4.2
+%global majorversion 8.4
+Version: 8.4.3
 Release: 1%{?dist}
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -76,14 +74,16 @@ Source7: ecpg_config.h
 Source14: postgresql.pam
 Source15: postgresql-bashprofile
 Source16: filter-requires-perl-Pg.sh
-Source17: http://www.postgresql.org/docs/manuals/postgresql-8.4.2-US.pdf
+Source17: http://www.postgresql.org/docs/manuals/postgresql-8.4.3-US.pdf
 Source18: ftp://ftp.pygresql.org/pub/distrib/PyGreSQL-3.8.1.tgz
 Source19: http://pgfoundry.org/projects/pgtclng/pgtcl1.6.2.tar.gz
 Source20: http://pgfoundry.org/projects/pgtclng/pgtcldocs-20070115.zip
 
+# Comments for these patches are in the patch files.
 Patch1: rpm-pgsql.patch
 Patch2: postgresql-ac-version.patch
 Patch3: postgresql-logging.patch
+Patch4: postgresql-oom-adj.patch
 Patch5: pgtcl-no-rpath.patch
 Patch6: postgresql-perl-rpath.patch
 
@@ -176,10 +176,13 @@ PostgreSQL server.
 %package server
 Summary: The programs needed to create and run a PostgreSQL server
 Group: Applications/Databases
-Requires: postgresql = %{version}-%{release}
+Requires: %{name} = %{version}-%{release}
 Requires(pre): /usr/sbin/useradd
-Requires(post): /sbin/chkconfig
-Requires(preun): /sbin/chkconfig
+Requires(post): chkconfig
+Requires(preun): chkconfig
+# This is for /sbin/service
+Requires(preun): initscripts
+Requires(postun): initscripts
 
 %description server
 The postgresql-server package includes the programs needed to create
@@ -305,18 +308,18 @@ binaries of various tests for the PostgreSQL database management
 system, including regression tests and benchmarks.
 %endif
 
-%define __perl_requires %{SOURCE16}
+%global __perl_requires %{SOURCE16}
 
 %prep
 %setup -q 
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
+%patch4 -p1
 # patch5 is applied later
 %patch6 -p1
 
-#call autoconf 2.53 or greater
-%aconfver
+autoconf
 
 cp -p %{SOURCE17} .
 
@@ -340,17 +343,28 @@ cp -p %{SOURCE17} .
 
    pushd Pgtcl
 %patch5 -p1
-%aconfver
+   autoconf
    popd
 %endif
 
 %build
 
+# fail quickly and obviously if user tries to build as root
+%if %runselftest
+	if [ x"`id -u`" = x0 ]; then
+		echo "postgresql's regression tests fail if run as root."
+		echo "If you really need to build the RPM as root, use"
+		echo "--define='runselftest 0' to skip the regression tests."
+		exit 1
+	fi
+%endif
+
 CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS
-CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS
 
 # Strip out -ffast-math from CFLAGS....
 CFLAGS=`echo $CFLAGS|xargs -n 1|grep -v ffast-math|xargs -n 100`
+# Add LINUX_OOM_ADJ=0 to ensure child processes reset postmaster's oom_adj
+CFLAGS="$CFLAGS -DLINUX_OOM_ADJ=0"
 # let's try removing this kluge, it may just be a workaround for bz#520916
 # # use -O1 on sparc64 and alpha
 # %ifarch sparc64 alpha
@@ -586,18 +600,18 @@ cat psql-%{majorversion}.lang >>main.lst
 %postun libs -p /sbin/ldconfig 
 
 %pre server
-groupadd -g 26 -o -r postgres >/dev/null 2>&1 || :
-useradd -M -N -g postgres -o -r -d /var/lib/pgsql -s /bin/bash \
+/usr/sbin/groupadd -g 26 -o -r postgres >/dev/null 2>&1 || :
+/usr/sbin/useradd -M -N -g postgres -o -r -d /var/lib/pgsql -s /bin/bash \
 	-c "PostgreSQL Server" -u 26 postgres >/dev/null 2>&1 || :
 
 %post server
-chkconfig --add postgresql
+/sbin/chkconfig --add postgresql
 /sbin/ldconfig
 
 %preun server
 if [ $1 = 0 ] ; then
-	/sbin/service postgresql condstop >/dev/null 2>&1
-	chkconfig --del postgresql
+	/sbin/service postgresql stop >/dev/null 2>&1
+	/sbin/chkconfig --del postgresql
 fi
 
 %postun server
@@ -826,6 +840,18 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Sun Mar 14 2010 Tom Lane <tgl@redhat.com> 8.4.3-1
+- Update to PostgreSQL 8.4.3, for various fixes described at
+  http://www.postgresql.org/docs/8.4/static/release-8-4-3.html
+- Bring init script into some modicum of compliance with Fedora/LSB standards
+Resolves: #201043
+- Emit explicit error message if user tries to build RPM as root
+Related: #558921
+- Arrange for the postmaster, but not any of its child processes, to be run
+  with oom_adj -17.  This compensates for the OOM killer not being smart about
+  accounting for shared memory usage.
+- Change %%define to %%global, per packaging guidelines
+
 * Thu Feb 18 2010 Tom "spot" Callaway <tcallawa@redhat.com>
 - adjust license tag to reflect OSI decision
 
