@@ -52,8 +52,8 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 8.4
-Version: 8.4.2
-Release: 6%{?dist}
+Version: 8.4.3
+Release: 1%{?dist}
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
 License: PostgreSQL
@@ -74,12 +74,12 @@ Source14: postgresql.pam
 Source15: postgresql-bashprofile
 Source16: filter-requires-perl-Pg.sh
 
+# Comments for these patches are in the patch files.
 Patch1: rpm-pgsql.patch
 Patch2: postgresql-ac-version.patch
 Patch3: postgresql-logging.patch
 Patch4: postgresql-oom-adj.patch
 Patch6: postgresql-perl-rpath.patch
-Patch7: postgresql-dtrace.patch
 
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex autoconf gawk
 BuildRequires: perl(ExtUtils::Embed), perl-devel
@@ -170,10 +170,13 @@ PostgreSQL server.
 %package server
 Summary: The programs needed to create and run a PostgreSQL server
 Group: Applications/Databases
-Requires: postgresql = %{version}-%{release}
+Requires: %{name} = %{version}-%{release}
 Requires(pre): /usr/sbin/useradd
-Requires(post): /sbin/chkconfig
-Requires(preun): /sbin/chkconfig
+Requires(post): chkconfig
+Requires(preun): chkconfig
+# This is for /sbin/service
+Requires(preun): initscripts
+Requires(postun): initscripts
 
 %description server
 The postgresql-server package includes the programs needed to create
@@ -279,7 +282,6 @@ system, including regression tests and benchmarks.
 %patch3 -p1
 %patch4 -p1
 %patch6 -p1
-%patch7 -p1
 
 autoconf
 
@@ -492,18 +494,18 @@ cat psql-%{majorversion}.lang >>main.lst
 %postun libs -p /sbin/ldconfig 
 
 %pre server
-groupadd -g 26 -o -r postgres >/dev/null 2>&1 || :
-useradd -M -N -g postgres -o -r -d /var/lib/pgsql -s /bin/bash \
+/usr/sbin/groupadd -g 26 -o -r postgres >/dev/null 2>&1 || :
+/usr/sbin/useradd -M -N -g postgres -o -r -d /var/lib/pgsql -s /bin/bash \
 	-c "PostgreSQL Server" -u 26 postgres >/dev/null 2>&1 || :
 
 %post server
-chkconfig --add postgresql
+/sbin/chkconfig --add postgresql
 /sbin/ldconfig
 
 %preun server
 if [ $1 = 0 ] ; then
-	/sbin/service postgresql condstop >/dev/null 2>&1
-	chkconfig --del postgresql
+	/sbin/service postgresql stop >/dev/null 2>&1
+	/sbin/chkconfig --del postgresql
 fi
 
 %postun server
@@ -711,6 +713,12 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Sun Mar 14 2010 Tom Lane <tgl@redhat.com> 8.4.3-1
+- Update to PostgreSQL 8.4.3, for various fixes described at
+  http://www.postgresql.org/docs/8.4/static/release-8-4-3.html
+- Bring init script into some modicum of compliance with Fedora/LSB standards
+Resolves: #201043
+
 * Thu Feb 18 2010 Tom "spot" Callaway <tcallawa@redhat.com>
 - adjust license tag to reflect OSI decision
 
