@@ -877,7 +877,7 @@ rm -rf $RPM_BUILD_ROOT
 %changelog
 * Mon May 17 2010 Tom Lane <tgl@redhat.com> 8.3.11-1
 - Update to PostgreSQL 8.3.11, for various fixes described at
-  http://www.postgresql.org/docs/8.4/static/release-8-3-11.html
+  http://www.postgresql.org/docs/8.3/static/release-8-3-11.html
   including fixes for CVE-2010-1169 and CVE-2010-1170
 Resolves: #593032
 
