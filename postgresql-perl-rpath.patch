@@ -7,16 +7,16 @@ So work around it by adding an rpath spec to plperl.so (only).
 Per bug #162198.
 
 
-diff -Naur postgresql-8.2.0.orig/src/pl/plperl/GNUmakefile postgresql-8.2.0/src/pl/plperl/GNUmakefile
---- postgresql-8.2.0.orig/src/pl/plperl/GNUmakefile	2006-07-20 20:24:04.000000000 -0400
-+++ postgresql-8.2.0/src/pl/plperl/GNUmakefile	2006-12-04 20:00:56.000000000 -0500
-@@ -36,6 +36,9 @@
+diff -Naur postgresql-8.3.11.orig/src/pl/plperl/GNUmakefile postgresql-8.3.11/src/pl/plperl/GNUmakefile
+--- postgresql-8.3.11.orig/src/pl/plperl/GNUmakefile	2010-05-13 12:42:51.000000000 -0400
++++ postgresql-8.3.11/src/pl/plperl/GNUmakefile	2010-05-17 14:05:14.000000000 -0400
+@@ -40,6 +40,9 @@
  
  SHLIB_LINK = $(perl_embed_ldflags) $(BE_DLLLIBS)
  
 +# Force rpath to be used even though we disable it everywhere else
 +SHLIB_LINK += $(rpath)
 +
- REGRESS_OPTS = --dbname=$(PL_TESTDB) --load-language=plperl
+ REGRESS_OPTS = --dbname=$(PL_TESTDB) --load-language=plperl  --load-language=plperlu
  REGRESS = plperl plperl_trigger plperl_shared plperl_elog
- # where to find psql for running the tests
+ # if Perl can support two interpreters in one backend, 

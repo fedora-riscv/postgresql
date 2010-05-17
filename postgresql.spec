@@ -83,7 +83,7 @@
 
 Summary: PostgreSQL client programs and libraries
 Name: postgresql
-Version: 8.3.10
+Version: 8.3.11
 Release: 1%{?dist}
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -100,7 +100,7 @@ Source7: ecpg_config.h
 Source14: postgresql.pam
 Source15: postgresql-bashprofile
 Source16: filter-requires-perl-Pg.sh
-Source17: http://www.postgresql.org/docs/manuals/postgresql-8.3.10-US.pdf
+Source17: http://www.postgresql.org/docs/manuals/postgresql-%{version}-US.pdf
 Source18: ftp://ftp.pygresql.org/pub/distrib/PyGreSQL-3.8.1.tgz
 Source19: http://pgfoundry.org/projects/pgtclng/pgtcl1.6.2.tar.gz
 Source20: http://pgfoundry.org/projects/pgtclng/pgtcldocs-20070115.zip
@@ -875,6 +875,12 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Mon May 17 2010 Tom Lane <tgl@redhat.com> 8.3.11-1
+- Update to PostgreSQL 8.3.11, for various fixes described at
+  http://www.postgresql.org/docs/8.4/static/release-8-3-11.html
+  including fixes for CVE-2010-1169 and CVE-2010-1170
+Resolves: #593032
+
 * Sun Mar 14 2010 Tom Lane <tgl@redhat.com> 8.3.10-1
 - Update to PostgreSQL 8.3.10, for various fixes described at
   http://www.postgresql.org/docs/8.3/static/release-8-3-10.html
