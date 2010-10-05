@@ -57,7 +57,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 8.4
-Version: 8.4.4
+Version: 8.4.5
 Release: 1%{?dist}
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -840,6 +840,12 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Tue Oct  5 2010 Tom Lane <tgl@redhat.com> 8.4.5-1
+- Update to PostgreSQL 8.4.5, for various fixes described at
+  http://www.postgresql.org/docs/8.4/static/release-8-4-5.html
+  including the fix for CVE-2010-3433
+Related: #639371
+
 * Mon May 17 2010 Tom Lane <tgl@redhat.com> 8.4.4-1
 - Update to PostgreSQL 8.4.4, for various fixes described at
   http://www.postgresql.org/docs/8.4/static/release-8-4-4.html
