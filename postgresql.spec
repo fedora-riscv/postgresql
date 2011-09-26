@@ -19,20 +19,19 @@
 # Tom Lane
 # and others in the Changelog....
 
-# This spec file and ancilliary files are licensed in accordance with 
+# This spec file and ancillary files are licensed in accordance with
 # The PostgreSQL license.
 
 # In this file you can find the default build package list macros.
 # These can be overridden by defining on the rpm command line:
 # rpm --define 'packagename 1' .... to force the package to build.
 # rpm --define 'packagename 0' .... to force the package NOT to build.
-# The base package, the lib package, the devel package, and the server package
+# The base package, the libs package, the devel package, and the server package
 # always get built.
 
 %global beta 0
 %{?beta:%global __os_install_post /usr/lib/rpm/brp-compress}
 
-%{!?tcldevel:%global tcldevel 1}
 %{!?test:%global test 1}
 %{!?upgrade:%global upgrade 1}
 %{!?plpython:%global plpython 1}
@@ -46,23 +45,24 @@
 %{!?xml:%global xml 1}
 %{!?pam:%global pam 1}
 %{!?sdt:%global sdt 1}
-%{!?pgfts:%global pgfts 1}
+%{!?selinux:%global selinux 1}
 %{!?runselftest:%global runselftest 1}
 
 
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.1
-Version: 9.1.0
+Version: 9.1.1
 Release: 1%{?dist}
-# Update this whenever F15 gets rebased; it must be NVR-greater than F15 pkg:
-%global first_systemd_version 9.0.4-8
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
 License: PostgreSQL
 Group: Applications/Databases
 Url: http://www.postgresql.org/
+
+# This number must be NVR-greater than any PG version shipped in F15:
+%global first_systemd_version 0:9.0.99
 
 # This SRPM includes a copy of the previous major release, which is needed for
 # in-place upgrade of an old database.  In most cases it will not be critical
@@ -89,6 +89,7 @@ Source15: postgresql-bashprofile
 Patch1: rpm-pgsql.patch
 Patch2: postgresql-logging.patch
 Patch3: postgresql-perl-rpath.patch
+Patch4: postgresql-no-sepsql-test.patch
 
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
 BuildRequires: perl(ExtUtils::Embed), perl-devel
@@ -100,10 +101,7 @@ BuildRequires: python-devel
 %endif
 
 %if %pltcl
-BuildRequires: tcl
-%if %tcldevel
 BuildRequires: tcl-devel
-%endif
 %endif
 
 %if %ssl
@@ -136,6 +134,10 @@ BuildRequires: pam-devel
 
 %if %sdt
 BuildRequires: systemtap-sdt-devel
+%endif
+
+%if %selinux
+BuildRequires: libselinux-devel
 %endif
 
 # main package requires -libs subpackage
@@ -312,6 +314,7 @@ system, including regression tests and benchmarks.
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
+%patch4 -p1
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -390,8 +393,8 @@ CFLAGS="$CFLAGS -DLINUX_OOM_ADJ=0"
 %if %sdt
 	--enable-dtrace \
 %endif
-%if %pgfts
-	--enable-thread-safety \
+%if %selinux
+	--with-selinux \
 %endif
 	--with-system-tzdata=/usr/share/zoneinfo \
 	--datadir=/usr/share/pgsql
@@ -556,13 +559,27 @@ rm -rf $RPM_BUILD_ROOT%{_docdir}/pgsql
 
 # remove files not to be packaged
 rm -f $RPM_BUILD_ROOT%{_libdir}/*.a
+%if !%upgrade
+rm -f $RPM_BUILD_ROOT%{_bindir}/pg_upgrade
+rm -f $RPM_BUILD_ROOT%{_libdir}/pgsql/pg_upgrade_support.so
+%endif
 
+# initialize file lists
+cp /dev/null main.lst
+cp /dev/null libs.lst
+cp /dev/null server.lst
+cp /dev/null devel.lst
+cp /dev/null plperl.lst
+cp /dev/null pltcl.lst
+cp /dev/null plpython.lst
+
+%if %nls
 %find_lang ecpg-%{majorversion}
-cat ecpg-%{majorversion}.lang >devel.lst
+cat ecpg-%{majorversion}.lang >>devel.lst
 %find_lang ecpglib6-%{majorversion}
-cat ecpglib6-%{majorversion}.lang >libs.lst
+cat ecpglib6-%{majorversion}.lang >>libs.lst
 %find_lang initdb-%{majorversion}
-cat initdb-%{majorversion}.lang >server.lst
+cat initdb-%{majorversion}.lang >>server.lst
 %find_lang libpq5-%{majorversion}
 cat libpq5-%{majorversion}.lang >>libs.lst
 %find_lang pg_basebackup-%{majorversion}
@@ -572,7 +589,7 @@ cat pg_controldata-%{majorversion}.lang >>server.lst
 %find_lang pg_ctl-%{majorversion}
 cat pg_ctl-%{majorversion}.lang >>server.lst
 %find_lang pg_config-%{majorversion}
-cat pg_config-%{majorversion}.lang >main.lst
+cat pg_config-%{majorversion}.lang >>main.lst
 %find_lang pg_dump-%{majorversion}
 cat pg_dump-%{majorversion}.lang >>main.lst
 %find_lang pg_resetxlog-%{majorversion}
@@ -581,22 +598,23 @@ cat pg_resetxlog-%{majorversion}.lang >>server.lst
 cat pgscripts-%{majorversion}.lang >>main.lst
 %if %plperl
 %find_lang plperl-%{majorversion}
-cat plperl-%{majorversion}.lang >plperl.lst
+cat plperl-%{majorversion}.lang >>plperl.lst
 %endif
 %find_lang plpgsql-%{majorversion}
 cat plpgsql-%{majorversion}.lang >>server.lst
 %if %plpython
 %find_lang plpython-%{majorversion}
-cat plpython-%{majorversion}.lang >plpython.lst
+cat plpython-%{majorversion}.lang >>plpython.lst
 %endif
 %if %pltcl
 %find_lang pltcl-%{majorversion}
-cat pltcl-%{majorversion}.lang >pltcl.lst
+cat pltcl-%{majorversion}.lang >>pltcl.lst
 %endif
 %find_lang postgres-%{majorversion}
 cat postgres-%{majorversion}.lang >>server.lst
 %find_lang psql-%{majorversion}
 cat psql-%{majorversion}.lang >>main.lst
+%endif
 
 %post libs -p /sbin/ldconfig 
 %postun libs -p /sbin/ldconfig 
@@ -734,7 +752,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/pgsql/extension/pgstattuple*
 %{_datadir}/pgsql/extension/refint*
 %{_datadir}/pgsql/extension/seg*
-%{_datadir}/pgsql/extension/sslinfo*
 %{_datadir}/pgsql/extension/tablefunc*
 %{_datadir}/pgsql/extension/test_parser*
 %{_datadir}/pgsql/extension/timetravel*
@@ -774,12 +791,19 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pgsql/pg_stat_statements.so
 %{_libdir}/pgsql/refint.so
 %{_libdir}/pgsql/seg.so
-%{_libdir}/pgsql/sslinfo.so
 %{_libdir}/pgsql/tablefunc.so
 %{_libdir}/pgsql/test_parser.so
 %{_libdir}/pgsql/timetravel.so
 %{_libdir}/pgsql/tsearch2.so
 %{_libdir}/pgsql/unaccent.so
+%if %selinux
+%{_datadir}/pgsql/contrib/sepgsql.sql
+%{_libdir}/pgsql/sepgsql.so
+%endif
+%if %ssl
+%{_datadir}/pgsql/extension/sslinfo*
+%{_libdir}/pgsql/sslinfo.so
+%endif
 %if %uuid
 %{_datadir}/pgsql/extension/uuid-ossp*
 %{_libdir}/pgsql/uuid-ossp.so
@@ -836,6 +860,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pgsql/dict_snowball.so
 %{_libdir}/pgsql/plpgsql.so
 %dir %{_datadir}/pgsql
+%dir %{_datadir}/pgsql/contrib
 %dir %{_datadir}/pgsql/extension
 %{_datadir}/pgsql/extension/plpgsql*
 %attr(700,postgres,postgres) %dir /var/lib/pgsql
@@ -903,6 +928,12 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Mon Sep 26 2011 Tom Lane <tgl@redhat.com> 9.1.1-1
+- Update to PostgreSQL 9.1.1, for various fixes described at
+  http://www.postgresql.org/docs/9.1/static/release-9-1-1.html
+- Enable build (but not test) of contrib/sepgsql
+- Clean up specfile build options so that turning options off works again
+
 * Mon Sep 12 2011 Tom Lane <tgl@redhat.com> 9.1.0-1
 - Update to PostgreSQL 9.1.0 (major version bump);
   in-place upgrade support now works from 9.0.x as the previous version
