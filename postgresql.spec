@@ -53,7 +53,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.1
 Version: 9.1.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -301,6 +301,7 @@ procedural language for the backend.
 Summary: The test suite distributed with PostgreSQL
 Group: Applications/Databases
 Requires: %{name}-server%{?_isa} = %{version}-%{release}
+Requires: %{name}-devel%{?_isa} = %{version}-%{release}
 
 %description test
 PostgreSQL is an advanced Object-Relational database management
@@ -542,8 +543,11 @@ install -m 644 %{SOURCE15} $RPM_BUILD_ROOT/var/lib/pgsql/.bash_profile
 	# Makefiles, however.
 	mkdir -p $RPM_BUILD_ROOT%{_libdir}/pgsql/test
 	cp -a src/test/regress $RPM_BUILD_ROOT%{_libdir}/pgsql/test
+	# pg_regress binary should be only in one subpackage, 
+	# there will be a symlink from -test to -devel
+	rm -f $RPM_BUILD_ROOT%{_libdir}/pgsql/test/regress/pg_regress
+	ln -sf ../../pgxs/src/test/regress/pg_regress $RPM_BUILD_ROOT%{_libdir}/pgsql/test/regress/pg_regress
 	pushd  $RPM_BUILD_ROOT%{_libdir}/pgsql/test/regress
-	strip *.so
 	rm -f GNUmakefile Makefile *.o
 	chmod 0755 pg_regress regress.so
 	popd
@@ -928,6 +932,11 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Wed Nov 02 2011 Honza Horak <hhorak@redhat.com> 9.1.1-2
+- Create a symlink of pg_regress instead of full copy;
+  Don't strip symbols from regress libs
+Resolves: #729012
+
 * Mon Sep 26 2011 Tom Lane <tgl@redhat.com> 9.1.1-1
 - Update to PostgreSQL 9.1.1, for various fixes described at
   http://www.postgresql.org/docs/9.1/static/release-9-1-1.html
