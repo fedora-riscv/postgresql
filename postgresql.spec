@@ -146,22 +146,14 @@ Requires: %{name}-libs%{?_isa} = %{version}-%{release}
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 %description
-PostgreSQL is an advanced Object-Relational database management system
-(DBMS) that supports almost all SQL constructs (including
-transactions, sub-selects and user-defined types and functions). The
-postgresql package includes the client programs and libraries that
-you'll need to access a PostgreSQL DBMS server.  These PostgreSQL
-client programs are programs that directly manipulate the internal
-structure of PostgreSQL databases on a PostgreSQL server. These client
-programs can be located on the same machine with the PostgreSQL
-server, or may be on a remote machine which accesses a PostgreSQL
-server over a network connection. This package contains the docs
-in HTML for the whole package, as well as command-line utilities for
-managing PostgreSQL databases on a PostgreSQL server. 
+PostgreSQL is an advanced Object-Relational database management system (DBMS).
+The base postgresql package contains the client programs that you'll need to
+access a PostgreSQL DBMS server, as well as HTML documentation for the whole
+system.  These client programs can be located on the same machine as the
+PostgreSQL server, or on a remote machine that accesses a PostgreSQL server
+over a network connection.  The PostgreSQL server can be found in the
+postgresql-server sub-package.
 
-If you want to manipulate a PostgreSQL database on a local or remote PostgreSQL
-server, you need this package. You also need to install this package
-if you're installing the postgresql-server package.
 
 %package libs
 Summary: The shared libraries required for any PostgreSQL clients
@@ -176,6 +168,7 @@ The postgresql-libs package provides the essential shared libraries for any
 PostgreSQL client program or interface. You will need to install this package
 to use any other PostgreSQL package or any clients that need to connect to a
 PostgreSQL server.
+
 
 %package server
 Summary: The programs needed to create and run a PostgreSQL server
@@ -197,15 +190,10 @@ Requires(post): systemd-sysv
 Requires(post): chkconfig
 
 %description server
-The postgresql-server package includes the programs needed to create
+PostgreSQL is an advanced Object-Relational database management system (DBMS).
+The postgresql-server package contains the programs needed to create
 and run a PostgreSQL server, which will in turn allow you to create
-and maintain PostgreSQL databases.  PostgreSQL is an advanced
-Object-Relational database management system (DBMS) that supports
-almost all SQL constructs (including transactions, sub-selects and
-user-defined types and functions). You should install
-postgresql-server if you want to create and maintain your own
-PostgreSQL databases and/or your own PostgreSQL server. You also need
-to install the postgresql package.
+and maintain PostgreSQL databases.
 
 
 %package docs
@@ -214,19 +202,19 @@ Group: Applications/Databases
 Requires: %{name}%{?_isa} = %{version}-%{release}
 
 %description docs
-The postgresql-docs package includes some additional documentation for
+The postgresql-docs package contains some additional documentation for
 PostgreSQL.  Currently, this includes the main documentation in PDF format
 and source files for the PostgreSQL tutorial.
 
 
 %package contrib
-Summary: Contributed modules distributed with PostgreSQL
+Summary: Extension modules distributed with PostgreSQL
 Group: Applications/Databases
 Requires: %{name}%{?_isa} = %{version}-%{release}
 Requires: %{name}-libs%{?_isa} = %{version}-%{release}
 
 %description contrib
-The postgresql-contrib package contains contributed packages that are
+The postgresql-contrib package contains various extension modules that are
 included in the PostgreSQL distribution.
 
 
@@ -239,9 +227,9 @@ Requires: %{name}-libs%{?_isa} = %{version}-%{release}
 %description devel
 The postgresql-devel package contains the header files and libraries
 needed to compile C or C++ applications which will directly interact
-with a PostgreSQL database management server and the ecpg Embedded C
-Postgres preprocessor. You need to install this package if you want to
-develop applications which will interact with a PostgreSQL server.
+with a PostgreSQL database management server.  It also contains the ecpg
+Embedded C Postgres preprocessor. You need to install this package if you want
+to develop applications which will interact with a PostgreSQL server.
 
 
 %if %upgrade
@@ -252,10 +240,9 @@ Requires: %{name}-server%{?_isa} = %{version}-%{release}
 Requires: %{name}-libs%{?_isa} = %{version}-%{release}
 
 %description upgrade
-PostgreSQL is an advanced Object-Relational database management
-system. The postgresql-upgrade package includes the pg_upgrade utility
-and supporting files needed for upgrading a database from the previous
-major version of PostgreSQL.
+The postgresql-upgrade package contains the pg_upgrade utility and supporting
+files needed for upgrading a PostgreSQL database from the previous major
+version of PostgreSQL.
 %endif
 
 
@@ -267,9 +254,9 @@ Requires: %{name}-server%{?_isa} = %{version}-%{release}
 Requires: perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 
 %description plperl
-PostgreSQL is an advanced Object-Relational database management
-system.  The postgresql-plperl package contains the PL/Perl
-procedural language for the backend.
+The postgresql-plperl package contains the PL/Perl procedural language,
+which is an extension to the PostgreSQL database server.
+Install this if you want to write database functions in Perl.
 %endif
 
 %if %plpython
@@ -279,9 +266,9 @@ Group: Applications/Databases
 Requires: %{name}-server%{?_isa} = %{version}-%{release}
 
 %description plpython
-PostgreSQL is an advanced Object-Relational database management
-system.  The postgresql-plpython package contains the PL/Python
-procedural language for the backend.
+The postgresql-plpython package contains the PL/Python procedural language,
+which is an extension to the PostgreSQL database server.
+Install this if you want to write database functions in Python.
 %endif
 
 %if %pltcl
@@ -291,9 +278,9 @@ Group: Applications/Databases
 Requires: %{name}-server%{?_isa} = %{version}-%{release}
 
 %description pltcl
-PostgreSQL is an advanced Object-Relational database management
-system.  The postgresql-pltcl package contains the PL/Tcl
-procedural language for the backend.
+The postgresql-plptcl package contains the PL/Tcl procedural language,
+which is an extension to the PostgreSQL database server.
+Install this if you want to write database functions in Tcl.
 %endif
 
 %if %test
@@ -304,10 +291,9 @@ Requires: %{name}-server%{?_isa} = %{version}-%{release}
 Requires: %{name}-devel%{?_isa} = %{version}-%{release}
 
 %description test
-PostgreSQL is an advanced Object-Relational database management
-system. The postgresql-test package includes the sources and pre-built
-binaries of various tests for the PostgreSQL database management
-system, including regression tests and benchmarks.
+The postgresql-test package contains files needed for various tests for the
+PostgreSQL database management system, including regression tests and
+benchmarks.
 %endif
 
 %prep
