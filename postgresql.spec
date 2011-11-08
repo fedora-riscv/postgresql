@@ -921,7 +921,7 @@ rm -rf $RPM_BUILD_ROOT
 * Wed Nov 02 2011 Honza Horak <hhorak@redhat.com> 9.1.1-2
 - Create a symlink of pg_regress instead of full copy;
   Don't strip symbols from regress libs
-Resolves: #729012
+Related: #729012
 
 * Mon Sep 26 2011 Tom Lane <tgl@redhat.com> 9.1.1-1
 - Update to PostgreSQL 9.1.1, for various fixes described at
