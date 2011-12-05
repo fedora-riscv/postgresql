@@ -13,9 +13,10 @@
 # You will need to have the docbook packages installed to run this.
 # Expect it to take about 20 minutes and use about 160MB of disk.
 
-# Extract version from specfile
+set -e
 
-VERSION=`sed -n 's/^Version: //p' postgresql.spec`
+# Pass package version (e.g., 9.1.2) as argument
+VERSION=$1
 
 TARGETFILE=postgresql-$VERSION-US.pdf
 
@@ -23,17 +24,19 @@ echo Building $TARGETFILE ...
 
 # Unpack and configure postgresql
 
-tar xfj postgresql-$VERSION.tar.bz2 || exit 1
+rm -rf postgresql-$VERSION
 
-cd postgresql-$VERSION || exit 1
+tar xfj postgresql-$VERSION.tar.bz2
 
-./configure >/dev/null || exit 1
+cd postgresql-$VERSION
+
+./configure >/dev/null
 
 # Build the PDF docs
 
 cd doc/src/sgml
 
-make postgres-US.pdf >make.log || exit 1
+make postgres-US.pdf >make.log
 
 mv -f postgres-US.pdf ../../../../$TARGETFILE
 
