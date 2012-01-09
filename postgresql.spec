@@ -53,7 +53,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.1
 Version: 9.1.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -76,6 +76,7 @@ Source1: postgresql-%{version}-US.pdf
 # generate-pdf.sh is not used during RPM build, but include for documentation
 Source2: generate-pdf.sh
 Source3: ftp://ftp.postgresql.org/pub/source/v%{prevversion}/postgresql-%{prevversion}.tar.bz2
+Source4: postgresql-check-db-dir
 Source5: Makefile.regress
 Source6: pg_config.h
 Source7: ecpg_config.h
@@ -450,7 +451,7 @@ case `uname -i` in
 esac
 
 install -d -m 755 $RPM_BUILD_ROOT%{_libdir}/pgsql/tutorial
-cp src/tutorial/* $RPM_BUILD_ROOT%{_libdir}/pgsql/tutorial
+cp -p src/tutorial/* $RPM_BUILD_ROOT%{_libdir}/pgsql/tutorial
 
 # prep the setup script, including insertion of some values it needs
 sed -e 's|^PGVERSION=.*$|PGVERSION=%{version}|' \
@@ -458,7 +459,16 @@ sed -e 's|^PGVERSION=.*$|PGVERSION=%{version}|' \
 	-e 's|^PREVMAJORVERSION=.*$|PREVMAJORVERSION=%{prevmajorversion}|' \
 	-e 's|^PREVPGENGINE=.*$|PREVPGENGINE=%{_libdir}/pgsql/postgresql-%{prevmajorversion}/bin|' \
 	<%{SOURCE9} >postgresql-setup
+touch -r %{SOURCE9} postgresql-setup
 install -m 755 postgresql-setup $RPM_BUILD_ROOT%{_bindir}/postgresql-setup
+
+# prep the startup check script, including insertion of some values it needs
+sed -e 's|^PGVERSION=.*$|PGVERSION=%{version}|' \
+	-e 's|^PREVMAJORVERSION=.*$|PREVMAJORVERSION=%{prevmajorversion}|' \
+	-e 's|^PGDOCDIR=.*$|PGDOCDIR=%{_docdir}/%{name}-%{version}|' \
+	<%{SOURCE4} >postgresql-check-db-dir
+touch -r %{SOURCE4} postgresql-check-db-dir
+install -m 755 postgresql-check-db-dir $RPM_BUILD_ROOT%{_bindir}/postgresql-check-db-dir
 
 install -d $RPM_BUILD_ROOT%{_unitdir}
 install -m 644 %{SOURCE10} $RPM_BUILD_ROOT%{_unitdir}/postgresql.service
@@ -831,6 +841,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/postgres
 %{_bindir}/postmaster
 %{_bindir}/postgresql-setup
+%{_bindir}/postgresql-check-db-dir
 %{_mandir}/man1/initdb.*
 %{_mandir}/man1/pg_basebackup.*
 %{_mandir}/man1/pg_controldata.*
@@ -916,6 +927,11 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Mon Jan  9 2012 Tom Lane <tgl@redhat.com> 9.1.2-2
+- Make systemd unit file more user-friendly by resurrecting the old init
+  script's checks for data directory presence and version match
+Resolves: #771496
+
 * Mon Dec  5 2011 Tom Lane <tgl@redhat.com> 9.1.2-1
 - Update to PostgreSQL 9.1.2, for various fixes described at
   http://www.postgresql.org/docs/9.1/static/release-9-1-2.html
