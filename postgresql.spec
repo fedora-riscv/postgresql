@@ -52,8 +52,8 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.1
-Version: 9.1.2
-Release: 2%{?dist}
+Version: 9.1.3
+Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -67,7 +67,7 @@ Url: http://www.postgresql.org/
 # This SRPM includes a copy of the previous major release, which is needed for
 # in-place upgrade of an old database.  In most cases it will not be critical
 # that this be kept up with the latest minor release of the previous series.
-%global prevversion 9.0.4
+%global prevversion 9.0.7
 %global prevmajorversion 9.0
 
 Source0: ftp://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2
@@ -927,6 +927,12 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Mon Feb 27 2012 Tom Lane <tgl@redhat.com> 9.1.3-1
+- Update to PostgreSQL 9.1.3, for various fixes described at
+  http://www.postgresql.org/docs/9.1/static/release-9-1-3.html
+  including the fixes for CVE-2012-0866, CVE-2012-0867, CVE-2012-0868
+Resolves: #797918
+
 * Mon Jan  9 2012 Tom Lane <tgl@redhat.com> 9.1.2-2
 - Make systemd unit file more user-friendly by resurrecting the old init
   script's checks for data directory presence and version match
