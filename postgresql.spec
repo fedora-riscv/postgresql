@@ -53,7 +53,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.1
 Version: 9.1.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -83,6 +83,7 @@ Source7: ecpg_config.h
 Source8: README.rpm-dist
 Source9: postgresql-setup
 Source10: postgresql.service
+Source11: postgresql.init
 Source14: postgresql.pam
 Source15: postgresql-bashprofile
 
@@ -473,6 +474,9 @@ install -m 755 postgresql-check-db-dir $RPM_BUILD_ROOT%{_bindir}/postgresql-chec
 install -d $RPM_BUILD_ROOT%{_unitdir}
 install -m 644 %{SOURCE10} $RPM_BUILD_ROOT%{_unitdir}/postgresql.service
 
+install -d $RPM_BUILD_ROOT/etc/rc.d/init.d
+install -m 755 %{SOURCE11} $RPM_BUILD_ROOT/etc/rc.d/init.d/postgresql
+
 %if %pam
 install -d $RPM_BUILD_ROOT/etc/pam.d
 install -m 644 %{SOURCE14} $RPM_BUILD_ROOT/etc/pam.d/postgresql
@@ -830,6 +834,7 @@ rm -rf $RPM_BUILD_ROOT
 %files server -f server.lst
 %defattr(-,root,root)
 %{_unitdir}/postgresql.service
+/etc/rc.d/init.d/postgresql
 %if %pam
 %config(noreplace) /etc/pam.d/postgresql
 %endif
@@ -927,6 +932,14 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Tue Mar 13 2012 Tom Lane <tgl@redhat.com> 9.1.3-2
+- Fix postgresql-setup to look for unit file in /usr/lib and to ignore
+  comments therein
+Resolves: #802835
+- Resurrect a now-mostly-dummy postgresql init script, so that people can
+  keep on using "service postgresql initdb" if they wish
+Resolves: #800416
+
 * Mon Feb 27 2012 Tom Lane <tgl@redhat.com> 9.1.3-1
 - Update to PostgreSQL 9.1.3, for various fixes described at
   http://www.postgresql.org/docs/9.1/static/release-9-1-3.html
