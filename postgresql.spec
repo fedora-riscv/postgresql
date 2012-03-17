@@ -53,7 +53,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.1
 Version: 9.1.3
-Release: 2%{?dist}
+Release: 3%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -932,6 +932,11 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Sat Mar 17 2012 Tom Lane <tgl@redhat.com> 9.1.3-3
+- Fix postgresql-setup to rely on systemd to parse the unit file, instead
+  of using ad-hoc code
+Resolves: #804290
+
 * Tue Mar 13 2012 Tom Lane <tgl@redhat.com> 9.1.3-2
 - Fix postgresql-setup to look for unit file in /usr/lib and to ignore
   comments therein
