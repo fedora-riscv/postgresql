@@ -52,8 +52,8 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.1
-Version: 9.1.3
-Release: 3%{?dist}
+Version: 9.1.4
+Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -67,7 +67,7 @@ Url: http://www.postgresql.org/
 # This SRPM includes a copy of the previous major release, which is needed for
 # in-place upgrade of an old database.  In most cases it will not be critical
 # that this be kept up with the latest minor release of the previous series.
-%global prevversion 9.0.7
+%global prevversion 9.0.8
 %global prevmajorversion 9.0
 
 Source0: ftp://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2
@@ -83,7 +83,6 @@ Source7: ecpg_config.h
 Source8: README.rpm-dist
 Source9: postgresql-setup
 Source10: postgresql.service
-Source11: postgresql.init
 Source14: postgresql.pam
 Source15: postgresql-bashprofile
 
@@ -474,9 +473,6 @@ install -m 755 postgresql-check-db-dir $RPM_BUILD_ROOT%{_bindir}/postgresql-chec
 install -d $RPM_BUILD_ROOT%{_unitdir}
 install -m 644 %{SOURCE10} $RPM_BUILD_ROOT%{_unitdir}/postgresql.service
 
-install -d $RPM_BUILD_ROOT/etc/rc.d/init.d
-install -m 755 %{SOURCE11} $RPM_BUILD_ROOT/etc/rc.d/init.d/postgresql
-
 %if %pam
 install -d $RPM_BUILD_ROOT/etc/pam.d
 install -m 644 %{SOURCE14} $RPM_BUILD_ROOT/etc/pam.d/postgresql
@@ -834,7 +830,6 @@ rm -rf $RPM_BUILD_ROOT
 %files server -f server.lst
 %defattr(-,root,root)
 %{_unitdir}/postgresql.service
-/etc/rc.d/init.d/postgresql
 %if %pam
 %config(noreplace) /etc/pam.d/postgresql
 %endif
@@ -932,6 +927,17 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Mon Jun  4 2012 Tom Lane <tgl@redhat.com> 9.1.4-1
+- Update to PostgreSQL 9.1.4, for various fixes described at
+  http://www.postgresql.org/docs/9.1/static/release-9-1-4.html
+  including the fixes for CVE-2012-2143, CVE-2012-2655
+Resolves: #826606
+- Update previous version (embedded in postgresql-upgrade) to 9.0.8
+  because fix in whole-row variable dumping could be needed for upgrades
+- Revert fix for bug #800416, per fedora-packaging discussion at
+  http://lists.fedoraproject.org/pipermail/packaging/2012-April/008314.html
+  "service postgresql initdb" is dead and will stay that way
+
 * Sat Mar 17 2012 Tom Lane <tgl@redhat.com> 9.1.3-3
 - Fix postgresql-setup to rely on systemd to parse the unit file, instead
   of using ad-hoc code
