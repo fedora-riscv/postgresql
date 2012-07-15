@@ -53,7 +53,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.1
 Version: 9.1.4
-Release: 1%{?dist}
+Release: 3%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -83,6 +83,8 @@ Source7: ecpg_config.h
 Source8: README.rpm-dist
 Source9: postgresql-setup
 Source10: postgresql.service
+Source11: initdb.sh
+Source12: upgrade.sh
 Source14: postgresql.pam
 Source15: postgresql-bashprofile
 
@@ -90,6 +92,7 @@ Source15: postgresql-bashprofile
 Patch1: rpm-pgsql.patch
 Patch2: postgresql-logging.patch
 Patch3: postgresql-perl-rpath.patch
+Patch4: postgresql-oom_score_adj.patch
 
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
 BuildRequires: perl(ExtUtils::Embed), perl-devel
@@ -301,6 +304,7 @@ benchmarks.
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
+%patch4 -p1
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -330,8 +334,8 @@ CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS
 
 # Strip out -ffast-math from CFLAGS....
 CFLAGS=`echo $CFLAGS|xargs -n 1|grep -v ffast-math|xargs -n 100`
-# Add LINUX_OOM_ADJ=0 to ensure child processes reset postmaster's oom_adj
-CFLAGS="$CFLAGS -DLINUX_OOM_ADJ=0"
+# Add LINUX_OOM_SCORE_ADJ=0 to ensure child processes reset postmaster's oom_score_adj
+CFLAGS="$CFLAGS -DLINUX_OOM_SCORE_ADJ=0"
 # let's try removing this kluge, it may just be a workaround for bz#520916
 # # use -O1 on sparc64 and alpha
 # %%ifarch sparc64 alpha
@@ -472,6 +476,10 @@ install -m 755 postgresql-check-db-dir $RPM_BUILD_ROOT%{_bindir}/postgresql-chec
 
 install -d $RPM_BUILD_ROOT%{_unitdir}
 install -m 644 %{SOURCE10} $RPM_BUILD_ROOT%{_unitdir}/postgresql.service
+
+install -d $RPM_BUILD_ROOT/usr/libexec/initscripts/legacy-actions/postgresql
+install -m 755 %{SOURCE11} $RPM_BUILD_ROOT/usr/libexec/initscripts/legacy-actions/postgresql/initdb
+install -m 755 %{SOURCE12} $RPM_BUILD_ROOT/usr/libexec/initscripts/legacy-actions/postgresql/upgrade
 
 %if %pam
 install -d $RPM_BUILD_ROOT/etc/pam.d
@@ -830,6 +838,8 @@ rm -rf $RPM_BUILD_ROOT
 %files server -f server.lst
 %defattr(-,root,root)
 %{_unitdir}/postgresql.service
+%dir /usr/libexec/initscripts/legacy-actions/postgresql
+/usr/libexec/initscripts/legacy-actions/postgresql/*
 %if %pam
 %config(noreplace) /etc/pam.d/postgresql
 %endif
@@ -927,6 +937,14 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Sat Jul 14 2012 Tom Lane <tgl@redhat.com> 9.1.4-3
+- Update code to use oom_score_adj not oom_adj, thereby suppressing
+  whining in the kernel log
+- Add "legacy action" scripts to support "service postgresql initdb" and
+  "service postgresql upgrade" in a now-approved fashion (requires a
+  recent version of initscripts to work)
+Resolves: #800416
+
 * Mon Jun  4 2012 Tom Lane <tgl@redhat.com> 9.1.4-1
 - Update to PostgreSQL 9.1.4, for various fixes described at
   http://www.postgresql.org/docs/9.1/static/release-9-1-4.html
