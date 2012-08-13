@@ -22,13 +22,19 @@ TARGETFILE=postgresql-$VERSION-US.pdf
 
 echo Building $TARGETFILE ...
 
-# Unpack and configure postgresql
+# Unpack postgresql
 
 rm -rf postgresql-$VERSION
 
 tar xfj postgresql-$VERSION.tar.bz2
 
 cd postgresql-$VERSION
+
+# Apply any patches that affect the PDF documentation
+
+patch -p1 < ../postgresql-multi-sockets.patch
+
+# Configure ...
 
 ./configure >/dev/null
 

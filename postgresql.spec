@@ -53,7 +53,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.1
 Version: 9.1.4
-Release: 4%{?dist}
+Release: 5%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -85,6 +85,7 @@ Source9: postgresql-setup
 Source10: postgresql.service
 Source11: initdb.sh
 Source12: upgrade.sh
+Source13: postgresql.tmpfiles.d
 Source14: postgresql.pam
 Source15: postgresql-bashprofile
 
@@ -93,6 +94,9 @@ Patch1: rpm-pgsql.patch
 Patch2: postgresql-logging.patch
 Patch3: postgresql-perl-rpath.patch
 Patch4: postgresql-oom_score_adj.patch
+Patch5: postgresql-multi-sockets.patch
+Patch6: postgresql-var-run-socket.patch
+Patch7: postgresql-config-comment.patch
 
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
 BuildRequires: perl(ExtUtils::Embed), perl-devel
@@ -146,8 +150,6 @@ BuildRequires: libselinux-devel
 # main package requires -libs subpackage
 Requires: %{name}-libs%{?_isa} = %{version}-%{release}
 
-Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root
-
 %description
 PostgreSQL is an advanced Object-Relational database management system (DBMS).
 The base postgresql package contains the client programs that you'll need to
@@ -182,7 +184,9 @@ Requires(pre): /usr/sbin/useradd
 # for /sbin/ldconfig
 Requires(post): glibc
 Requires(postun): glibc
-# pre/post stuff needs systemd too
+# We require this to be present for %%{_prefix}/lib/tmpfiles.d
+Requires: systemd-units
+# Make sure it's there when scriptlets run, too
 Requires(post): systemd-units
 Requires(preun): systemd-units
 Requires(postun): systemd-units
@@ -305,6 +309,9 @@ benchmarks.
 %patch2 -p1
 %patch3 -p1
 %patch4 -p1
+%patch5 -p1
+%patch6 -p1
+%patch7 -p1
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -435,7 +442,6 @@ rm -f src/tutorial/GNUmakefile
 %endif
 
 %install
-rm -rf $RPM_BUILD_ROOT
 
 make DESTDIR=$RPM_BUILD_ROOT install-world
 
@@ -485,6 +491,13 @@ install -m 755 %{SOURCE12} $RPM_BUILD_ROOT/usr/libexec/initscripts/legacy-action
 install -d $RPM_BUILD_ROOT/etc/pam.d
 install -m 644 %{SOURCE14} $RPM_BUILD_ROOT/etc/pam.d/postgresql
 %endif
+
+# Create the directory for sockets.
+install -d -m 755 $RPM_BUILD_ROOT/var/run/postgresql
+
+# ... and make a tmpfiles script to recreate it at reboot.
+mkdir -p $RPM_BUILD_ROOT%{_prefix}/lib/tmpfiles.d
+install -m 0644 %{SOURCE13} $RPM_BUILD_ROOT%{_prefix}/lib/tmpfiles.d/postgresql.conf
 
 # PGDATA needs removal of group and world permissions due to pg_pwd hole.
 install -d -m 700 $RPM_BUILD_ROOT/var/lib/pgsql/data
@@ -678,13 +691,9 @@ fi
 %postun -p /sbin/ldconfig pltcl
 %endif
 
-%clean
-rm -rf $RPM_BUILD_ROOT
-
 # FILES section.
 
 %files -f main.lst
-%defattr(-,root,root)
 %doc doc/KNOWN_BUGS doc/MISSING_FEATURES doc/TODO
 %doc COPYRIGHT README HISTORY doc/bug.template
 %doc README.rpm-dist
@@ -721,12 +730,10 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_libdir}/pgsql
 
 %files docs
-%defattr(-,root,root)
 %doc *-US.pdf
 %{_libdir}/pgsql/tutorial/
 
 %files contrib
-%defattr(-,root,root)
 %{_datadir}/pgsql/extension/adminpack*
 %{_datadir}/pgsql/extension/autoinc*
 %{_datadir}/pgsql/extension/btree_gin*
@@ -828,7 +835,6 @@ rm -rf $RPM_BUILD_ROOT
 %doc contrib/spi/*.example
 
 %files libs -f libs.lst
-%defattr(-,root,root)
 %doc COPYRIGHT
 %{_libdir}/libpq.so.*
 %{_libdir}/libecpg.so.*
@@ -836,7 +842,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libecpg_compat.so.*
 
 %files server -f server.lst
-%defattr(-,root,root)
 %{_unitdir}/postgresql.service
 %dir /usr/libexec/initscripts/legacy-actions/postgresql
 /usr/libexec/initscripts/legacy-actions/postgresql/*
@@ -872,6 +877,8 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/pgsql/contrib
 %dir %{_datadir}/pgsql/extension
 %{_datadir}/pgsql/extension/plpgsql*
+%{_prefix}/lib/tmpfiles.d/postgresql.conf
+%attr(755,postgres,postgres) %dir /var/run/postgresql
 %attr(700,postgres,postgres) %dir /var/lib/pgsql
 %attr(700,postgres,postgres) %dir /var/lib/pgsql/data
 %attr(700,postgres,postgres) %dir /var/lib/pgsql/backups
@@ -885,7 +892,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/pgsql/sql_features.txt
 
 %files devel -f devel.lst
-%defattr(-,root,root)
 /usr/include/*
 %{_bindir}/ecpg
 %{_libdir}/libpq.so
@@ -898,7 +904,6 @@ rm -rf $RPM_BUILD_ROOT
 
 %if %upgrade
 %files upgrade
-%defattr(-,root,root)
 %{_bindir}/pg_upgrade
 %{_libdir}/pgsql/pg_upgrade_support.so
 %{_libdir}/pgsql/postgresql-%{prevmajorversion}
@@ -906,14 +911,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %if %plperl
 %files plperl -f plperl.lst
-%defattr(-,root,root)
 %{_datadir}/pgsql/extension/plperl*
 %{_libdir}/pgsql/plperl.so
 %endif
 
 %if %pltcl
 %files pltcl -f pltcl.lst
-%defattr(-,root,root)
 %{_datadir}/pgsql/extension/pltcl*
 %{_libdir}/pgsql/pltcl.so
 %{_bindir}/pltcl_delmod
@@ -924,7 +927,6 @@ rm -rf $RPM_BUILD_ROOT
 
 %if %plpython
 %files plpython -f plpython.lst
-%defattr(-,root,root)
 %{_datadir}/pgsql/extension/plpython*
 %{_libdir}/pgsql/plpython2.so
 %endif
@@ -937,6 +939,15 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Mon Aug 13 2012 Tom Lane <tgl@redhat.com> 9.1.4-5
+- Back-port upstream support for postmaster listening on multiple Unix sockets
+- Configure postmaster to create sockets in both /var/run/postgresql and /tmp;
+  the former is now the default place for libpq to contact the postmaster.
+Resolves: #825448
+- Annotate postgresql.config about not setting port number there
+- Minor specfile cleanup per suggestions from Tom Callaway
+Related: #845110
+
 * Sat Jul 21 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 9.1.4-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
 

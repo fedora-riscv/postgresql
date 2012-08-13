@@ -1,0 +1,26 @@
+Add notes warning users that the data directory and port number are
+forced in the service file (the latter now mostly because it's traditional
+in Red Hat installations to set it there rather than in postgresql.conf).
+
+
+diff -Naur postgresql-9.1.4.orig/src/backend/utils/misc/postgresql.conf.sample postgresql-9.1.4/src/backend/utils/misc/postgresql.conf.sample
+--- postgresql-9.1.4.orig/src/backend/utils/misc/postgresql.conf.sample	2012-05-31 19:07:09.000000000 -0400
++++ postgresql-9.1.4/src/backend/utils/misc/postgresql.conf.sample	2012-08-13 12:15:10.939846705 -0400
+@@ -38,6 +38,8 @@
+ # The default values of these variables are driven from the -D command-line
+ # option or PGDATA environment variable, represented here as ConfigDir.
+ 
++# Note: In RHEL/Fedora installations, you can't set data_directory here;
++# adjust it in the service file instead.
+ #data_directory = 'ConfigDir'		# use data in another directory
+ 					# (change requires restart)
+ #hba_file = 'ConfigDir/pg_hba.conf'	# host-based authentication file
+@@ -60,6 +62,8 @@
+ 					# comma-separated list of addresses;
+ 					# defaults to 'localhost', '*' = all
+ 					# (change requires restart)
++# Note: In RHEL/Fedora installations, you can't set the port number here;
++# adjust it in the service file instead.
+ #port = 5432				# (change requires restart)
+ #max_connections = 100			# (change requires restart)
+ # Note:  Increasing max_connections costs ~400 bytes of shared memory per
