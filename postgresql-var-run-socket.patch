@@ -1,0 +1,94 @@
+Change the built-in default socket directory to be /var/run/postgresql.
+For backwards compatibility with (probably non-libpq-based) clients that
+might still expect to find the socket in /tmp, also create a socket in
+/tmp.  This is to resolve communication problems with clients operating
+under systemd's PrivateTmp environment, which won't be using the same
+global /tmp directory as the server; see bug #825448.
+
+Note that we apply the socket directory change at the level of the
+hard-wired defaults in the C code, not by just twiddling the setting in
+postgresql.conf.sample; this is so that the change will take effect on
+server package update, without requiring any existing postgresql.conf
+to be updated.  (Of course, a user who dislikes this behavior can still
+override it via postgresql.conf.)
+
+This patch must be applied after postgresql-multi-sockets.patch, at
+least until 9.3 when that will be part of the upstream package.
+
+
+diff -Naur postgresql-9.1.4.sockets/contrib/pg_upgrade/server.c postgresql-9.1.4/contrib/pg_upgrade/server.c
+--- postgresql-9.1.4.sockets/contrib/pg_upgrade/server.c	2012-05-31 19:07:09.000000000 -0400
++++ postgresql-9.1.4/contrib/pg_upgrade/server.c	2012-08-12 22:43:10.388873678 -0400
+@@ -179,11 +179,14 @@
+ 	 */
+ 	snprintf(cmd, sizeof(cmd),
+ 			 SYSTEMQUOTE "\"%s/pg_ctl\" -w -l \"%s\" -D \"%s\" "
+-			 "-o \"-p %d %s\" start >> \"%s\" 2>&1" SYSTEMQUOTE,
++			 "-o \"-p %d %s %s\" start >> \"%s\" 2>&1" SYSTEMQUOTE,
+ 			 cluster->bindir, output_filename, cluster->pgdata, cluster->port,
+ 			 (cluster->controldata.cat_ver >=
+ 			  BINARY_UPGRADE_SERVER_FLAG_CAT_VER) ? "-b" :
+ 			 "-c autovacuum=off -c autovacuum_freeze_max_age=2000000000",
++			 /* assume 9.1 builds will have newer socket directory */
++			 (GET_MAJOR_VERSION(cluster->major_version) < 901) ?
++			 "-c unix_socket_directory=/var/run/postgresql" : "",
+ 			 output_filename);
+ 
+ 	/*
+diff -Naur postgresql-9.1.4.sockets/src/backend/utils/misc/guc.c postgresql-9.1.4/src/backend/utils/misc/guc.c
+--- postgresql-9.1.4.sockets/src/backend/utils/misc/guc.c	2012-08-12 20:35:22.559682963 -0400
++++ postgresql-9.1.4/src/backend/utils/misc/guc.c	2012-08-12 20:35:55.071983609 -0400
+@@ -2874,7 +2874,7 @@
+ 		},
+ 		&Unix_socket_directories,
+ #ifdef HAVE_UNIX_SOCKETS
+-		DEFAULT_PGSOCKET_DIR,
++		DEFAULT_PGSOCKET_DIR ", /tmp",
+ #else
+ 		"",
+ #endif
+diff -Naur postgresql-9.1.4.sockets/src/bin/initdb/initdb.c postgresql-9.1.4/src/bin/initdb/initdb.c
+--- postgresql-9.1.4.sockets/src/bin/initdb/initdb.c	2012-08-12 20:35:22.561682693 -0400
++++ postgresql-9.1.4/src/bin/initdb/initdb.c	2012-08-12 20:35:55.073983799 -0400
+@@ -970,7 +970,7 @@
+ 
+ #ifdef HAVE_UNIX_SOCKETS
+ 	snprintf(repltok, sizeof(repltok), "#unix_socket_directories = '%s'",
+-			 DEFAULT_PGSOCKET_DIR);
++			 DEFAULT_PGSOCKET_DIR ", /tmp");
+ #else
+ 	snprintf(repltok, sizeof(repltok), "#unix_socket_directories = ''");
+ #endif
+diff -Naur postgresql-9.1.4.sockets/src/include/pg_config_manual.h postgresql-9.1.4/src/include/pg_config_manual.h
+--- postgresql-9.1.4.sockets/src/include/pg_config_manual.h	2012-05-31 19:07:09.000000000 -0400
++++ postgresql-9.1.4/src/include/pg_config_manual.h	2012-08-12 20:35:55.073983799 -0400
+@@ -141,7 +141,7 @@
+  * here's where to twiddle it.  You can also override this at runtime
+  * with the postmaster's -k switch.
+  */
+-#define DEFAULT_PGSOCKET_DIR  "/tmp"
++#define DEFAULT_PGSOCKET_DIR  "/var/run/postgresql"
+ 
+ /*
+  * The random() function is expected to yield values between 0 and
+diff -Naur postgresql-9.1.4.sockets/src/test/regress/pg_regress.c postgresql-9.1.4/src/test/regress/pg_regress.c
+--- postgresql-9.1.4.sockets/src/test/regress/pg_regress.c	2012-05-31 19:07:09.000000000 -0400
++++ postgresql-9.1.4/src/test/regress/pg_regress.c	2012-08-12 20:38:43.933609334 -0400
+@@ -781,7 +781,7 @@
+ 		if (hostname != NULL)
+ 			doputenv("PGHOST", hostname);
+ 		else
+-			unsetenv("PGHOST");
++			doputenv("PGHOST", "/tmp");
+ 		unsetenv("PGHOSTADDR");
+ 		if (port != -1)
+ 		{
+@@ -2240,7 +2240,7 @@
+ 		 */
+ 		header(_("starting postmaster"));
+ 		snprintf(buf, sizeof(buf),
+-				 SYSTEMQUOTE "\"%s/postgres\" -D \"%s/data\" -F%s -c \"listen_addresses=%s\" > \"%s/log/postmaster.log\" 2>&1" SYSTEMQUOTE,
++				 SYSTEMQUOTE "\"%s/postgres\" -D \"%s/data\" -F%s -c \"listen_addresses=%s\" -c \"unix_socket_directories=/tmp\" > \"%s/log/postmaster.log\" 2>&1" SYSTEMQUOTE,
+ 				 bindir, temp_install,
+ 				 debug ? " -d 5" : "",
+ 				 hostname ? hostname : "",
