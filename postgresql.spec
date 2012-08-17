@@ -52,8 +52,8 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.1
-Version: 9.1.4
-Release: 3%{?dist}
+Version: 9.1.5
+Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -145,8 +145,6 @@ BuildRequires: libselinux-devel
 
 # main package requires -libs subpackage
 Requires: %{name}-libs%{?_isa} = %{version}-%{release}
-
-Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root
 
 %description
 PostgreSQL is an advanced Object-Relational database management system (DBMS).
@@ -435,7 +433,6 @@ rm -f src/tutorial/GNUmakefile
 %endif
 
 %install
-rm -rf $RPM_BUILD_ROOT
 
 make DESTDIR=$RPM_BUILD_ROOT install-world
 
@@ -678,13 +675,9 @@ fi
 %postun -p /sbin/ldconfig pltcl
 %endif
 
-%clean
-rm -rf $RPM_BUILD_ROOT
-
 # FILES section.
 
 %files -f main.lst
-%defattr(-,root,root)
 %doc doc/KNOWN_BUGS doc/MISSING_FEATURES doc/TODO
 %doc COPYRIGHT README HISTORY doc/bug.template
 %doc README.rpm-dist
@@ -721,12 +714,10 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_libdir}/pgsql
 
 %files docs
-%defattr(-,root,root)
 %doc *-US.pdf
 %{_libdir}/pgsql/tutorial/
 
 %files contrib
-%defattr(-,root,root)
 %{_datadir}/pgsql/extension/adminpack*
 %{_datadir}/pgsql/extension/autoinc*
 %{_datadir}/pgsql/extension/btree_gin*
@@ -828,7 +819,6 @@ rm -rf $RPM_BUILD_ROOT
 %doc contrib/spi/*.example
 
 %files libs -f libs.lst
-%defattr(-,root,root)
 %doc COPYRIGHT
 %{_libdir}/libpq.so.*
 %{_libdir}/libecpg.so.*
@@ -836,7 +826,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libecpg_compat.so.*
 
 %files server -f server.lst
-%defattr(-,root,root)
 %{_unitdir}/postgresql.service
 %dir /usr/libexec/initscripts/legacy-actions/postgresql
 /usr/libexec/initscripts/legacy-actions/postgresql/*
@@ -885,7 +874,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/pgsql/sql_features.txt
 
 %files devel -f devel.lst
-%defattr(-,root,root)
 /usr/include/*
 %{_bindir}/ecpg
 %{_libdir}/libpq.so
@@ -898,7 +886,6 @@ rm -rf $RPM_BUILD_ROOT
 
 %if %upgrade
 %files upgrade
-%defattr(-,root,root)
 %{_bindir}/pg_upgrade
 %{_libdir}/pgsql/pg_upgrade_support.so
 %{_libdir}/pgsql/postgresql-%{prevmajorversion}
@@ -906,14 +893,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %if %plperl
 %files plperl -f plperl.lst
-%defattr(-,root,root)
 %{_datadir}/pgsql/extension/plperl*
 %{_libdir}/pgsql/plperl.so
 %endif
 
 %if %pltcl
 %files pltcl -f pltcl.lst
-%defattr(-,root,root)
 %{_datadir}/pgsql/extension/pltcl*
 %{_libdir}/pgsql/pltcl.so
 %{_bindir}/pltcl_delmod
@@ -924,7 +909,6 @@ rm -rf $RPM_BUILD_ROOT
 
 %if %plpython
 %files plpython -f plpython.lst
-%defattr(-,root,root)
 %{_datadir}/pgsql/extension/plpython*
 %{_libdir}/pgsql/plpython2.so
 %endif
@@ -937,6 +921,13 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Fri Aug 17 2012 Tom Lane <tgl@redhat.com> 9.1.5-1
+- Update to PostgreSQL 9.1.5, for various fixes described at
+  http://www.postgresql.org/docs/9.1/static/release-9-1-5.html
+  including the fixes for CVE-2012-3488, CVE-2012-3489
+- Minor specfile cleanup per suggestions from Tom Callaway
+Related: #845110
+
 * Sat Jul 14 2012 Tom Lane <tgl@redhat.com> 9.1.4-3
 - Update code to use oom_score_adj not oom_adj, thereby suppressing
   whining in the kernel log
