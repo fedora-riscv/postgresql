@@ -52,8 +52,8 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.1
-Version: 9.1.4
-Release: 5%{?dist}
+Version: 9.1.5
+Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -939,12 +939,17 @@ fi
 %endif
 
 %changelog
+* Fri Aug 17 2012 Tom Lane <tgl@redhat.com> 9.1.5-1
+- Update to PostgreSQL 9.1.5, for various fixes described at
+  http://www.postgresql.org/docs/9.1/static/release-9-1-5.html
+  including the fixes for CVE-2012-3488, CVE-2012-3489
+
 * Mon Aug 13 2012 Tom Lane <tgl@redhat.com> 9.1.4-5
 - Back-port upstream support for postmaster listening on multiple Unix sockets
 - Configure postmaster to create sockets in both /var/run/postgresql and /tmp;
   the former is now the default place for libpq to contact the postmaster.
 Resolves: #825448
-- Annotate postgresql.config about not setting port number there
+- Annotate postgresql.conf about not setting port number there
 - Minor specfile cleanup per suggestions from Tom Callaway
 Related: #845110
 
