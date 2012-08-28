@@ -53,7 +53,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.1
 Version: 9.1.5
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -181,9 +181,6 @@ Group: Applications/Databases
 Requires: %{name}%{?_isa} = %{version}-%{release}
 Requires: %{name}-libs%{?_isa} = %{version}-%{release}
 Requires(pre): /usr/sbin/useradd
-# for /sbin/ldconfig
-Requires(post): glibc
-Requires(postun): glibc
 # We require this to be present for %%{_prefix}/lib/tmpfiles.d
 Requires: systemd-units
 # Make sure it's there when scriptlets run, too
@@ -644,7 +641,6 @@ cat psql-%{majorversion}.lang >>main.lst
 	-c "PostgreSQL Server" -u 26 postgres >/dev/null 2>&1 || :
 
 %post server
-/sbin/ldconfig
 if [ $1 -eq 1 ] ; then
     # Initial installation
     /bin/systemctl daemon-reload >/dev/null 2>&1 || :
@@ -669,27 +665,11 @@ if [ $1 -eq 0 ] ; then
 fi
 
 %postun server
-/sbin/ldconfig 
 /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 if [ $1 -ge 1 ] ; then
     # Package upgrade, not uninstall
     /bin/systemctl try-restart postgresql.service >/dev/null 2>&1 || :
 fi
-
-%if %plperl
-%post -p /sbin/ldconfig plperl
-%postun -p /sbin/ldconfig plperl
-%endif
-
-%if %plpython
-%post -p /sbin/ldconfig plpython
-%postun -p /sbin/ldconfig plpython
-%endif
-
-%if %pltcl
-%post -p /sbin/ldconfig pltcl
-%postun -p /sbin/ldconfig pltcl
-%endif
 
 # FILES section.
 
@@ -939,6 +919,10 @@ fi
 %endif
 
 %changelog
+* Tue Aug 28 2012 Tom Lane <tgl@redhat.com> 9.1.5-2
+- Remove unnecessary ldconfig calls in pre/post triggers
+Resolves: #849344
+
 * Fri Aug 17 2012 Tom Lane <tgl@redhat.com> 9.1.5-1
 - Update to PostgreSQL 9.1.5, for various fixes described at
   http://www.postgresql.org/docs/9.1/static/release-9-1-5.html
