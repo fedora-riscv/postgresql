@@ -1,0 +1,62 @@
+This won't be needed in 9.2.1 and later.
+
+
+commit 770556d6c69c4edf219d4ace2e4fb29a1f2c35df
+Author: Tom Lane <tgl@sss.pgh.pa.us>
+Date:   Sat Sep 8 17:39:02 2012 -0400
+
+    Adjust PL/Python regression tests some more for Python 3.3.
+    
+    Commit 2cfb1c6f77734db81b6e74bcae630f93b94f69be fixed some issues caused
+    by Python 3.3 choosing to iterate through dict entries in a different order
+    than before.  But here's another one: the test cases adjusted here made two
+    bad entries in a dict and expected the one complained of would always be
+    the same.
+    
+    Possibly this should be back-patched further than 9.2, but there seems
+    little point unless the earlier fix is too.
+
+diff --git a/src/pl/plpython/expected/plpython_trigger.out b/src/pl/plpython/expected/plpython_trigger.out
+index 4c46b2b..25060b0 100644
+--- a/src/pl/plpython/expected/plpython_trigger.out
++++ b/src/pl/plpython/expected/plpython_trigger.out
+@@ -476,7 +476,7 @@ DROP TRIGGER stupid_trigger6 ON trigger_test;
+ -- TD keys not corresponding to row columns
+ CREATE FUNCTION stupid7() RETURNS trigger
+ AS $$
+-    TD["new"] = {'a': 'foo', 'b': 'bar'}
++    TD["new"] = {'v': 'foo', 'a': 'bar'}
+     return "MODIFY";
+ $$ LANGUAGE plpythonu;
+ CREATE TRIGGER stupid_trigger7
+@@ -490,7 +490,7 @@ DROP TRIGGER stupid_trigger7 ON trigger_test;
+ -- Unicode variant
+ CREATE FUNCTION stupid7u() RETURNS trigger
+ AS $$
+-    TD["new"] = {u'a': 'foo', u'b': 'bar'}
++    TD["new"] = {u'v': 'foo', u'a': 'bar'}
+     return "MODIFY"
+ $$ LANGUAGE plpythonu;
+ CREATE TRIGGER stupid_trigger7
+diff --git a/src/pl/plpython/sql/plpython_trigger.sql b/src/pl/plpython/sql/plpython_trigger.sql
+index 2a4859f..9727f44 100644
+--- a/src/pl/plpython/sql/plpython_trigger.sql
++++ b/src/pl/plpython/sql/plpython_trigger.sql
+@@ -253,7 +253,7 @@ DROP TRIGGER stupid_trigger6 ON trigger_test;
+ 
+ CREATE FUNCTION stupid7() RETURNS trigger
+ AS $$
+-    TD["new"] = {'a': 'foo', 'b': 'bar'}
++    TD["new"] = {'v': 'foo', 'a': 'bar'}
+     return "MODIFY";
+ $$ LANGUAGE plpythonu;
+ 
+@@ -270,7 +270,7 @@ DROP TRIGGER stupid_trigger7 ON trigger_test;
+ 
+ CREATE FUNCTION stupid7u() RETURNS trigger
+ AS $$
+-    TD["new"] = {u'a': 'foo', u'b': 'bar'}
++    TD["new"] = {u'v': 'foo', u'a': 'bar'}
+     return "MODIFY"
+ $$ LANGUAGE plpythonu;
+ 

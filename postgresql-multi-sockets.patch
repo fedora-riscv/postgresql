@@ -9,10 +9,23 @@ files.  We don't want that to happen because the BuildRequires for the
 package don't include the necessary documentation tools.
 
 
-diff -Naur postgresql-9.1.5.orig/doc/src/sgml/client-auth.sgml postgresql-9.1.5/doc/src/sgml/client-auth.sgml
---- postgresql-9.1.5.orig/doc/src/sgml/client-auth.sgml	2012-08-14 18:41:04.000000000 -0400
-+++ postgresql-9.1.5/doc/src/sgml/client-auth.sgml	2012-09-06 11:53:55.188679276 -0400
-@@ -831,7 +831,7 @@
+diff -Naur postgresql-9.2rc1.orig/contrib/pg_upgrade/server.c postgresql-9.2rc1/contrib/pg_upgrade/server.c
+--- postgresql-9.2rc1.orig/contrib/pg_upgrade/server.c	2012-09-05 01:08:30.000000000 -0400
++++ postgresql-9.2rc1/contrib/pg_upgrade/server.c	2012-09-06 12:06:22.425763034 -0400
+@@ -197,7 +197,8 @@
+ 		snprintf(socket_string + strlen(socket_string),
+ 				 sizeof(socket_string) - strlen(socket_string),
+ 				 " -c %s='%s'",
+-				 (GET_MAJOR_VERSION(cluster->major_version) < 903) ?
++	/* assume 9.1 build will not have unix_socket_directories patch */
++				 (GET_MAJOR_VERSION(cluster->major_version) < 902) ?
+ 				 "unix_socket_directory" : "unix_socket_directories",
+ 				 cluster->sockdir);
+ #endif
+diff -Naur postgresql-9.2rc1.orig/doc/src/sgml/client-auth.sgml postgresql-9.2rc1/doc/src/sgml/client-auth.sgml
+--- postgresql-9.2rc1.orig/doc/src/sgml/client-auth.sgml	2012-09-05 01:08:30.000000000 -0400
++++ postgresql-9.2rc1/doc/src/sgml/client-auth.sgml	2012-09-06 12:06:22.426763044 -0400
+@@ -838,7 +838,7 @@
      <varname>unix_socket_permissions</varname> (and possibly
      <varname>unix_socket_group</varname>) configuration parameters as
      described in <xref linkend="runtime-config-connection">.  Or you
@@ -21,10 +34,10 @@ diff -Naur postgresql-9.1.5.orig/doc/src/sgml/client-auth.sgml postgresql-9.1.5/
      configuration parameter to place the socket file in a suitably
      restricted directory.
     </para>
-diff -Naur postgresql-9.1.5.orig/doc/src/sgml/config.sgml postgresql-9.1.5/doc/src/sgml/config.sgml
---- postgresql-9.1.5.orig/doc/src/sgml/config.sgml	2012-08-14 18:41:04.000000000 -0400
-+++ postgresql-9.1.5/doc/src/sgml/config.sgml	2012-09-06 11:53:55.200679690 -0400
-@@ -417,17 +417,24 @@
+diff -Naur postgresql-9.2rc1.orig/doc/src/sgml/config.sgml postgresql-9.2rc1/doc/src/sgml/config.sgml
+--- postgresql-9.2rc1.orig/doc/src/sgml/config.sgml	2012-09-05 01:08:30.000000000 -0400
++++ postgresql-9.2rc1/doc/src/sgml/config.sgml	2012-09-06 12:06:22.428763063 -0400
+@@ -453,17 +453,24 @@
        </listitem>
       </varlistentry>
  
@@ -56,7 +69,7 @@ diff -Naur postgresql-9.1.5.orig/doc/src/sgml/config.sgml postgresql-9.1.5/doc/s
          This parameter can only be set at server start.
         </para>
  
-@@ -436,8 +443,8 @@
+@@ -472,8 +479,8 @@
          <literal>.s.PGSQL.<replaceable>nnnn</></literal> where
          <replaceable>nnnn</> is the server's port number, an ordinary file
          named <literal>.s.PGSQL.<replaceable>nnnn</>.lock</literal> will be
@@ -67,7 +80,7 @@ diff -Naur postgresql-9.1.5.orig/doc/src/sgml/config.sgml postgresql-9.1.5/doc/s
         </para>
  
         <para>
-@@ -454,8 +461,8 @@
+@@ -490,8 +497,8 @@
        </indexterm>
        <listitem>
         <para>
@@ -78,7 +91,7 @@ diff -Naur postgresql-9.1.5.orig/doc/src/sgml/config.sgml postgresql-9.1.5/doc/s
          server.)  In combination with the parameter
          <varname>unix_socket_permissions</varname> this can be used as
          an additional access control mechanism for Unix-domain connections.
-@@ -478,7 +485,7 @@
+@@ -514,7 +521,7 @@
        </indexterm>
        <listitem>
         <para>
@@ -87,7 +100,7 @@ diff -Naur postgresql-9.1.5.orig/doc/src/sgml/config.sgml postgresql-9.1.5/doc/s
          sockets use the usual Unix file system permission set.
          The parameter value is expected to be a numeric mode
          specified in the format accepted by the
-@@ -6417,7 +6424,7 @@
+@@ -6606,7 +6613,7 @@
         </row>
         <row>
          <entry><option>-k <replaceable>x</replaceable></option></entry>
@@ -96,10 +109,10 @@ diff -Naur postgresql-9.1.5.orig/doc/src/sgml/config.sgml postgresql-9.1.5/doc/s
         </row>
         <row>
          <entry><option>-l</option></entry>
-diff -Naur postgresql-9.1.5.orig/doc/src/sgml/html/app-postgres.html postgresql-9.1.5/doc/src/sgml/html/app-postgres.html
---- postgresql-9.1.5.orig/doc/src/sgml/html/app-postgres.html	2012-08-14 18:56:14.000000000 -0400
-+++ postgresql-9.1.5/doc/src/sgml/html/app-postgres.html	2012-09-06 11:53:55.201679728 -0400
-@@ -531,11 +531,19 @@
+diff -Naur postgresql-9.2rc1.orig/doc/src/sgml/html/app-postgres.html postgresql-9.2rc1/doc/src/sgml/html/app-postgres.html
+--- postgresql-9.2rc1.orig/doc/src/sgml/html/app-postgres.html	2012-09-05 13:24:03.000000000 -0400
++++ postgresql-9.2rc1/doc/src/sgml/html/app-postgres.html	2012-09-06 12:06:22.429763072 -0400
+@@ -574,11 +574,19 @@
  CLASS="COMMAND"
  >postgres</TT
  > is to listen for
@@ -121,9 +134,9 @@ diff -Naur postgresql-9.1.5.orig/doc/src/sgml/html/app-postgres.html postgresql-
         </P
  ></DD
  ><DT
-diff -Naur postgresql-9.1.5.orig/doc/src/sgml/html/auth-methods.html postgresql-9.1.5/doc/src/sgml/html/auth-methods.html
---- postgresql-9.1.5.orig/doc/src/sgml/html/auth-methods.html	2012-08-14 18:55:57.000000000 -0400
-+++ postgresql-9.1.5/doc/src/sgml/html/auth-methods.html	2012-09-06 11:53:55.201679728 -0400
+diff -Naur postgresql-9.2rc1.orig/doc/src/sgml/html/auth-methods.html postgresql-9.2rc1/doc/src/sgml/html/auth-methods.html
+--- postgresql-9.2rc1.orig/doc/src/sgml/html/auth-methods.html	2012-09-05 13:23:46.000000000 -0400
++++ postgresql-9.2rc1/doc/src/sgml/html/auth-methods.html	2012-09-06 12:06:22.430763081 -0400
 @@ -161,7 +161,7 @@
  >.  Or you
      could set the <TT
@@ -133,10 +146,10 @@ diff -Naur postgresql-9.1.5.orig/doc/src/sgml/html/auth-methods.html postgresql-
  >
      configuration parameter to place the socket file in a suitably
      restricted directory.
-diff -Naur postgresql-9.1.5.orig/doc/src/sgml/html/bookindex.html postgresql-9.1.5/doc/src/sgml/html/bookindex.html
---- postgresql-9.1.5.orig/doc/src/sgml/html/bookindex.html	2012-08-14 18:56:48.000000000 -0400
-+++ postgresql-9.1.5/doc/src/sgml/html/bookindex.html	2012-09-06 11:53:55.204679820 -0400
-@@ -16893,7 +16893,7 @@
+diff -Naur postgresql-9.2rc1.orig/doc/src/sgml/html/bookindex.html postgresql-9.2rc1/doc/src/sgml/html/bookindex.html
+--- postgresql-9.2rc1.orig/doc/src/sgml/html/bookindex.html	2012-09-05 13:24:38.000000000 -0400
++++ postgresql-9.2rc1/doc/src/sgml/html/bookindex.html	2012-09-06 12:06:22.433763111 -0400
+@@ -17236,7 +17236,7 @@
  ></DL
  ></DD
  ><DT
@@ -145,9 +158,9 @@ diff -Naur postgresql-9.1.5.orig/doc/src/sgml/html/bookindex.html postgresql-9.1
      <A
  HREF="runtime-config-connection.html#RUNTIME-CONFIG-CONNECTION-SETTINGS"
  >Connection Settings</A
-diff -Naur postgresql-9.1.5.orig/doc/src/sgml/html/preventing-server-spoofing.html postgresql-9.1.5/doc/src/sgml/html/preventing-server-spoofing.html
---- postgresql-9.1.5.orig/doc/src/sgml/html/preventing-server-spoofing.html	2012-08-14 18:55:56.000000000 -0400
-+++ postgresql-9.1.5/doc/src/sgml/html/preventing-server-spoofing.html	2012-09-06 11:53:55.205679845 -0400
+diff -Naur postgresql-9.2rc1.orig/doc/src/sgml/html/preventing-server-spoofing.html postgresql-9.2rc1/doc/src/sgml/html/preventing-server-spoofing.html
+--- postgresql-9.2rc1.orig/doc/src/sgml/html/preventing-server-spoofing.html	2012-09-05 13:23:45.000000000 -0400
++++ postgresql-9.2rc1/doc/src/sgml/html/preventing-server-spoofing.html	2012-09-06 12:06:22.434763120 -0400
 @@ -115,8 +115,8 @@
  >local</TT
  >
@@ -159,9 +172,9 @@ diff -Naur postgresql-9.1.5.orig/doc/src/sgml/html/preventing-server-spoofing.ht
  >) that has write permission only
     for a trusted local user.  This prevents a malicious user from creating
     their own socket file in that directory.  If you are concerned that
-diff -Naur postgresql-9.1.5.orig/doc/src/sgml/html/runtime-config-connection.html postgresql-9.1.5/doc/src/sgml/html/runtime-config-connection.html
---- postgresql-9.1.5.orig/doc/src/sgml/html/runtime-config-connection.html	2012-08-14 18:55:56.000000000 -0400
-+++ postgresql-9.1.5/doc/src/sgml/html/runtime-config-connection.html	2012-09-06 11:53:55.205679845 -0400
+diff -Naur postgresql-9.2rc1.orig/doc/src/sgml/html/runtime-config-connection.html postgresql-9.2rc1/doc/src/sgml/html/runtime-config-connection.html
+--- postgresql-9.2rc1.orig/doc/src/sgml/html/runtime-config-connection.html	2012-09-05 13:23:45.000000000 -0400
++++ postgresql-9.2rc1/doc/src/sgml/html/runtime-config-connection.html	2012-09-06 12:06:22.435763129 -0400
 @@ -274,24 +274,31 @@
  ></DD
  ><DT
@@ -236,10 +249,10 @@ diff -Naur postgresql-9.1.5.orig/doc/src/sgml/html/runtime-config-connection.htm
          sockets use the usual Unix file system permission set.
          The parameter value is expected to be a numeric mode
          specified in the format accepted by the
-diff -Naur postgresql-9.1.5.orig/doc/src/sgml/html/runtime-config-short.html postgresql-9.1.5/doc/src/sgml/html/runtime-config-short.html
---- postgresql-9.1.5.orig/doc/src/sgml/html/runtime-config-short.html	2012-08-14 18:55:57.000000000 -0400
-+++ postgresql-9.1.5/doc/src/sgml/html/runtime-config-short.html	2012-09-06 11:53:55.206679864 -0400
-@@ -323,7 +323,7 @@
+diff -Naur postgresql-9.2rc1.orig/doc/src/sgml/html/runtime-config-short.html postgresql-9.2rc1/doc/src/sgml/html/runtime-config-short.html
+--- postgresql-9.2rc1.orig/doc/src/sgml/html/runtime-config-short.html	2012-09-05 13:23:46.000000000 -0400
++++ postgresql-9.2rc1/doc/src/sgml/html/runtime-config-short.html	2012-09-06 12:06:22.435763129 -0400
+@@ -330,7 +330,7 @@
  ><TD
  ><TT
  CLASS="LITERAL"
@@ -248,13 +261,13 @@ diff -Naur postgresql-9.1.5.orig/doc/src/sgml/html/runtime-config-short.html pos
  CLASS="REPLACEABLE"
  ><I
  >x</I
-diff -Naur postgresql-9.1.5.orig/doc/src/sgml/man1/postgres.1 postgresql-9.1.5/doc/src/sgml/man1/postgres.1
---- postgresql-9.1.5.orig/doc/src/sgml/man1/postgres.1	2012-08-14 18:57:43.000000000 -0400
-+++ postgresql-9.1.5/doc/src/sgml/man1/postgres.1	2012-09-06 11:53:55.206679864 -0400
-@@ -180,8 +180,10 @@
+diff -Naur postgresql-9.2rc1.orig/doc/src/sgml/man1/postgres.1 postgresql-9.2rc1/doc/src/sgml/man1/postgres.1
+--- postgresql-9.2rc1.orig/doc/src/sgml/man1/postgres.1	2012-09-05 13:25:37.000000000 -0400
++++ postgresql-9.2rc1/doc/src/sgml/man1/postgres.1	2012-09-06 12:06:22.436763138 -0400
+@@ -195,8 +195,10 @@
  .RS 4
  Specifies the directory of the Unix\-domain socket on which
- postgres
+ \fBpostgres\fR
 -is to listen for connections from client applications\&. The default is normally
 -/tmp, but can be changed at build time\&.
 +is to listen for connections from client applications\&. The value can also be a comma\-separated list of directories\&. An empty value specifies not listening on any Unix\-domain sockets, in which case only TCP/IP sockets can be used to connect to the server\&. The default value is normally
@@ -264,10 +277,10 @@ diff -Naur postgresql-9.1.5.orig/doc/src/sgml/man1/postgres.1 postgresql-9.1.5/d
  .RE
  .PP
  \fB\-l\fR
-diff -Naur postgresql-9.1.5.orig/doc/src/sgml/ref/postgres-ref.sgml postgresql-9.1.5/doc/src/sgml/ref/postgres-ref.sgml
---- postgresql-9.1.5.orig/doc/src/sgml/ref/postgres-ref.sgml	2012-08-14 18:41:04.000000000 -0400
-+++ postgresql-9.1.5/doc/src/sgml/ref/postgres-ref.sgml	2012-09-06 11:53:55.207679890 -0400
-@@ -233,8 +233,14 @@
+diff -Naur postgresql-9.2rc1.orig/doc/src/sgml/ref/postgres-ref.sgml postgresql-9.2rc1/doc/src/sgml/ref/postgres-ref.sgml
+--- postgresql-9.2rc1.orig/doc/src/sgml/ref/postgres-ref.sgml	2012-09-05 01:08:30.000000000 -0400
++++ postgresql-9.2rc1/doc/src/sgml/ref/postgres-ref.sgml	2012-09-06 12:06:22.437763147 -0400
+@@ -254,8 +254,14 @@
         <para>
          Specifies the directory of the Unix-domain socket on which
          <command>postgres</command> is to listen for
@@ -284,10 +297,10 @@ diff -Naur postgresql-9.1.5.orig/doc/src/sgml/ref/postgres-ref.sgml postgresql-9
         </para>
        </listitem>
       </varlistentry>
-diff -Naur postgresql-9.1.5.orig/doc/src/sgml/runtime.sgml postgresql-9.1.5/doc/src/sgml/runtime.sgml
---- postgresql-9.1.5.orig/doc/src/sgml/runtime.sgml	2012-08-14 18:41:04.000000000 -0400
-+++ postgresql-9.1.5/doc/src/sgml/runtime.sgml	2012-09-06 11:53:55.208679918 -0400
-@@ -1816,7 +1816,7 @@
+diff -Naur postgresql-9.2rc1.orig/doc/src/sgml/runtime.sgml postgresql-9.2rc1/doc/src/sgml/runtime.sgml
+--- postgresql-9.2rc1.orig/doc/src/sgml/runtime.sgml	2012-09-05 01:08:30.000000000 -0400
++++ postgresql-9.2rc1/doc/src/sgml/runtime.sgml	2012-09-06 12:06:22.438763157 -0400
+@@ -1798,7 +1798,7 @@
    <para>
     The simplest way to prevent spoofing for <literal>local</>
     connections is to use a Unix domain socket directory (<xref
@@ -296,9 +309,9 @@ diff -Naur postgresql-9.1.5.orig/doc/src/sgml/runtime.sgml postgresql-9.1.5/doc/
     for a trusted local user.  This prevents a malicious user from creating
     their own socket file in that directory.  If you are concerned that
     some applications might still reference <filename>/tmp</> for the
-diff -Naur postgresql-9.1.5.orig/src/backend/libpq/pqcomm.c postgresql-9.1.5/src/backend/libpq/pqcomm.c
---- postgresql-9.1.5.orig/src/backend/libpq/pqcomm.c	2012-08-14 18:41:04.000000000 -0400
-+++ postgresql-9.1.5/src/backend/libpq/pqcomm.c	2012-09-06 11:53:55.209679942 -0400
+diff -Naur postgresql-9.2rc1.orig/src/backend/libpq/pqcomm.c postgresql-9.2rc1/src/backend/libpq/pqcomm.c
+--- postgresql-9.2rc1.orig/src/backend/libpq/pqcomm.c	2012-09-05 01:08:30.000000000 -0400
++++ postgresql-9.2rc1/src/backend/libpq/pqcomm.c	2012-09-06 12:06:22.439763167 -0400
 @@ -42,7 +42,7 @@
   *		StreamServerPort	- Open postmaster's server port
   *		StreamConnection	- Create new connection with client
@@ -508,10 +521,10 @@ diff -Naur postgresql-9.1.5.orig/src/backend/libpq/pqcomm.c postgresql-9.1.5/src
  		/*
  		 * utime() is POSIX standard, utimes() is a common alternative. If we
  		 * have neither, there's no way to affect the mod or access time of
-diff -Naur postgresql-9.1.5.orig/src/backend/postmaster/postmaster.c postgresql-9.1.5/src/backend/postmaster/postmaster.c
---- postgresql-9.1.5.orig/src/backend/postmaster/postmaster.c	2012-08-14 18:41:04.000000000 -0400
-+++ postgresql-9.1.5/src/backend/postmaster/postmaster.c	2012-09-06 11:53:55.210679959 -0400
-@@ -157,7 +157,9 @@
+diff -Naur postgresql-9.2rc1.orig/src/backend/postmaster/postmaster.c postgresql-9.2rc1/src/backend/postmaster/postmaster.c
+--- postgresql-9.2rc1.orig/src/backend/postmaster/postmaster.c	2012-09-05 01:08:30.000000000 -0400
++++ postgresql-9.2rc1/src/backend/postmaster/postmaster.c	2012-09-06 12:06:22.441763187 -0400
+@@ -156,7 +156,9 @@
  
  /* The socket number we are listening for connections on */
  int			PostPortNumber;
@@ -522,7 +535,7 @@ diff -Naur postgresql-9.1.5.orig/src/backend/postmaster/postmaster.c postgresql-
  char	   *ListenAddresses;
  
  /*
-@@ -590,7 +592,7 @@
+@@ -608,7 +610,7 @@
  				break;
  
  			case 'k':
@@ -531,7 +544,7 @@ diff -Naur postgresql-9.1.5.orig/src/backend/postmaster/postmaster.c postgresql-
  				break;
  
  			case 'l':
-@@ -848,7 +850,7 @@
+@@ -852,7 +854,7 @@
  		/* Need a modifiable copy of ListenAddresses */
  		rawstring = pstrdup(ListenAddresses);
  
@@ -540,7 +553,7 @@ diff -Naur postgresql-9.1.5.orig/src/backend/postmaster/postmaster.c postgresql-
  		if (!SplitIdentifierString(rawstring, ',', &elemlist))
  		{
  			/* syntax error in list */
-@@ -864,12 +866,12 @@
+@@ -868,12 +870,12 @@
  			if (strcmp(curhost, "*") == 0)
  				status = StreamServerPort(AF_UNSPEC, NULL,
  										  (unsigned short) PostPortNumber,
@@ -555,7 +568,7 @@ diff -Naur postgresql-9.1.5.orig/src/backend/postmaster/postmaster.c postgresql-
  										  ListenSocket, MAXLISTEN);
  
  			if (status == STATUS_OK)
-@@ -888,7 +890,7 @@
+@@ -892,7 +894,7 @@
  								curhost)));
  		}
  
@@ -564,7 +577,7 @@ diff -Naur postgresql-9.1.5.orig/src/backend/postmaster/postmaster.c postgresql-
  			ereport(FATAL,
  					(errmsg("could not create any TCP/IP sockets")));
  
-@@ -935,13 +937,54 @@
+@@ -939,13 +941,54 @@
  #endif
  
  #ifdef HAVE_UNIX_SOCKETS
@@ -626,7 +639,7 @@ diff -Naur postgresql-9.1.5.orig/src/backend/postmaster/postmaster.c postgresql-
  #endif
  
  	/*
-@@ -1529,15 +1572,15 @@
+@@ -1435,15 +1478,15 @@
  		}
  
  		/*
@@ -645,10 +658,10 @@ diff -Naur postgresql-9.1.5.orig/src/backend/postmaster/postmaster.c postgresql-
  			last_touch_time = now;
  		}
  	}
-diff -Naur postgresql-9.1.5.orig/src/backend/tcop/postgres.c postgresql-9.1.5/src/backend/tcop/postgres.c
---- postgresql-9.1.5.orig/src/backend/tcop/postgres.c	2012-08-14 18:41:04.000000000 -0400
-+++ postgresql-9.1.5/src/backend/tcop/postgres.c	2012-09-06 11:53:55.211679977 -0400
-@@ -3345,7 +3345,7 @@
+diff -Naur postgresql-9.2rc1.orig/src/backend/tcop/postgres.c postgresql-9.2rc1/src/backend/tcop/postgres.c
+--- postgresql-9.2rc1.orig/src/backend/tcop/postgres.c	2012-09-05 01:08:30.000000000 -0400
++++ postgresql-9.2rc1/src/backend/tcop/postgres.c	2012-09-06 12:06:22.442763197 -0400
+@@ -3343,7 +3343,7 @@
  				break;
  
  			case 'k':
@@ -657,10 +670,10 @@ diff -Naur postgresql-9.1.5.orig/src/backend/tcop/postgres.c postgresql-9.1.5/sr
  				break;
  
  			case 'l':
-diff -Naur postgresql-9.1.5.orig/src/backend/utils/adt/varlena.c postgresql-9.1.5/src/backend/utils/adt/varlena.c
---- postgresql-9.1.5.orig/src/backend/utils/adt/varlena.c	2012-08-14 18:41:04.000000000 -0400
-+++ postgresql-9.1.5/src/backend/utils/adt/varlena.c	2012-09-06 11:54:14.148859548 -0400
-@@ -2387,6 +2387,119 @@
+diff -Naur postgresql-9.2rc1.orig/src/backend/utils/adt/varlena.c postgresql-9.2rc1/src/backend/utils/adt/varlena.c
+--- postgresql-9.2rc1.orig/src/backend/utils/adt/varlena.c	2012-09-05 01:08:30.000000000 -0400
++++ postgresql-9.2rc1/src/backend/utils/adt/varlena.c	2012-09-06 12:06:39.209922137 -0400
+@@ -2446,6 +2446,119 @@
  }
  
  
@@ -780,9 +793,9 @@ diff -Naur postgresql-9.1.5.orig/src/backend/utils/adt/varlena.c postgresql-9.1.
  /*****************************************************************************
   *	Comparison Functions used for bytea
   *
-diff -Naur postgresql-9.1.5.orig/src/backend/utils/init/miscinit.c postgresql-9.1.5/src/backend/utils/init/miscinit.c
---- postgresql-9.1.5.orig/src/backend/utils/init/miscinit.c	2012-08-14 18:41:04.000000000 -0400
-+++ postgresql-9.1.5/src/backend/utils/init/miscinit.c	2012-09-06 11:53:55.213680015 -0400
+diff -Naur postgresql-9.2rc1.orig/src/backend/utils/init/miscinit.c postgresql-9.2rc1/src/backend/utils/init/miscinit.c
+--- postgresql-9.2rc1.orig/src/backend/utils/init/miscinit.c	2012-09-05 01:08:30.000000000 -0400
++++ postgresql-9.2rc1/src/backend/utils/init/miscinit.c	2012-09-06 12:06:22.445763224 -0400
 @@ -49,8 +49,8 @@
  
  ProcessingMode Mode = InitProcessing;
@@ -794,7 +807,7 @@ diff -Naur postgresql-9.1.5.orig/src/backend/utils/init/miscinit.c postgresql-9.
  
  
  /* ----------------------------------------------------------------
-@@ -648,32 +648,35 @@
+@@ -640,32 +640,35 @@
   */
  
  /*
@@ -840,7 +853,7 @@ diff -Naur postgresql-9.1.5.orig/src/backend/utils/init/miscinit.c postgresql-9.
  			   bool isDDLock, const char *refName)
  {
  	int			fd;
-@@ -899,12 +902,7 @@
+@@ -891,12 +894,7 @@
  			 DataDir,
  			 (long) MyStartTime,
  			 PostPortNumber,
@@ -854,7 +867,7 @@ diff -Naur postgresql-9.1.5.orig/src/backend/utils/init/miscinit.c postgresql-9.
  
  	errno = 0;
  	if (write(fd, buffer, strlen(buffer)) != strlen(buffer))
-@@ -942,9 +940,14 @@
+@@ -934,9 +932,14 @@
  	}
  
  	/*
@@ -871,7 +884,7 @@ diff -Naur postgresql-9.1.5.orig/src/backend/utils/init/miscinit.c postgresql-9.
  }
  
  /*
-@@ -953,41 +956,50 @@
+@@ -945,41 +948,50 @@
   * When this is called, we must have already switched the working
   * directory to DataDir, so we can just use a relative path.  This
   * helps ensure that we are locking the directory we should be.
@@ -933,7 +946,7 @@ diff -Naur postgresql-9.1.5.orig/src/backend/utils/init/miscinit.c postgresql-9.
  		/*
  		 * utime() is POSIX standard, utimes() is a common alternative; if we
  		 * have neither, fall back to actually reading the file (which only
-@@ -1019,8 +1031,10 @@
+@@ -1011,8 +1023,10 @@
   * Add (or replace) a line in the data directory lock file.
   * The given string should not include a trailing newline.
   *
@@ -946,7 +959,7 @@ diff -Naur postgresql-9.1.5.orig/src/backend/utils/init/miscinit.c postgresql-9.
   */
  void
  AddToDataDirLockFile(int target_line, const char *str)
-@@ -1028,8 +1042,10 @@
+@@ -1020,8 +1034,10 @@
  	int			fd;
  	int			len;
  	int			lineno;
@@ -959,7 +972,7 @@ diff -Naur postgresql-9.1.5.orig/src/backend/utils/init/miscinit.c postgresql-9.
  
  	fd = open(DIRECTORY_LOCK_FILE, O_RDWR | PG_BINARY, 0);
  	if (fd < 0)
-@@ -1040,7 +1056,7 @@
+@@ -1032,7 +1048,7 @@
  						DIRECTORY_LOCK_FILE)));
  		return;
  	}
@@ -968,7 +981,7 @@ diff -Naur postgresql-9.1.5.orig/src/backend/utils/init/miscinit.c postgresql-9.
  	if (len < 0)
  	{
  		ereport(LOG,
-@@ -1050,36 +1066,50 @@
+@@ -1042,36 +1058,50 @@
  		close(fd);
  		return;
  	}
@@ -1027,10 +1040,10 @@ diff -Naur postgresql-9.1.5.orig/src/backend/utils/init/miscinit.c postgresql-9.
  	{
  		/* if write didn't set errno, assume problem is no disk space */
  		if (errno == 0)
-diff -Naur postgresql-9.1.5.orig/src/backend/utils/misc/guc.c postgresql-9.1.5/src/backend/utils/misc/guc.c
---- postgresql-9.1.5.orig/src/backend/utils/misc/guc.c	2012-08-14 18:41:04.000000000 -0400
-+++ postgresql-9.1.5/src/backend/utils/misc/guc.c	2012-09-06 11:53:55.215680028 -0400
-@@ -2867,14 +2867,18 @@
+diff -Naur postgresql-9.2rc1.orig/src/backend/utils/misc/guc.c postgresql-9.2rc1/src/backend/utils/misc/guc.c
+--- postgresql-9.2rc1.orig/src/backend/utils/misc/guc.c	2012-09-05 01:08:30.000000000 -0400
++++ postgresql-9.2rc1/src/backend/utils/misc/guc.c	2012-09-06 12:06:22.447763243 -0400
+@@ -2894,14 +2894,18 @@
  	},
  
  	{
@@ -1053,9 +1066,9 @@ diff -Naur postgresql-9.1.5.orig/src/backend/utils/misc/guc.c postgresql-9.1.5/s
  	},
  
  	{
-diff -Naur postgresql-9.1.5.orig/src/backend/utils/misc/postgresql.conf.sample postgresql-9.1.5/src/backend/utils/misc/postgresql.conf.sample
---- postgresql-9.1.5.orig/src/backend/utils/misc/postgresql.conf.sample	2012-08-14 18:41:04.000000000 -0400
-+++ postgresql-9.1.5/src/backend/utils/misc/postgresql.conf.sample	2012-09-06 11:53:55.216680035 -0400
+diff -Naur postgresql-9.2rc1.orig/src/backend/utils/misc/postgresql.conf.sample postgresql-9.2rc1/src/backend/utils/misc/postgresql.conf.sample
+--- postgresql-9.2rc1.orig/src/backend/utils/misc/postgresql.conf.sample	2012-09-05 01:08:30.000000000 -0400
++++ postgresql-9.2rc1/src/backend/utils/misc/postgresql.conf.sample	2012-09-06 12:06:22.447763243 -0400
 @@ -65,7 +65,8 @@
  # Note:  Increasing max_connections costs ~400 bytes of shared memory per
  # connection slot, plus lock space (see max_locks_per_transaction).
@@ -1066,19 +1079,19 @@ diff -Naur postgresql-9.1.5.orig/src/backend/utils/misc/postgresql.conf.sample p
  #unix_socket_group = ''			# (change requires restart)
  #unix_socket_permissions = 0777		# begin with 0 to use octal notation
  					# (change requires restart)
-diff -Naur postgresql-9.1.5.orig/src/bin/initdb/initdb.c postgresql-9.1.5/src/bin/initdb/initdb.c
---- postgresql-9.1.5.orig/src/bin/initdb/initdb.c	2012-08-14 18:41:04.000000000 -0400
-+++ postgresql-9.1.5/src/bin/initdb/initdb.c	2012-09-06 11:53:55.217680041 -0400
-@@ -947,7 +947,7 @@
+diff -Naur postgresql-9.2rc1.orig/src/bin/initdb/initdb.c postgresql-9.2rc1/src/bin/initdb/initdb.c
+--- postgresql-9.2rc1.orig/src/bin/initdb/initdb.c	2012-09-05 01:08:30.000000000 -0400
++++ postgresql-9.2rc1/src/bin/initdb/initdb.c	2012-09-06 12:06:22.448763252 -0400
+@@ -979,7 +979,7 @@
  setup_config(void)
  {
  	char	  **conflines;
--	char		repltok[100];
+-	char		repltok[TZ_STRLEN_MAX + 100];
 +	char		repltok[MAXPGPATH];
  	char		path[MAXPGPATH];
+ 	const char *default_timezone;
  
- 	fputs(_("creating configuration files ... "), stdout);
-@@ -968,6 +968,15 @@
+@@ -1001,6 +1001,15 @@
  				 n_buffers * (BLCKSZ / 1024));
  	conflines = replace_token(conflines, "#shared_buffers = 32MB", repltok);
  
@@ -1094,10 +1107,10 @@ diff -Naur postgresql-9.1.5.orig/src/bin/initdb/initdb.c postgresql-9.1.5/src/bi
  #if DEF_PGPORT != 5432
  	snprintf(repltok, sizeof(repltok), "#port = %d", DEF_PGPORT);
  	conflines = replace_token(conflines, "#port = 5432", repltok);
-diff -Naur postgresql-9.1.5.orig/src/bin/pg_ctl/pg_ctl.c postgresql-9.1.5/src/bin/pg_ctl/pg_ctl.c
---- postgresql-9.1.5.orig/src/bin/pg_ctl/pg_ctl.c	2012-08-14 18:41:04.000000000 -0400
-+++ postgresql-9.1.5/src/bin/pg_ctl/pg_ctl.c	2012-09-06 11:53:55.218680049 -0400
-@@ -519,7 +519,7 @@
+diff -Naur postgresql-9.2rc1.orig/src/bin/pg_ctl/pg_ctl.c postgresql-9.2rc1/src/bin/pg_ctl/pg_ctl.c
+--- postgresql-9.2rc1.orig/src/bin/pg_ctl/pg_ctl.c	2012-09-05 01:08:30.000000000 -0400
++++ postgresql-9.2rc1/src/bin/pg_ctl/pg_ctl.c	2012-09-06 12:06:22.449763262 -0400
+@@ -521,7 +521,7 @@
  						hostaddr = optlines[LOCK_FILE_LINE_LISTEN_ADDR - 1];
  
  						/*
@@ -1106,9 +1119,9 @@ diff -Naur postgresql-9.1.5.orig/src/bin/pg_ctl/pg_ctl.c postgresql-9.1.5/src/bi
  						 * directories, libpq's host parameter must have a
  						 * leading slash to indicate a socket directory.  So,
  						 * ignore sockdir if it's relative, and try to use TCP
-diff -Naur postgresql-9.1.5.orig/src/include/libpq/libpq.h postgresql-9.1.5/src/include/libpq/libpq.h
---- postgresql-9.1.5.orig/src/include/libpq/libpq.h	2012-08-14 18:41:04.000000000 -0400
-+++ postgresql-9.1.5/src/include/libpq/libpq.h	2012-09-06 11:53:55.218680049 -0400
+diff -Naur postgresql-9.2rc1.orig/src/include/libpq/libpq.h postgresql-9.2rc1/src/include/libpq/libpq.h
+--- postgresql-9.2rc1.orig/src/include/libpq/libpq.h	2012-09-05 01:08:30.000000000 -0400
++++ postgresql-9.2rc1/src/include/libpq/libpq.h	2012-09-06 12:06:22.450763271 -0400
 @@ -44,12 +44,12 @@
  /*
   * prototypes for functions in pqcomm.c
@@ -1126,10 +1139,10 @@ diff -Naur postgresql-9.1.5.orig/src/include/libpq/libpq.h postgresql-9.1.5/src/
  extern void pq_init(void);
  extern void pq_comm_reset(void);
  extern int	pq_getbytes(char *s, size_t len);
-diff -Naur postgresql-9.1.5.orig/src/include/miscadmin.h postgresql-9.1.5/src/include/miscadmin.h
---- postgresql-9.1.5.orig/src/include/miscadmin.h	2012-08-14 18:41:04.000000000 -0400
-+++ postgresql-9.1.5/src/include/miscadmin.h	2012-09-06 11:53:55.219680061 -0400
-@@ -370,7 +370,7 @@
+diff -Naur postgresql-9.2rc1.orig/src/include/miscadmin.h postgresql-9.2rc1/src/include/miscadmin.h
+--- postgresql-9.2rc1.orig/src/include/miscadmin.h	2012-09-05 01:08:30.000000000 -0400
++++ postgresql-9.2rc1/src/include/miscadmin.h	2012-09-06 12:06:22.450763271 -0400
+@@ -411,7 +411,7 @@
   *		2	data directory path
   *		3	postmaster start timestamp (time_t representation)
   *		4	port number
@@ -1138,7 +1151,7 @@ diff -Naur postgresql-9.1.5.orig/src/include/miscadmin.h postgresql-9.1.5/src/in
   *		6	first listen_address (IP address or "*"; empty if no TCP port)
   *		7	shared memory key (not present on Windows)
   *
-@@ -388,8 +388,9 @@
+@@ -429,8 +429,9 @@
  #define LOCK_FILE_LINE_SHMEM_KEY	7
  
  extern void CreateDataDirLockFile(bool amPostmaster);
@@ -1150,10 +1163,10 @@ diff -Naur postgresql-9.1.5.orig/src/include/miscadmin.h postgresql-9.1.5/src/in
  extern void AddToDataDirLockFile(int target_line, const char *str);
  extern void ValidatePgVersion(const char *path);
  extern void process_shared_preload_libraries(void);
-diff -Naur postgresql-9.1.5.orig/src/include/postmaster/postmaster.h postgresql-9.1.5/src/include/postmaster/postmaster.h
---- postgresql-9.1.5.orig/src/include/postmaster/postmaster.h	2012-08-14 18:41:04.000000000 -0400
-+++ postgresql-9.1.5/src/include/postmaster/postmaster.h	2012-09-06 11:53:55.219680061 -0400
-@@ -20,7 +20,7 @@
+diff -Naur postgresql-9.2rc1.orig/src/include/postmaster/postmaster.h postgresql-9.2rc1/src/include/postmaster/postmaster.h
+--- postgresql-9.2rc1.orig/src/include/postmaster/postmaster.h	2012-09-05 01:08:30.000000000 -0400
++++ postgresql-9.2rc1/src/include/postmaster/postmaster.h	2012-09-06 12:06:22.451763281 -0400
+@@ -19,7 +19,7 @@
  extern int	PostPortNumber;
  extern int	Unix_socket_permissions;
  extern char *Unix_socket_group;
@@ -1162,10 +1175,10 @@ diff -Naur postgresql-9.1.5.orig/src/include/postmaster/postmaster.h postgresql-
  extern char *ListenAddresses;
  extern bool ClientAuthInProgress;
  extern int	PreAuthDelay;
-diff -Naur postgresql-9.1.5.orig/src/include/utils/builtins.h postgresql-9.1.5/src/include/utils/builtins.h
---- postgresql-9.1.5.orig/src/include/utils/builtins.h	2012-08-14 18:41:04.000000000 -0400
-+++ postgresql-9.1.5/src/include/utils/builtins.h	2012-09-06 11:53:55.220680072 -0400
-@@ -728,6 +728,8 @@
+diff -Naur postgresql-9.2rc1.orig/src/include/utils/builtins.h postgresql-9.2rc1/src/include/utils/builtins.h
+--- postgresql-9.2rc1.orig/src/include/utils/builtins.h	2012-09-05 01:08:30.000000000 -0400
++++ postgresql-9.2rc1/src/include/utils/builtins.h	2012-09-06 12:06:22.451763281 -0400
+@@ -754,6 +754,8 @@
  extern List *textToQualifiedNameList(text *textval);
  extern bool SplitIdentifierString(char *rawstring, char separator,
  					  List **namelist);
@@ -1174,13 +1187,13 @@ diff -Naur postgresql-9.1.5.orig/src/include/utils/builtins.h postgresql-9.1.5/s
  extern Datum replace_text(PG_FUNCTION_ARGS);
  extern text *replace_text_regexp(text *src_text, void *regexp,
  					text *replace_text, bool glob);
-diff -Naur postgresql-9.1.5.orig/doc/src/sgml/html-stamp postgresql-9.1.5/doc/src/sgml/html-stamp
---- postgresql-9.1.5.orig/doc/src/sgml/html-stamp	2012-08-14 18:56:48.000000000 -0400
-+++ postgresql-9.1.5/doc/src/sgml/html-stamp	2012-09-06 11:53:55.220680072 -0400
+diff -Naur postgresql-9.2rc1.orig/doc/src/sgml/html-stamp postgresql-9.2rc1/doc/src/sgml/html-stamp
+--- postgresql-9.2rc1.orig/doc/src/sgml/html-stamp	2012-09-05 13:24:38.000000000 -0400
++++ postgresql-9.2rc1/doc/src/sgml/html-stamp	2012-09-06 12:06:22.452763290 -0400
 @@ -0,0 +1 @@
 +hack
-diff -Naur postgresql-9.1.5.orig/doc/src/sgml/man-stamp postgresql-9.1.5/doc/src/sgml/man-stamp
---- postgresql-9.1.5.orig/doc/src/sgml/man-stamp	2012-08-14 18:57:47.000000000 -0400
-+++ postgresql-9.1.5/doc/src/sgml/man-stamp	2012-09-06 11:53:55.220680072 -0400
+diff -Naur postgresql-9.2rc1.orig/doc/src/sgml/man-stamp postgresql-9.2rc1/doc/src/sgml/man-stamp
+--- postgresql-9.2rc1.orig/doc/src/sgml/man-stamp	2012-09-05 13:25:43.000000000 -0400
++++ postgresql-9.2rc1/doc/src/sgml/man-stamp	2012-09-06 12:06:22.452763290 -0400
 @@ -0,0 +1 @@
 +hack

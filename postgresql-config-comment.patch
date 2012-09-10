@@ -5,11 +5,11 @@ to doing it this way though, for example that the postmaster's port number
 is visible in "ps" as part of its command line.)
 
 
-diff -Naur postgresql-9.1.5.orig/src/backend/utils/misc/postgresql.conf.sample postgresql-9.1.5/src/backend/utils/misc/postgresql.conf.sample
---- postgresql-9.1.5.orig/src/backend/utils/misc/postgresql.conf.sample	2012-08-14 18:41:04.000000000 -0400
-+++ postgresql-9.1.5/src/backend/utils/misc/postgresql.conf.sample	2012-08-17 11:37:03.400210802 -0400
+diff -Naur postgresql-9.2rc1.orig/src/backend/utils/misc/postgresql.conf.sample postgresql-9.2rc1/src/backend/utils/misc/postgresql.conf.sample
+--- postgresql-9.2rc1.orig/src/backend/utils/misc/postgresql.conf.sample	2012-08-23 18:06:49.000000000 -0400
++++ postgresql-9.2rc1/src/backend/utils/misc/postgresql.conf.sample	2012-09-01 21:57:55.498629897 -0400
 @@ -61,6 +61,8 @@
- 					# defaults to 'localhost', '*' = all
+ 					# defaults to 'localhost'; use '*' for all
  					# (change requires restart)
  #port = 5432				# (change requires restart)
 +# Note: In RHEL/Fedora installations, you can't set the port number here;
