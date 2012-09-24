@@ -53,7 +53,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.2
-Version: 9.2.0
+Version: 9.2.1
 Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
@@ -68,7 +68,7 @@ Url: http://www.postgresql.org/
 # This SRPM includes a copy of the previous major release, which is needed for
 # in-place upgrade of an old database.  In most cases it will not be critical
 # that this be kept up with the latest minor release of the previous series.
-%global prevversion 9.1.5
+%global prevversion 9.1.6
 %global prevmajorversion 9.1
 
 Source0: ftp://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2
@@ -97,7 +97,6 @@ Patch3: postgresql-perl-rpath.patch
 Patch4: postgresql-config-comment.patch
 Patch5: postgresql-multi-sockets.patch
 Patch6: postgresql-var-run-socket.patch
-Patch7: postgresql-python3.patch
 
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
 BuildRequires: perl(ExtUtils::Embed), perl-devel
@@ -325,7 +324,6 @@ benchmarks.
 %patch4 -p1
 %patch5 -p1
 %patch6 -p1
-%patch7 -p1
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -772,10 +770,7 @@ cat psql-%{majorversion}.lang >>main.lst
 	-c "PostgreSQL Server" -u 26 postgres >/dev/null 2>&1 || :
 
 %post server
-if [ $1 -eq 1 ] ; then
-    # Initial installation
-    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
-fi
+%systemd_post postgresql.service
 
 # Run this when upgrading from SysV initscript to native systemd unit
 %triggerun server -- postgresql-server < %{first_systemd_version}
@@ -789,18 +784,10 @@ fi
 /bin/systemctl try-restart postgresql.service >/dev/null 2>&1 || :
 
 %preun server
-if [ $1 -eq 0 ] ; then
-    # Package removal, not upgrade
-    /bin/systemctl --no-reload disable postgresql.service >/dev/null 2>&1 || :
-    /bin/systemctl stop postgresql.service >/dev/null 2>&1 || :
-fi
+%systemd_preun postgresql.service
 
 %postun server
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :
-if [ $1 -ge 1 ] ; then
-    # Package upgrade, not uninstall
-    /bin/systemctl try-restart postgresql.service >/dev/null 2>&1 || :
-fi
+%systemd_postun_with_restart postgresql.service
 
 # FILES section.
 
@@ -1070,6 +1057,13 @@ fi
 %endif
 
 %changelog
+* Mon Sep 24 2012 Tom Lane <tgl@redhat.com> 9.2.1-1
+- Update to PostgreSQL 9.2.1, for various fixes described at
+  http://www.postgresql.org/docs/9.2/static/release-9-2-1.html
+  including a nasty data-loss bug
+- Adopt new systemd macros for server package install/uninstall triggers
+Resolves: #850277
+
 * Mon Sep 10 2012 Tom Lane <tgl@redhat.com> 9.2.0-1
 - Update to PostgreSQL 9.2.0 (major version bump);
   in-place upgrade support now works from 9.1.x as the previous version
