@@ -52,8 +52,8 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.1
-Version: 9.1.5
-Release: 2%{?dist}
+Version: 9.1.6
+Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -901,6 +901,11 @@ fi
 %endif
 
 %changelog
+* Mon Sep 24 2012 Tom Lane <tgl@redhat.com> 9.1.6-1
+- Update to PostgreSQL 9.1.6, for various fixes described at
+  http://www.postgresql.org/docs/9.1/static/release-9-1-6.html
+  including a nasty data-loss bug
+
 * Tue Aug 28 2012 Tom Lane <tgl@redhat.com> 9.1.5-2
 - Remove unnecessary ldconfig calls in pre/post triggers
 Resolves: #849344
