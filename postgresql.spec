@@ -53,7 +53,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.2
-Version: 9.2.1
+Version: 9.2.2
 Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
@@ -67,8 +67,9 @@ Url: http://www.postgresql.org/
 
 # This SRPM includes a copy of the previous major release, which is needed for
 # in-place upgrade of an old database.  In most cases it will not be critical
-# that this be kept up with the latest minor release of the previous series.
-%global prevversion 9.1.6
+# that this be kept up with the latest minor release of the previous series;
+# but update when bugs affecting pg_dump output are fixed.
+%global prevversion 9.1.7
 %global prevmajorversion 9.1
 
 Source0: ftp://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2
@@ -770,7 +771,14 @@ cat psql-%{majorversion}.lang >>main.lst
 	-c "PostgreSQL Server" -u 26 postgres >/dev/null 2>&1 || :
 
 %post server
+%if 0%{?systemd_post:1}
 %systemd_post postgresql.service
+%else
+if [ $1 -eq 1 ]; then
+    # Initial installation
+    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
+fi
+%endif
 
 # Run this when upgrading from SysV initscript to native systemd unit
 %triggerun server -- postgresql-server < %{first_systemd_version}
@@ -784,10 +792,26 @@ cat psql-%{majorversion}.lang >>main.lst
 /bin/systemctl try-restart postgresql.service >/dev/null 2>&1 || :
 
 %preun server
+%if 0%{?systemd_preun:1}
 %systemd_preun postgresql.service
+%else
+if [ $1 -eq 0 ]; then
+    # Package removal, not upgrade
+    /bin/systemctl --no-reload disable postgresql.service >/dev/null 2>&1 || :
+    /bin/systemctl stop postgresql.service >/dev/null 2>&1 || :
+fi
+%endif
 
 %postun server
+%if 0%{?systemd_postun_with_restart:1}
 %systemd_postun_with_restart postgresql.service
+%else
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :
+if [ $1 -ge 1 ]; then
+    # Package upgrade, not uninstall
+    /bin/systemctl try-restart postgresql.service >/dev/null 2>&1 || :
+fi
+%endif
 
 # FILES section.
 
@@ -1057,6 +1081,12 @@ cat psql-%{majorversion}.lang >>main.lst
 %endif
 
 %changelog
+* Thu Dec  6 2012 Tom Lane <tgl@redhat.com> 9.2.2-1
+- Update to PostgreSQL 9.2.2, for various fixes described at
+  http://www.postgresql.org/docs/9.2/static/release-9-2-2.html
+- Use new systemd install/uninstall trigger macros conditionally,
+  so that package can still be installed on pre-F18 branches
+
 * Mon Sep 24 2012 Tom Lane <tgl@redhat.com> 9.2.1-1
 - Update to PostgreSQL 9.2.1, for various fixes described at
   http://www.postgresql.org/docs/9.2/static/release-9-2-1.html
