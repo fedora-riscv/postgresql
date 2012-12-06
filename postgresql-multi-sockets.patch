@@ -6,7 +6,9 @@ documentation files).
 Note the patch also touches html-stamp and man-stamp in doc/src/sgml/;
 this is to keep the makefiles from trying to rebuild the derived doc
 files.  We don't want that to happen because the BuildRequires for the
-package don't include the necessary documentation tools.
+package don't include the necessary documentation tools.  Those diff
+hunks *must be at the end* so that those files are newer than the
+master doc files.
 
 
 diff -Naur postgresql-9.2.2.orig/contrib/pg_upgrade/server.c postgresql-9.2.2/contrib/pg_upgrade/server.c
@@ -261,16 +263,6 @@ diff -Naur postgresql-9.2.2.orig/doc/src/sgml/html/runtime-config-short.html pos
  CLASS="REPLACEABLE"
  ><I
  >x</I
-diff -Naur postgresql-9.2.2.orig/doc/src/sgml/html-stamp postgresql-9.2.2/doc/src/sgml/html-stamp
---- postgresql-9.2.2.orig/doc/src/sgml/html-stamp	2012-12-03 15:32:32.000000000 -0500
-+++ postgresql-9.2.2/doc/src/sgml/html-stamp	2012-12-04 11:31:53.728802524 -0500
-@@ -0,0 +1 @@
-+hack
-diff -Naur postgresql-9.2.2.orig/doc/src/sgml/man-stamp postgresql-9.2.2/doc/src/sgml/man-stamp
---- postgresql-9.2.2.orig/doc/src/sgml/man-stamp	2012-12-03 15:33:38.000000000 -0500
-+++ postgresql-9.2.2/doc/src/sgml/man-stamp	2012-12-04 11:31:53.728802524 -0500
-@@ -0,0 +1 @@
-+hack
 diff -Naur postgresql-9.2.2.orig/doc/src/sgml/man1/postgres.1 postgresql-9.2.2/doc/src/sgml/man1/postgres.1
 --- postgresql-9.2.2.orig/doc/src/sgml/man1/postgres.1	2012-12-03 15:33:32.000000000 -0500
 +++ postgresql-9.2.2/doc/src/sgml/man1/postgres.1	2012-12-04 11:31:53.714802380 -0500
@@ -1213,3 +1205,13 @@ diff -Naur postgresql-9.2.2.orig/src/include/utils/builtins.h postgresql-9.2.2/s
  extern Datum replace_text(PG_FUNCTION_ARGS);
  extern text *replace_text_regexp(text *src_text, void *regexp,
  					text *replace_text, bool glob);
+diff -Naur postgresql-9.2.2.orig/doc/src/sgml/html-stamp postgresql-9.2.2/doc/src/sgml/html-stamp
+--- postgresql-9.2.2.orig/doc/src/sgml/html-stamp	2012-12-03 15:32:32.000000000 -0500
++++ postgresql-9.2.2/doc/src/sgml/html-stamp	2012-12-04 11:31:53.728802524 -0500
+@@ -0,0 +1 @@
++hack
+diff -Naur postgresql-9.2.2.orig/doc/src/sgml/man-stamp postgresql-9.2.2/doc/src/sgml/man-stamp
+--- postgresql-9.2.2.orig/doc/src/sgml/man-stamp	2012-12-03 15:33:38.000000000 -0500
++++ postgresql-9.2.2/doc/src/sgml/man-stamp	2012-12-04 11:31:53.728802524 -0500
+@@ -0,0 +1 @@
++hack
