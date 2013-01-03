@@ -58,7 +58,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.2
 Version: 9.2.2
-Release: 2%{?dist}
+Release: 3%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -101,7 +101,8 @@ Patch2: postgresql-logging.patch
 Patch3: postgresql-perl-rpath.patch
 Patch4: postgresql-config-comment.patch
 Patch5: postgresql-multi-sockets.patch
-Patch6: postgresql-var-run-socket.patch
+Patch6: postgresql-upgrade-test.patch
+Patch7: postgresql-var-run-socket.patch
 
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
 BuildRequires: perl(ExtUtils::Embed), perl-devel
@@ -329,6 +330,7 @@ benchmarks.
 %patch4 -p1
 %patch5 -p1
 %patch6 -p1
+%patch7 -p1
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -1085,6 +1087,13 @@ fi
 %endif
 
 %changelog
+* Thu Jan  3 2013 Tom Lane <tgl@redhat.com> 9.2.2-3
+- Prevent creation of TCP socket during pg_upgrade regression test, so that
+  concurrent RPM builds on the same machine won't fail
+Resolves: #891531
+- Make sure $PGDATA/pg_log/ gets the right SELinux label in postgresql-setup
+Resolves: #891547
+
 * Wed Dec 19 2012 Tom Lane <tgl@redhat.com> 9.2.2-2
 - Make building of plpython3 dependent on Fedora version, per guidelines
 Resolves: #888419
