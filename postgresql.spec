@@ -57,8 +57,8 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.2
-Version: 9.2.2
-Release: 3%{?dist}
+Version: 9.2.3
+Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -73,7 +73,7 @@ Url: http://www.postgresql.org/
 # in-place upgrade of an old database.  In most cases it will not be critical
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
-%global prevversion 9.1.7
+%global prevversion 9.1.8
 %global prevmajorversion 9.1
 
 Source0: ftp://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2
@@ -101,8 +101,7 @@ Patch2: postgresql-logging.patch
 Patch3: postgresql-perl-rpath.patch
 Patch4: postgresql-config-comment.patch
 Patch5: postgresql-multi-sockets.patch
-Patch6: postgresql-upgrade-test.patch
-Patch7: postgresql-var-run-socket.patch
+Patch6: postgresql-var-run-socket.patch
 
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
 BuildRequires: perl(ExtUtils::Embed), perl-devel
@@ -330,7 +329,6 @@ benchmarks.
 %patch4 -p1
 %patch5 -p1
 %patch6 -p1
-%patch7 -p1
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -571,6 +569,10 @@ make DESTDIR=$RPM_BUILD_ROOT install-world
 	mv -f src/Makefile.global.save src/Makefile.global
 %endif
 
+# make sure these directories exist even if we suppressed all contrib modules
+install -d -m 755 $RPM_BUILD_ROOT%{_datadir}/pgsql/contrib
+install -d -m 755 $RPM_BUILD_ROOT%{_datadir}/pgsql/extension
+
 # multilib header hack; note pg_config.h is installed in two places!
 # we only apply this to known Red Hat multilib arches, per bug #177564
 case `uname -i` in
@@ -653,7 +655,6 @@ install -m 644 %{SOURCE15} $RPM_BUILD_ROOT/var/lib/pgsql/.bash_profile
 	rm bin/initdb
 	rm bin/pg_basebackup
 	rm bin/pg_config
-	rm bin/pg_controldata
 	rm bin/pg_dump
 	rm bin/pg_dumpall
 	rm bin/pg_restore
@@ -1087,6 +1088,16 @@ fi
 %endif
 
 %changelog
+* Thu Feb  7 2013 Tom Lane <tgl@redhat.com> 9.2.3-1
+- Update to PostgreSQL 9.2.3, for various fixes described at
+  http://www.postgresql.org/docs/9.2/static/release-9-2-3.html
+  including the fix for CVE-2013-0255
+Resolves: #908722
+- Make the package build with selinux option disabled
+Resolves: #894367
+- Include old version of pg_controldata in postgresql-upgrade subpackage
+Related: #896161
+
 * Thu Jan  3 2013 Tom Lane <tgl@redhat.com> 9.2.2-3
 - Prevent creation of TCP socket during pg_upgrade regression test, so that
   concurrent RPM builds on the same machine won't fail
