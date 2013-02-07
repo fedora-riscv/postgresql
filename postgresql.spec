@@ -52,7 +52,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.1
-Version: 9.1.7
+Version: 9.1.8
 Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
@@ -442,6 +442,10 @@ rm -f src/tutorial/GNUmakefile
 
 make DESTDIR=$RPM_BUILD_ROOT install-world
 
+# make sure these directories exist even if we suppressed all contrib modules
+install -d -m 755 $RPM_BUILD_ROOT%{_datadir}/pgsql/contrib
+install -d -m 755 $RPM_BUILD_ROOT%{_datadir}/pgsql/extension
+
 # multilib header hack; note pg_config.h is installed in two places!
 # we only apply this to known Red Hat multilib arches, per bug #177564
 case `uname -i` in
@@ -523,7 +527,6 @@ install -m 644 %{SOURCE15} $RPM_BUILD_ROOT/var/lib/pgsql/.bash_profile
 	rm bin/ecpg
 	rm bin/initdb
 	rm bin/pg_config
-	rm bin/pg_controldata
 	rm bin/pg_dump
 	rm bin/pg_dumpall
 	rm bin/pg_restore
@@ -919,6 +922,16 @@ fi
 %endif
 
 %changelog
+* Thu Feb  7 2013 Tom Lane <tgl@redhat.com> 9.1.8-1
+- Update to PostgreSQL 9.1.8, for various fixes described at
+  http://www.postgresql.org/docs/9.1/static/release-9-1-8.html
+  including the fix for CVE-2013-0255
+Resolves: #908722
+- Make the package build with selinux option disabled
+Resolves: #894367
+- Include old version of pg_controldata in postgresql-upgrade subpackage
+Related: #896161
+
 * Thu Dec  6 2012 Tom Lane <tgl@redhat.com> 9.1.7-1
 - Update to PostgreSQL 9.1.7, for various fixes described at
   http://www.postgresql.org/docs/9.1/static/release-9-1-7.html
