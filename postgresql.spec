@@ -58,7 +58,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.2
 Version: 9.2.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -333,10 +333,14 @@ benchmarks.
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
 
+# add ppc64p7 optimized arch support
+sed -i -e "s/ppc64-\*/ppc64-\* \| ppc64p7-\*/" config/config.sub
+
 cp -p %{SOURCE1} .
 
 %if %upgrade
 tar xfj %{SOURCE3}
+sed -i -e "s/ppc64-\*/ppc64-\* \| ppc64p7-\*/" postgresql-%{prevversion}/config/config.sub
 %endif
 
 # remove .gitignore files to ensure none get into the RPMs (bug #642210)
@@ -1088,6 +1092,9 @@ fi
 %endif
 
 %changelog
+* Tue Mar 19 2013 Karsten Hopp <karsten@redhat.com> 9.2.3-2
+- add ppc64p7 optimized arch support
+
 * Thu Feb  7 2013 Tom Lane <tgl@redhat.com> 9.2.3-1
 - Update to PostgreSQL 9.2.3, for various fixes described at
   http://www.postgresql.org/docs/9.2/static/release-9-2-3.html
