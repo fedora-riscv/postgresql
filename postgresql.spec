@@ -57,7 +57,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.2
-Version: 9.2.3
+Version: 9.2.4
 Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
@@ -73,7 +73,7 @@ Url: http://www.postgresql.org/
 # in-place upgrade of an old database.  In most cases it will not be critical
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
-%global prevversion 9.1.8
+%global prevversion 9.1.9
 %global prevmajorversion 9.1
 
 Source0: ftp://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2
@@ -333,10 +333,19 @@ benchmarks.
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
 
+# add ppc64p7 support (https://fedoraproject.org/wiki/Features/Power7Subarch)
+# hopefully need for this will go away next time upstream updates config.sub
+sed -i -e "s/ppc64-\*/ppc64-\* \| ppc64p7-\*/" config/config.sub
+
 cp -p %{SOURCE1} .
 
 %if %upgrade
 tar xfj %{SOURCE3}
+# make sure older version is up-to-date on config.guess/config.sub;
+# not always necessary, but PG 9.2 knows about aarch64 while 9.1 doesn't
+# (and also see the ppc64p7 hack above)
+cp -p config/config.guess postgresql-%{prevversion}/config/config.guess
+cp -p config/config.sub postgresql-%{prevversion}/config/config.sub
 %endif
 
 # remove .gitignore files to ensure none get into the RPMs (bug #642210)
@@ -1088,6 +1097,13 @@ fi
 %endif
 
 %changelog
+* Thu Apr  4 2013 Tom Lane <tgl@redhat.com> 9.2.4-1
+- Update to PostgreSQL 9.2.4, for various fixes described at
+  http://www.postgresql.org/docs/9.2/static/release-9-2-4.html
+  including the fixes for CVE-2013-1899, CVE-2013-1900, CVE-2013-1901
+Resolves: #929223, #929255, #929328
+- fix build for aarch64 and ppc64p7
+
 * Thu Feb  7 2013 Tom Lane <tgl@redhat.com> 9.2.3-1
 - Update to PostgreSQL 9.2.3, for various fixes described at
   http://www.postgresql.org/docs/9.2/static/release-9-2-3.html
