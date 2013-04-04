@@ -52,7 +52,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.1
-Version: 9.1.8
+Version: 9.1.9
 Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
@@ -67,7 +67,7 @@ Url: http://www.postgresql.org/
 # This SRPM includes a copy of the previous major release, which is needed for
 # in-place upgrade of an old database.  In most cases it will not be critical
 # that this be kept up with the latest minor release of the previous series.
-%global prevversion 9.0.11
+%global prevversion 9.0.13
 %global prevmajorversion 9.0
 
 Source0: ftp://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2
@@ -922,6 +922,12 @@ fi
 %endif
 
 %changelog
+* Thu Apr  4 2013 Tom Lane <tgl@redhat.com> 9.1.9-1
+- Update to PostgreSQL 9.1.9, for various fixes described at
+  http://www.postgresql.org/docs/9.1/static/release-9-1-9.html
+  including the fixes for CVE-2013-1899, CVE-2013-1900, CVE-2013-1901
+Resolves: #929223, #929255, #929328
+
 * Thu Feb  7 2013 Tom Lane <tgl@redhat.com> 9.1.8-1
 - Update to PostgreSQL 9.1.8, for various fixes described at
   http://www.postgresql.org/docs/9.1/static/release-9-1-8.html
