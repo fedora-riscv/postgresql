@@ -633,8 +633,8 @@ install -m 644 %{SOURCE14} $RPM_BUILD_ROOT/etc/pam.d/postgresql
 install -d -m 755 $RPM_BUILD_ROOT/var/run/postgresql
 
 # ... and make a tmpfiles script to recreate it at reboot.
-mkdir -p $RPM_BUILD_ROOT%{_prefix}/lib/tmpfiles.d
-install -m 0644 %{SOURCE13} $RPM_BUILD_ROOT%{_prefix}/lib/tmpfiles.d/postgresql.conf
+mkdir -p $RPM_BUILD_ROOT%{_tmpfilesdir}
+install -m 0644 %{SOURCE13} $RPM_BUILD_ROOT%{_tmpfilesdir}/postgresql.conf
 
 # PGDATA needs removal of group and world permissions due to pg_pwd hole.
 install -d -m 700 $RPM_BUILD_ROOT/var/lib/pgsql/data
@@ -1027,7 +1027,7 @@ fi
 %dir %{_datadir}/pgsql/contrib
 %dir %{_datadir}/pgsql/extension
 %{_datadir}/pgsql/extension/plpgsql*
-%{_prefix}/lib/tmpfiles.d/postgresql.conf
+%{_tmpfilesdir}/postgresql.conf
 %attr(755,postgres,postgres) %dir /var/run/postgresql
 %attr(700,postgres,postgres) %dir /var/lib/pgsql
 %attr(700,postgres,postgres) %dir /var/lib/pgsql/data
@@ -1097,6 +1097,9 @@ fi
 %endif
 
 %changelog
+* Tue Jun 04 2013 Pavel Raiskup <praiskup@redhat.com> - 9.2.4-1
+- fix rpmlint warnings
+
 * Thu Apr  4 2013 Tom Lane <tgl@redhat.com> 9.2.4-1
 - Update to PostgreSQL 9.2.4, for various fixes described at
   http://www.postgresql.org/docs/9.2/static/release-9-2-4.html
@@ -1699,7 +1702,7 @@ Resolves: #161470
 * Mon Aug 30 2004 Tom Lane <tgl@redhat.com> 7.4.5-2
 - Update to PyGreSQL 3.5.
 
-* Wed Aug 24 2004 Tom Lane <tgl@redhat.com> 7.4.5-1
+* Tue Aug 24 2004 Tom Lane <tgl@redhat.com> 7.4.5-1
 - Update to PostgreSQL 7.4.5.
 - Update JDBC jars to driver build 215.
 - Add Obsoletes: entries for rh-postgresql packages, per bug 129278.
