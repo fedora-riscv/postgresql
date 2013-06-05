@@ -58,7 +58,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.2
 Version: 9.2.4
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -102,6 +102,11 @@ Patch3: postgresql-perl-rpath.patch
 Patch4: postgresql-config-comment.patch
 Patch5: postgresql-multi-sockets.patch
 Patch6: postgresql-var-run-socket.patch
+
+# Add support for atomic operations TAS/S_UNLOCK in aarch64.
+# ~> upstream (612ecf311b)
+# ~> #970661
+Patch7: postgresql-9.2.4-aarch64-atomic.patch
 
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
 BuildRequires: perl(ExtUtils::Embed), perl-devel
@@ -329,6 +334,7 @@ benchmarks.
 %patch4 -p1
 %patch5 -p1
 %patch6 -p1
+%patch7 -p1 -b .atomic-aarch64
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -1097,8 +1103,9 @@ fi
 %endif
 
 %changelog
-* Tue Jun 04 2013 Pavel Raiskup <praiskup@redhat.com> - 9.2.4-1
+* Wed Jun 05 2013 Pavel Raiskup <praiskup@redhat.com> - 9.2.4-2
 - fix rpmlint warnings
+- fix aarch64 build by defining missing atomic operations (#970661)
 
 * Thu Apr  4 2013 Tom Lane <tgl@redhat.com> 9.2.4-1
 - Update to PostgreSQL 9.2.4, for various fixes described at
