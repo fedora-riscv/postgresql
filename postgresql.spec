@@ -1103,6 +1103,10 @@ fi
 %endif
 
 %changelog
+* Tue Jun 11 2013 Pavel Raiskup <praiskup@redhat.com> - 9.2.4-2
+- postgresql-setup: don't create whole path to server's data to make sure that
+  the parent directory has correct permissions (#972425)
+
 * Wed Jun 05 2013 Pavel Raiskup <praiskup@redhat.com> - 9.2.4-2
 - fix rpmlint warnings
 - fix aarch64 build by defining missing atomic operations (#970661)
