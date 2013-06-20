@@ -441,8 +441,8 @@ export PYTHON=/usr/bin/python3
 %if %selinux
 	--with-selinux \
 %endif
-	--with-system-tzdata=/usr/share/zoneinfo \
-	--datadir=/usr/share/pgsql
+	--with-system-tzdata=%{_datadir}/zoneinfo \
+	--datadir=%{_datadir}/pgsql
 
 # Fortunately we don't need to build much except plpython itself
 cd src/backend
@@ -1109,6 +1109,10 @@ fi
 %endif
 
 %changelog
+* Thu Jun 20 2013 Pavel Raiskup <praiskup@redhat.com> - 9.3.4-3
+- fix README.rpm-dist for the bug (#969050)
+- replace hard-wired path with %%{_datadir}
+
 * Thu Jun 13 2013 Pavel Raiskup <praiskup@redhat.com> - 9.2.4-3
 - add atomic operations support for aarch64 to preupgrade version also (#970661)
 - apply the forgotten man-page-day patch (#948933)
