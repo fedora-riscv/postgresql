@@ -58,7 +58,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.2
 Version: 9.2.4
-Release: 3%{?dist}
+Release: 4%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -337,7 +337,7 @@ benchmarks.
 %patch4 -p1
 %patch5 -p1
 %patch6 -p1
-%patch8 -p1 -b .man-page-day-fixes
+%patch8 -p1
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -1109,7 +1109,10 @@ fi
 %endif
 
 %changelog
-* Thu Jun 20 2013 Pavel Raiskup <praiskup@redhat.com> - 9.3.4-3
+* Tue Jul 09 2013 Pavel Raiskup <praiskup@redhat.com> - 9.2.4-4
+- do not use -b for manual page fixes
+
+* Thu Jun 20 2013 Pavel Raiskup <praiskup@redhat.com> - 9.2.4-3
 - fix README.rpm-dist for the bug (#969050)
 - replace hard-wired path with %%{_datadir}
 
