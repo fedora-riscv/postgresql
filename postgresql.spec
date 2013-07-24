@@ -58,7 +58,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.2
 Version: 9.2.4
-Release: 4%{?dist}
+Release: 5%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -103,13 +103,14 @@ Patch4: postgresql-config-comment.patch
 Patch5: postgresql-multi-sockets.patch
 Patch6: postgresql-var-run-socket.patch
 
+# Comments for these patches are in the patch files.
+Patch8: postgresql-man.patch
+
 # Add support for atomic operations TAS/S_UNLOCK in aarch64.
 # ~> upstream (612ecf311b)
 # ~> #970661
-Patch7: postgresql-9.2.4-aarch64-atomic.patch
-
-# Comments for these patches are in the patch files.
-Patch8: postgresql-man.patch
+Patch10: postgresql-9.2.4-aarch64-atomic.patch
+Patch11: postgresql-9.2.4-aarch64-atomic-upgrade.patch
 
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
 BuildRequires: perl(ExtUtils::Embed), perl-devel
@@ -338,6 +339,7 @@ benchmarks.
 %patch5 -p1
 %patch6 -p1
 %patch8 -p1
+%patch10 -p1
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -355,10 +357,11 @@ tar xfj %{SOURCE3}
 # (and also see the ppc64p7 hack above)
 cp -p config/config.guess postgresql-%{prevversion}/config/config.guess
 cp -p config/config.sub postgresql-%{prevversion}/config/config.sub
-%endif
 
-# the %%{SOURCE3} must be unpacked before this patch is applied
-%patch7 -p1 -b .atomic-aarch64
+pushd postgresql-%{prevversion}
+%patch11 -p2
+popd
+%endif
 
 # remove .gitignore files to ensure none get into the RPMs (bug #642210)
 find . -type f -name .gitignore | xargs rm
@@ -1109,6 +1112,9 @@ fi
 %endif
 
 %changelog
+* Wed Jul 24 2013 Pavel Raiskup <praiskup@redhat.com> - 9.2.4-5
+- split aarch64 patch to allow build without postgresql-upgrade
+
 * Tue Jul 09 2013 Pavel Raiskup <praiskup@redhat.com> - 9.2.4-4
 - do not use -b for manual page fixes
 
