@@ -1105,6 +1105,7 @@ fi
 - postgresql-setup: don't create whole path to server's data to make sure that
   the parent directory has correct permissions (#972425) (pick from fc20)
 - backport fix for manual pages (#948933) (pick from fc20)
+- fix README.rpm-dist for the bug (#969050) (pick from fc20)
 
 * Thu Apr  4 2013 Tom Lane <tgl@redhat.com> 9.2.4-1
 - Update to PostgreSQL 9.2.4, for various fixes described at
