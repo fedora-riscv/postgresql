@@ -58,7 +58,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.2
 Version: 9.2.4
-Release: 5%{?dist}
+Release: 6%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -569,7 +569,11 @@ rm -f src/tutorial/GNUmakefile
 	# any options that affect on-disk file layout match the previous
 	# major release!  Also, note we intentionally do not use %%configure
 	# here, because we *don't* want its ideas about installation paths.
-	./configure --build=%{_build} --host=%{_host} \
+
+	# The -fno-aggressive-loop-optimizations is hack for #993532
+	CFLAGS="$CFLAGS -fno-aggressive-loop-optimizations" ./configure \
+		--build=%{_build} \
+		--host=%{_host} \
 		--prefix=%{_libdir}/pgsql/postgresql-%{prevmajorversion} \
 		--disable-rpath \
 		--with-system-tzdata=/usr/share/zoneinfo
@@ -1112,6 +1116,9 @@ fi
 %endif
 
 %changelog
+* Mon Aug 12 2013 Pavel Raiskup <praiskup@redhat.com> - 9.2.4-6
+- disable aggressive loop optimizations for old codebase (#993532)
+
 * Wed Jul 24 2013 Pavel Raiskup <praiskup@redhat.com> - 9.2.4-5
 - split aarch64 patch to allow build without postgresql-upgrade
 
