@@ -1,0 +1,54 @@
+diff --git a/contrib/pg_upgrade/server.c b/contrib/pg_upgrade/server.c
+index c5ecb84..a519a9e 100644
+--- a/contrib/pg_upgrade/server.c
++++ b/contrib/pg_upgrade/server.c
+@@ -166,7 +166,6 @@ static void
+ stop_postmaster_atexit(void)
+ {
+ 	stop_postmaster(true);
+-
+ }
+ 
+ 
+@@ -235,7 +234,23 @@ start_postmaster(ClusterInfo *cluster)
+ 							  false,
+ 							  "%s", cmd);
+ 
+-	/* Check to see if we can connect to the server; if not, report it. */
++	/*
++	 * We set this here to make sure atexit() shuts down the server,
++	 * but only if we started the server successfully.  We do it
++	 * before checking for connectivity in case the server started but
++	 * there is a connectivity failure.  If pg_ctl did not return success,
++	 * we will exit below.
++	 */
++	if (pg_ctl_return)
++		os_info.running_cluster = cluster;
++
++	/*
++	 * pg_ctl -w might have failed because the server couldn't be started,
++	 * or there might have been a connection problem in _checking_ if the
++	 * server has started.  Therefore, even if pg_ctl failed, we continue
++	 * and test for connectivity in case we get a connection reason for the
++	 * failure.
++	 */
+ 	if ((conn = get_db_conn(cluster, "template1")) == NULL ||
+ 		PQstatus(conn) != CONNECTION_OK)
+ 	{
+@@ -249,12 +264,13 @@ start_postmaster(ClusterInfo *cluster)
+ 	}
+ 	PQfinish(conn);
+ 
+-	/* If the connection didn't fail, fail now */
++	/*
++	 * If pg_ctl failed, and the connection didn't fail, fail now.  This
++	 * could happen if the server was already running.
++	 */
+ 	if (!pg_ctl_return)
+ 		pg_log(PG_FATAL, "pg_ctl failed to start the %s server, or connection failed\n",
+ 			   CLUSTER_NAME(cluster));
+-
+-	os_info.running_cluster = cluster;
+ }
+ 
+ 
