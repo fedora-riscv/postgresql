@@ -106,6 +106,14 @@ Patch6: postgresql-var-run-socket.patch
 # Comments for these patches are in the patch files.
 Patch7: postgresql-man.patch
 
+# When user complicates access of 'postgres' user to the database, the
+# pg_upgrade can left the old server running - and re-run of pg_upgrade thus
+# does not help.  This patch stops the server in described scenario properly.
+# ~> not yet upstream, patch by Bruce Momjian:
+# ~> http://www.postgresql.org/message-id/20130812193347.GD12510@momjian.us
+# ~> #896161
+Patch8: postgresql-9.2.4-upgrade-and-perm-problems.patch
+
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
 BuildRequires: perl(ExtUtils::Embed), perl-devel
 BuildRequires: readline-devel zlib-devel
@@ -333,6 +341,7 @@ benchmarks.
 %patch5 -p1
 %patch6 -p1
 %patch7 -p1
+%patch8 -p1
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -1101,11 +1110,12 @@ fi
 %endif
 
 %changelog
-* Mon Aug 12 2013 Pavel Raiskup <praiskup@redhat.com> - 9.2.4-2
+* Thu Aug 15 2013 Pavel Raiskup <praiskup@redhat.com> - 9.2.4-2
 - postgresql-setup: don't create whole path to server's data to make sure that
   the parent directory has correct permissions (#972425) (pick from fc20)
 - backport fix for manual pages (#948933) (pick from fc20)
 - fix README.rpm-dist for the bug (#969050) (pick from fc20)
+- upgrade: stop old server if perm. problem occur (#896161) (pick from fc20)
 
 * Thu Apr  4 2013 Tom Lane <tgl@redhat.com> 9.2.4-1
 - Update to PostgreSQL 9.2.4, for various fixes described at
