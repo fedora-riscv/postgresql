@@ -59,7 +59,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.3
-Version: 9.3.0
+Version: 9.3.1
 Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
@@ -1120,6 +1120,10 @@ fi
 %endif
 
 %changelog
+* Thu Oct 10 2013 Jozef Mlich <jmlich@redhat.com> - 9.3.1-1
+- update to 9.3.1 minor version per release notes:
+  http://www.postgresql.org/docs/9.3/static/release-9-3-1.html
+
 * Tue Sep 10 2013 Pavel Raiskup <praiskup@redhat.com> - 9.3.0-1
 - update to 9.3 major version per release notes:
   http://www.postgresql.org/docs/9.3/static/release-9-3.html
