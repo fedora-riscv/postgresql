@@ -57,8 +57,8 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.2
-Version: 9.2.4
-Release: 2%{?dist}
+Version: 9.2.5
+Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -73,7 +73,7 @@ Url: http://www.postgresql.org/
 # in-place upgrade of an old database.  In most cases it will not be critical
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
-%global prevversion 9.1.9
+%global prevversion 9.1.10
 %global prevmajorversion 9.1
 
 Source0: ftp://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2
@@ -1110,6 +1110,10 @@ fi
 %endif
 
 %changelog
+* Thu Oct 17 2013 Jozef Mlich <jmlich@redhat.com> - 9.2.5-1
+- update to 9.2.5 minor version per release notes:
+  http://www.postgresql.org/docs/9.2/static/release-9-2-5.html
+
 * Thu Aug 15 2013 Pavel Raiskup <praiskup@redhat.com> - 9.2.4-2
 - postgresql-setup: don't create whole path to server's data to make sure that
   the parent directory has correct permissions (#972425) (pick from fc20)
@@ -1722,7 +1726,7 @@ Resolves: #161470
 * Mon Aug 30 2004 Tom Lane <tgl@redhat.com> 7.4.5-2
 - Update to PyGreSQL 3.5.
 
-* Wed Aug 24 2004 Tom Lane <tgl@redhat.com> 7.4.5-1
+* Tue Aug 24 2004 Tom Lane <tgl@redhat.com> 7.4.5-1
 - Update to PostgreSQL 7.4.5.
 - Update JDBC jars to driver build 215.
 - Add Obsoletes: entries for rh-postgresql packages, per bug 129278.
