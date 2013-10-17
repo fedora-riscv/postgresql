@@ -60,7 +60,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.3
 Version: 9.3.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -75,7 +75,7 @@ Url: http://www.postgresql.org/
 # in-place upgrade of an old database.  In most cases it will not be critical
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
-%global prevversion 9.2.4
+%global prevversion 9.2.5
 %global prevmajorversion 9.2
 
 Source0: ftp://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2
@@ -104,7 +104,6 @@ Patch3: postgresql-perl-rpath.patch
 Patch4: postgresql-config-comment.patch
 Patch5: postgresql-var-run-socket.patch
 Patch6: postgresql-man.patch
-Patch100: postgresql-aarch64-atomic-upgrade.patch
 
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
 BuildRequires: perl(ExtUtils::Embed), perl-devel
@@ -351,7 +350,6 @@ cp -p config/config.guess postgresql-%{prevversion}/config/config.guess
 cp -p config/config.sub postgresql-%{prevversion}/config/config.sub
 
 # apply once SOURCE3 is extracted
-%patch100 -d postgresql-%{prevversion} -p1
 %endif
 
 # remove .gitignore files to ensure none get into the RPMs (bug #642210)
@@ -1120,6 +1118,10 @@ fi
 %endif
 
 %changelog
+* Thu Oct 17 2013 Jozef Mlich <jmlich@redhat.com> - 9.3.1-2
+- the prevversion (see package upgrade process) is updated
+  from 9.2.4 to 9.2.5
+
 * Thu Oct 10 2013 Jozef Mlich <jmlich@redhat.com> - 9.3.1-1
 - update to 9.3.1 minor version per release notes:
   http://www.postgresql.org/docs/9.3/static/release-9-3-1.html
