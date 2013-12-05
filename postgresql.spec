@@ -53,11 +53,15 @@
 %{!?selinux:%global selinux 1}
 %{!?runselftest:%global runselftest 1}
 
+# By default, patch(1) creates backup files when chunks apply with offsets.
+# Turn that off to ensure such files don't get included in RPMs.
+%global _default_patch_flags --no-backup-if-mismatch
+
 
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.2
-Version: 9.2.5
+Version: 9.2.6
 Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
@@ -73,7 +77,7 @@ Url: http://www.postgresql.org/
 # in-place upgrade of an old database.  In most cases it will not be critical
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
-%global prevversion 9.1.10
+%global prevversion 9.1.11
 %global prevmajorversion 9.1
 
 Source0: ftp://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2
@@ -1125,6 +1129,10 @@ fi
 %endif
 
 %changelog
+* Thu Dec 05 2013 Jozef Mlich <jmlich@redhat.com> - 9.2.6-1
+- Update to PostgreSQL 9.2.6, for various fixes described at
+  http://www.postgresql.org/docs/9.2/static/release-9-2-6.html
+
 * Wed Oct 16 2013 Jozef Mlich <jmlich@redhat.com> - 9.2.5-1
 - Update to PostgreSQL 9.2.5, for various fixes described at
   http://www.postgresql.org/docs/9.2/static/release-9-2-5.html
