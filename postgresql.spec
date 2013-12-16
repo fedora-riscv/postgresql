@@ -64,7 +64,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.3
 Version: 9.3.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -1122,6 +1122,12 @@ fi
 %endif
 
 %changelog
+* Fri Dec 13 2013 Pavel Raiskup <praiskup@redhat.com> - 9.3.2-2
+- lint the postgresql-setup script
+
+* Thu Dec 12 2013 Jozef Mlich <jmlich@redhat.com> - 9.3.2-2
+- don't fail if user has badly configure 'postgres' user access (#1040364)
+
 * Thu Dec 05 2013 Jozef Mlich <jmlich@redhat.com> - 9.3.2-1
 - update to 9.3.2 minor version per release notes:
   http://www.postgresql.org/docs/9.3/static/release-9-3-2.html
