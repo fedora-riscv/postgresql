@@ -63,8 +63,8 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.3
-Version: 9.3.2
-Release: 2%{?dist}
+Version: 9.3.3
+Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -79,7 +79,7 @@ Url: http://www.postgresql.org/
 # in-place upgrade of an old database.  In most cases it will not be critical
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
-%global prevversion 9.2.6
+%global prevversion 9.2.7
 %global prevmajorversion 9.2
 
 Source0: ftp://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2
@@ -109,7 +109,7 @@ Patch4: postgresql-config-comment.patch
 Patch5: postgresql-var-run-socket.patch
 Patch6: postgresql-man.patch
 
-BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
+BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk help2man
 BuildRequires: perl(ExtUtils::Embed), perl-devel
 BuildRequires: readline-devel zlib-devel
 BuildRequires: systemd-units
@@ -359,6 +359,25 @@ cp -p config/config.sub postgresql-%{prevversion}/config/config.sub
 # remove .gitignore files to ensure none get into the RPMs (bug #642210)
 find . -type f -name .gitignore | xargs rm
 
+# prep the setup script, including insertion of some values it needs
+sed -e 's|^PGVERSION=.*$|PGVERSION=%{version}|' \
+	-e 's|^PGMAJORVERSION=.*$|PGMAJORVERSION=%{majorversion}|' \
+	-e 's|^PGENGINE=.*$|PGENGINE=%{_bindir}|' \
+	-e 's|^PREVMAJORVERSION=.*$|PREVMAJORVERSION=%{prevmajorversion}|' \
+	-e 's|^PREVPGENGINE=.*$|PREVPGENGINE=%{_libdir}/pgsql/postgresql-%{prevmajorversion}/bin|' \
+	-e 's|^README_RPM_DIST=.*$|README_RPM_DIST=%{_pkgdocdir}/%(basename %{SOURCE8})|' \
+	<%{SOURCE9} >postgresql-setup
+touch -r %{SOURCE9} postgresql-setup
+chmod +x postgresql-setup
+help2man -N -m "Postgresql RPM-dist manual" ./postgresql-setup -o postgresql-setup.1
+
+# prep the startup check script, including insertion of some values it needs
+sed -e 's|^PGVERSION=.*$|PGVERSION=%{version}|' \
+	-e 's|^PREVMAJORVERSION=.*$|PREVMAJORVERSION=%{prevmajorversion}|' \
+	-e 's|^PGDOCDIR=.*$|PGDOCDIR=%{_pkgdocdir}|' \
+	<%{SOURCE4} >postgresql-check-db-dir
+touch -r %{SOURCE4} postgresql-check-db-dir
+
 %build
 
 # fail quickly and obviously if user tries to build as root
@@ -371,17 +390,18 @@ find . -type f -name .gitignore | xargs rm
 	fi
 %endif
 
-CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS
+# Fiddling with CFLAGS.
 
+CFLAGS="${CFLAGS:-%optflags}"
+%ifarch %{power64}
+# See the bug #1051075, ppc64 should benefit from -O3
+CFLAGS=`echo $CFLAGS | xargs -n 1 | sed 's|-O2|-O3|g' | xargs -n 100`
+%endif
 # Strip out -ffast-math from CFLAGS....
 CFLAGS=`echo $CFLAGS|xargs -n 1|grep -v ffast-math|xargs -n 100`
 # Add LINUX_OOM_SCORE_ADJ=0 to ensure child processes reset postmaster's oom_score_adj
 CFLAGS="$CFLAGS -DLINUX_OOM_SCORE_ADJ=0"
-# let's try removing this kluge, it may just be a workaround for bz#520916
-# # use -O1 on sparc64 and alpha
-# %%ifarch sparc64 alpha
-# CFLAGS=`echo $CFLAGS| sed -e "s|-O2|-O1|g" `
-# %%endif
+export CFLAGS
 
 # plpython requires separate configure/build runs to build against python 2
 # versus python 3.  Our strategy is to do the python 3 run first, then make
@@ -616,21 +636,9 @@ esac
 install -d -m 755 $RPM_BUILD_ROOT%{_libdir}/pgsql/tutorial
 cp -p src/tutorial/* $RPM_BUILD_ROOT%{_libdir}/pgsql/tutorial
 
-# prep the setup script, including insertion of some values it needs
-sed -e 's|^PGVERSION=.*$|PGVERSION=%{version}|' \
-	-e 's|^PGENGINE=.*$|PGENGINE=%{_bindir}|' \
-	-e 's|^PREVMAJORVERSION=.*$|PREVMAJORVERSION=%{prevmajorversion}|' \
-	-e 's|^PREVPGENGINE=.*$|PREVPGENGINE=%{_libdir}/pgsql/postgresql-%{prevmajorversion}/bin|' \
-	<%{SOURCE9} >postgresql-setup
-touch -r %{SOURCE9} postgresql-setup
 install -m 755 postgresql-setup $RPM_BUILD_ROOT%{_bindir}/postgresql-setup
+install -p -m 644 postgresql-setup.1 $RPM_BUILD_ROOT%{_mandir}/man1
 
-# prep the startup check script, including insertion of some values it needs
-sed -e 's|^PGVERSION=.*$|PGVERSION=%{version}|' \
-	-e 's|^PREVMAJORVERSION=.*$|PREVMAJORVERSION=%{prevmajorversion}|' \
-	-e 's|^PGDOCDIR=.*$|PGDOCDIR=%{_pkgdocdir}|' \
-	<%{SOURCE4} >postgresql-check-db-dir
-touch -r %{SOURCE4} postgresql-check-db-dir
 install -m 755 postgresql-check-db-dir $RPM_BUILD_ROOT%{_bindir}/postgresql-check-db-dir
 
 install -d $RPM_BUILD_ROOT%{_unitdir}
@@ -1037,6 +1045,7 @@ fi
 %{_mandir}/man1/pg_receivexlog.*
 %{_mandir}/man1/pg_resetxlog.*
 %{_mandir}/man1/postgres.*
+%{_mandir}/man1/postgresql-setup.*
 %{_mandir}/man1/postmaster.*
 %{_datadir}/pgsql/postgres.bki
 %{_datadir}/pgsql/postgres.description
@@ -1122,6 +1131,29 @@ fi
 %endif
 
 %changelog
+* Thu Feb 20 2014 Jozef Mlich <jmlich@redhat.com> - 9.3.3-1
+- update to 9.3.3 minor version per release notes:
+  http://www.postgresql.org/docs/9.3/static/release-9-3-3.html
+
+* Thu Jan 23 2014 Pavel Raiskup <praiskup@redhat.com> - 9.3.2-7
+- postgresql-setup: typos
+
+* Tue Jan 21 2014 Pavel Raiskup <praiskup@redhat.com> - 9.3.2-6
+- add PGSETUP_PGUPGRADE_OPTIONS env var for postgresql-setup
+
+* Mon Jan 20 2014 Pavel Raiskup <praiskup@redhat.com> - 9.3.2-5
+- fix the postgresql-setup --version option
+
+* Mon Jan 20 2014 Pavel Raiskup <praiskup@redhat.com> - 9.3.2-4
+- postgresql-setup(upgrade): don't stop old server when it can not be started
+- postgresql-setup(initdb, upgrade): add $PGSETUP_INITDB_OPTIONS
+- postgresql-setup: do not pretend 'sh' compatibility
+- move script generation to proper place
+- postgresql-setup: document a little and genrate manual page
+
+* Fri Jan 10 2014 Pavel Raiskup <praiskup@redhat.com> - 9.3.2-3
+- build with -O3 on ppc64 (private #1051075)
+
 * Fri Dec 13 2013 Pavel Raiskup <praiskup@redhat.com> - 9.3.2-2
 - lint the postgresql-setup script
 
