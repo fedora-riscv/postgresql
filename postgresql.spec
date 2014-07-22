@@ -63,7 +63,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.3
-Version: 9.3.4
+Version: 9.3.5
 Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
@@ -79,7 +79,7 @@ Url: http://www.postgresql.org/
 # in-place upgrade of an old database.  In most cases it will not be critical
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
-%global prevversion 9.2.8
+%global prevversion 9.2.9
 %global prevmajorversion 9.2
 
 Source0: ftp://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2
@@ -100,6 +100,9 @@ Source12: upgrade.sh
 Source13: postgresql.tmpfiles.d
 Source14: postgresql.pam
 Source15: postgresql-bashprofile
+
+Source16: ftp://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2.sha256
+Source17: ftp://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{prevversion}.tar.bz2.sha256
 
 # Comments for these patches are in the patch files.
 Patch1: rpm-pgsql.patch
@@ -328,7 +331,8 @@ benchmarks.
 %endif
 
 %prep
-%setup -q 
+( cd %_sourcedir; sha256sum -c %{SOURCE16}; sha256sum -c %{SOURCE17} )
+%setup -q
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
@@ -1131,6 +1135,10 @@ fi
 %endif
 
 %changelog
+* Tue Jul 22 2014 Pavel Raiskup <praiskup@redhat.com> - 9.3.5-1
+- update to 9.3.5 per release notes
+  http://www.postgresql.org/docs/9.3/static/release-9-3-5.html
+
 * Thu Mar 20 2014 Jozef Mlich <jmlich@redhat.com> - 9.3.4-1
 - update to 9.3.4 minor version per release notes:
   http://www.postgresql.org/docs/9.3/static/release-9-3-4.html
