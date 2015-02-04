@@ -66,8 +66,8 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.3
-Version: 9.3.5
-Release: 5%{?dist}
+Version: 9.3.6
+Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -82,7 +82,7 @@ Url: http://www.postgresql.org/
 # in-place upgrade of an old database.  In most cases it will not be critical
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
-%global prevversion 9.2.9
+%global prevversion 9.2.10
 %global prevmajorversion 9.2
 
 Source0: ftp://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2
@@ -117,8 +117,6 @@ Patch3: postgresql-perl-rpath.patch
 Patch4: postgresql-config-comment.patch
 Patch5: postgresql-var-run-socket.patch
 Patch6: postgresql-man.patch
-Patch7: postgresql-upgrade-locale-spelling.patch
-Patch8: postgresql-upgrade-locale-spelling-2.patch
 
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk help2man
 BuildRequires: perl(ExtUtils::Embed), perl-devel
@@ -355,8 +353,6 @@ benchmarks.
 %patch4 -p1
 %patch5 -p1
 %patch6 -p1
-%patch7 -p1
-%patch8 -p1
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -1159,6 +1155,10 @@ fi
 %endif
 
 %changelog
+* Wed Feb 04 2015 Pavel Raiskup <praiskup@redhat.com> - 9.3.6-1
+- update to 9.3.6 per release notes
+  http://www.postgresql.org/docs/9.3/static/release-9-3-6.html
+
 * Mon Oct 20 2014 Pavel Raiskup <praiskup@redhat.com> - 9.3.5-5
 - be forgiving of variant spellings of locale names in pg_upgrade (#1007802)
 
