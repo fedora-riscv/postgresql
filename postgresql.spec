@@ -650,11 +650,8 @@ cd postgresql-setup-%{setup_version}
 make install DESTDIR=$RPM_BUILD_ROOT
 cd ..
 
-# For some reson, specifying %doc %{_pkgdocdir}/README.rpm-dist in %files does
-# not work (at least on RHEL6) and rpmbuild fails with (it may be known issue
-# but I was unable to debug properly yet):
-#   error: create archive failed on file
-#   /builddir/.../...-9.4.1/README.rpm-dist: cpio: Bad magic
+# For some reason, having '%%doc %%{_pkgdocdir}/README.rpm-dist' in %%files
+# causes FTBFS (at least on RHEL6), see rhbz#1250006.
 cp $RPM_BUILD_ROOT/%{_pkgdocdir}/README.rpm-dist ./
 
 cat > $RPM_BUILD_ROOT%{_sysconfdir}/postgresql-setup/upgrade/postgresql.conf <<EOF
@@ -916,6 +913,7 @@ fi
 %files -f main.lst
 %doc doc/KNOWN_BUGS doc/MISSING_FEATURES doc/TODO
 %doc COPYRIGHT README HISTORY doc/bug.template
+%doc README.rpm-dist
 %{_bindir}/clusterdb
 %{_bindir}/createdb
 %{_bindir}/createlang
@@ -1202,6 +1200,7 @@ fi
 %changelog
 * Fri Sep 25 2015 Pavel Raiskup <praiskup@redhat.com> - 9.4.4-4
 - postgresql-setup rebase to 3.4 (rhbz#1265319, rhbz#1247477)
+- install README.rpm-dist properly (rhbz#1249708)
 
 * Tue Jul 14 2015 Pavel Raiskup <praiskup@redhat.com> - 9.4.4-3
 - revert/fix part of e6acde1a9 commit related to multilib hack (rhbz#1242873)
