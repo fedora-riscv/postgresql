@@ -98,8 +98,7 @@ Source1: postgresql-%{version}-US.pdf
 Source2: generate-pdf.sh
 Source3: ftp://ftp.postgresql.org/pub/source/v%{prevversion}/postgresql-%{prevversion}.tar.bz2
 Source4: Makefile.regress
-Source5: pg_config.h
-Source6: ecpg_config.h
+Source5: multilib-fix
 Source9: postgresql.tmpfiles.d
 Source10: postgresql.pam
 Source11: postgresql-bashprofile
@@ -683,22 +682,14 @@ echo "%%%{name}_major %{majorversion}" > macros.%{name}
 install -D -m 644 macros.%{name} \
     $RPM_BUILD_ROOT%{macrosdir}/macros.%{name}
 
-# multilib header hack; note pg_config.h is installed in two places!
-# we only apply this to known Red Hat multilib arches, per bug #177564
-build_arch=`uname -i`
-test "$build_arch" = ppc64p7 && build_arch=ppc64
-case "$build_arch" in
-  i386 | x86_64 | ppc | ppc64 | s390 | s390x | sparc | sparc64 )
-    mv $RPM_BUILD_ROOT%{_includedir}/pg_config.h $RPM_BUILD_ROOT%{_includedir}/pg_config_"$build_arch".h
-    install -m 644 %{SOURCE5} $RPM_BUILD_ROOT%{_includedir}/
-    mv $RPM_BUILD_ROOT%{_includedir}/pgsql/server/pg_config.h $RPM_BUILD_ROOT%{_includedir}/pgsql/server/pg_config_"$build_arch".h
-    install -m 644 %{SOURCE5} $RPM_BUILD_ROOT%{_includedir}/pgsql/server/
-    mv $RPM_BUILD_ROOT%{_includedir}/ecpg_config.h $RPM_BUILD_ROOT%{_includedir}/ecpg_config_"$build_arch".h
-    install -m 644 %{SOURCE6} $RPM_BUILD_ROOT%{_includedir}/
-    ;;
-  *)
-    ;;
-esac
+# multilib header hack; some headers are installed in two places!
+%global ml_fix_c_header %{SOURCE5} --buildroot "$RPM_BUILD_ROOT"
+for header in pg_config pg_config_ext ecpg_config; do
+%ml_fix_c_header --destdir "%{_includedir}" --basename "$header"
+done
+for header in pg_config pg_config_ext; do
+%ml_fix_c_header --destdir "%{_includedir}/pgsql/server" --basename "$header"
+done
 
 install -d -m 755 $RPM_BUILD_ROOT%{_libdir}/pgsql/tutorial
 cp -p src/tutorial/* $RPM_BUILD_ROOT%{_libdir}/pgsql/tutorial
@@ -1199,6 +1190,7 @@ fi
 %changelog
 * Fri Oct 16 2015 Pavel Raiskup <praiskup@redhat.com> - 9.4.5-2
 - devel package should not require the main package (rhbz#1272219)
+- multilib fix, more general solution (rhbz#1190346)
 
 * Tue Oct 06 2015 Pavel Raiskup <praiskup@redhat.com> - 9.4.5-1
 - update to 9.4.5 per release notes
