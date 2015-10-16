@@ -71,7 +71,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.4
 Version: 9.4.5
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -265,7 +265,6 @@ included in the PostgreSQL distribution.
 %package devel
 Summary: PostgreSQL development header files and libraries
 Group: Development/Libraries
-Requires: %{name}%{?_isa} = %{version}-%{release}
 Requires: %{name}-libs%{?_isa} = %{version}-%{release}
 
 %description devel
@@ -921,7 +920,6 @@ fi
 %{_bindir}/dropdb
 %{_bindir}/droplang
 %{_bindir}/dropuser
-%{_bindir}/pg_config
 %{_bindir}/pg_dump
 %{_bindir}/pg_dumpall
 %{_bindir}/pg_isready
@@ -937,7 +935,6 @@ fi
 %{_mandir}/man1/dropdb.*
 %{_mandir}/man1/droplang.*
 %{_mandir}/man1/dropuser.*
-%{_mandir}/man1/pg_config.*
 %{_mandir}/man1/pg_dump.*
 %{_mandir}/man1/pg_dumpall.*
 %{_mandir}/man1/pg_isready.*
@@ -1144,6 +1141,7 @@ fi
 
 %files devel -f devel.lst
 %{_bindir}/ecpg
+%{_bindir}/pg_config
 %{_includedir}/*
 %{_libdir}/libecpg.so
 %{_libdir}/libecpg_compat.so
@@ -1152,6 +1150,7 @@ fi
 %{_libdir}/pgsql/pgxs/
 %{_libdir}/pkgconfig/*.pc
 %{_mandir}/man1/ecpg.*
+%{_mandir}/man1/pg_config.*
 %{_mandir}/man3/SPI_*
 %{macrosdir}/*
 
@@ -1198,6 +1197,9 @@ fi
 %endif
 
 %changelog
+* Fri Oct 16 2015 Pavel Raiskup <praiskup@redhat.com> - 9.4.5-2
+- devel package should not require the main package (rhbz#1272219)
+
 * Tue Oct 06 2015 Pavel Raiskup <praiskup@redhat.com> - 9.4.5-1
 - update to 9.4.5 per release notes
   http://www.postgresql.org/docs/9.4/static/release-9-4-5.html
