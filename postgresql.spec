@@ -71,7 +71,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.4
 Version: 9.4.5
-Release: 2%{?dist}
+Release: 3%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -1188,6 +1188,9 @@ fi
 %endif
 
 %changelog
+* Tue Nov 10 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 9.4.5-3
+- Rebuilt for https://fedoraproject.org/wiki/Changes/python3.5
+
 * Fri Oct 16 2015 Pavel Raiskup <praiskup@redhat.com> - 9.4.5-2
 - devel package should not require the main package (rhbz#1272219)
 - multilib fix, more general solution (rhbz#1190346)
