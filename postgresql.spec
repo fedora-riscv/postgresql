@@ -121,6 +121,7 @@ Patch4: postgresql-config-comment.patch
 Patch5: postgresql-var-run-socket.patch
 Patch6: postgresql-man.patch
 Patch7: postgresql-perl-5.22-test-fail.patch
+Patch8: postgresql-python3.5-tests.patch
 
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk help2man
 BuildRequires: perl(ExtUtils::Embed), perl-devel
@@ -361,6 +362,7 @@ benchmarks.
 %patch5 -p1
 %patch6 -p1
 %patch7 -p1
+%patch8 -p1
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -1188,6 +1190,9 @@ fi
 %endif
 
 %changelog
+* Thu Nov 12 2015 Pavel Raiskup <praiskup@redhat.com> - 9.4.5-3
+- fix testsuite failure with new Python 3.5 (rhbz#1280404)
+
 * Tue Nov 10 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 9.4.5-3
 - Rebuilt for https://fedoraproject.org/wiki/Changes/python3.5
 
