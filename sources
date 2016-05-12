@@ -1,6 +1,7 @@
 8323008e726a84d76c3153ed68357576  postgresql-setup-2.0.tar.gz
-15faf1b01a8a66e15689f30587ed27af  postgresql-9.4.7-US.pdf
-8bf119bbac1bbb566397d606861695a9  postgresql-9.4.7.tar.bz2
-12256026fbda590af5a22e58b14283d1  postgresql-9.4.7.tar.bz2.sha256
-4aebf27010e4b022b79e793e3c98e91e  postgresql-9.3.12.tar.bz2
-544341dc460f45889d0e32dd87b793b7  postgresql-9.3.12.tar.bz2.sha256
+8f0234e930ddce06f7ebaedfc26faed8  postgresql-9.4.8-US.pdf
+a1a2e8014b2b4c49fc58fe2e2fe83681  postgresql-9.4.8.tar.bz2
+4497d4530be084b651df00f21d067b3b  postgresql-9.4.8.tar.bz2.sha256
+904a57cb606dd5492b170cf732320ba2  postgresql-9.3.13.tar.bz2
+c898a46163843f86341d8527622c02b4  postgresql-9.3.13.tar.bz2.sha256
+
