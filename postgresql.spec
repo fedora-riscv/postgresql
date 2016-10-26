@@ -70,7 +70,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.4
-Version: 9.4.9
+Version: 9.4.10
 Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
@@ -86,7 +86,7 @@ Url: http://www.postgresql.org/
 # in-place upgrade of an old database.  In most cases it will not be critical
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
-%global prevversion 9.3.14
+%global prevversion 9.3.15
 %global prevmajorversion 9.3
 
 %global setup_version 3.4
@@ -1190,6 +1190,10 @@ fi
 %endif
 
 %changelog
+* Wed Oct 26 2016 Pavel Raiskup <praiskup@redhat.com> - 9.4.10-1
+- update to 9.4.10 per release notes
+  http://www.postgresql.org/docs/9.4/static/release-9-4-10.html
+
 * Fri Aug 12 2016 Petr Kubat <pkubat@redhat.com> - 9.4.9-1
 - update to 9.4.9 per release notes
   http://www.postgresql.org/docs/9.4/static/release-9-4-9.html
