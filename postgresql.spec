@@ -66,7 +66,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.5
-Version: 9.5.4
+Version: 9.5.5
 Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
@@ -82,7 +82,7 @@ Url: http://www.postgresql.org/
 # in-place upgrade of an old database.  In most cases it will not be critical
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
-%global prevversion 9.4.9
+%global prevversion 9.4.10
 %global prevmajorversion 9.4
 
 %global setup_version 4.0
@@ -94,7 +94,6 @@ Source1: postgresql-%{version}-US.pdf
 Source2: generate-pdf.sh
 Source3: ftp://ftp.postgresql.org/pub/source/v%{prevversion}/postgresql-%{prevversion}.tar.bz2
 Source4: Makefile.regress
-Source5: multilib-fix
 Source9: postgresql.tmpfiles.d
 Source10: postgresql.pam
 Source11: postgresql-bashprofile
@@ -119,8 +118,10 @@ Patch6: postgresql-man.patch
 
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk help2man
 BuildRequires: perl(ExtUtils::Embed), perl-devel
+BuildRequires: perl-generators
 BuildRequires: readline-devel zlib-devel
 BuildRequires: systemd-units util-linux
+BuildRequires: multilib-rpm-config
 
 # postgresql-setup build requires
 BuildRequires: m4 elinks docbook-utils help2man
@@ -687,12 +688,14 @@ install -D -m 644 macros.%{name} \
     $RPM_BUILD_ROOT%{macrosdir}/macros.%{name}
 
 # multilib header hack; some headers are installed in two places!
-%global ml_fix_c_header %{SOURCE5} --buildroot "$RPM_BUILD_ROOT"
-for header in pg_config pg_config_ext ecpg_config; do
-%ml_fix_c_header --destdir "%{_includedir}" --basename "$header"
-done
-for header in pg_config pg_config_ext; do
-%ml_fix_c_header --destdir "%{_includedir}/pgsql/server" --basename "$header"
+for header in \
+	%{_includedir}/pg_config.h \
+	%{_includedir}/pg_config_ext.h \
+	%{_includedir}/ecpg_config.h \
+	%{_includedir}/pgsql/server/pg_config.h \
+	%{_includedir}/pgsql/server/pg_config_ext.h
+do
+%multilib_fix_c_header --file "$header"
 done
 
 install -d -m 755 $RPM_BUILD_ROOT%{_libdir}/pgsql/tutorial
@@ -1213,9 +1216,19 @@ fi
 %endif
 
 %changelog
+* Wed Oct 26 2016 Pavel Raiskup <praiskup@redhat.com> - 9.5.5-1
+- update to 9.5.5 per release notes:
+  http://www.postgresql.org/docs/9.5/static/release-9-5-5.html
+
 * Fri Aug 12 2016 Petr Kubat <pkubat@redhat.com> - 9.5.4-1
 - update to 9.5.4 per release notes:
   http://www.postgresql.org/docs/9.5/static/release-9-5-4.html
+
+* Mon Jun 20 2016 Pavel Raiskup <praiskup@redhat.com> - 9.5.3-3
+- use multilib-rpm-config package for multilib hacks
+
+* Sun May 15 2016 Jitka Plesnikova <jplesnik@redhat.com> - 9.5.3-2
+- Perl 5.24 rebuild
 
 * Thu May 12 2016 Pavel Raiskup <praiskup@redhat.com> - 9.5.3-1
 - update to 9.5.3 per release notes:
