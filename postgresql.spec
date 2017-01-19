@@ -67,7 +67,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.6
 Version: 9.6.1
-Release: 3%{?dist}
+Release: 4%{?dist}.ciphers_test
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -114,6 +114,7 @@ Patch2: postgresql-logging.patch
 Patch3: postgresql-perl-rpath.patch
 Patch5: postgresql-var-run-socket.patch
 Patch6: postgresql-man.patch
+Patch7: specific-cipher-set.patch
 
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk help2man
 BuildRequires: perl(ExtUtils::Embed), perl-devel
@@ -363,6 +364,7 @@ benchmarks.
 %patch3 -p1
 %patch5 -p1
 %patch6 -p1
+%patch7 -p1
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -450,6 +452,7 @@ export PYTHON=/usr/bin/python3
 %endif
 %if %ssl
 	--with-openssl \
+	--with-openssl-be-ciphers="PROFILE=SYSTEM" \
 %endif
 %if %pam
 	--with-pam \
@@ -513,6 +516,7 @@ unset PYTHON
 %endif
 %if %ssl
 	--with-openssl \
+	--with-openssl-be-ciphers="PROFILE=SYSTEM" \
 %endif
 %if %pam
 	--with-pam \
@@ -1198,6 +1202,9 @@ fi
 %endif
 
 %changelog
+* Thu Jan 19 2017 Pavel Raiskup <praiskup@redhat.com> - 9.6.1-4.fc25.ciphers_test
+- test upstream proposal
+
 * Thu Jan 12 2017 Igor Gnatenko <ignatenko@redhat.com> - 9.6.1-3
 - Rebuild for readline 7.x
 

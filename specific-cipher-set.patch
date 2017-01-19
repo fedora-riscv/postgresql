@@ -1,0 +1,130 @@
+From 4ec0b8204dcf833025a9781d4bb1785e8540be6f Mon Sep 17 00:00:00 2001
+From: Pavel Raiskup <praiskup@redhat.com>
+Date: Wed, 18 Jan 2017 13:34:55 +0100
+Subject: [PATCH] Allow setting distribution-specific cipher set
+
+Fedora OpenSSL maintainers invented a way to specify consolidated,
+per-system cipher set [1] and it is our packaging policy to comply
+(if this is a bit meaningful).
+
+So for such situations ./configure options comes in handy instead
+of downstream-patching, per Red Hat bug report [2].
+
+[1] https://fedoraproject.org/wiki/Packaging:CryptoPolicies
+[2] https://bugzilla.redhat.com/show_bug.cgi?id=1348125
+---
+ configure                    | 32 ++++++++++++++++++++++++++++++++
+ configure.in                 |  8 ++++++++
+ src/backend/utils/misc/guc.c |  4 ++++
+ src/include/pg_config.h.in   |  3 +++
+ 4 files changed, 47 insertions(+)
+
+diff --git a/configure b/configure
+index 9a83f19..0188bfc 100755
+--- a/configure
++++ b/configure
+@@ -832,6 +832,7 @@ with_bsd_auth
+ with_ldap
+ with_bonjour
+ with_openssl
++with_openssl_be_ciphers
+ with_selinux
+ with_systemd
+ with_readline
+@@ -1523,6 +1524,8 @@ Optional Packages:
+   --with-ldap             build with LDAP support
+   --with-bonjour          build with Bonjour support
+   --with-openssl          build with OpenSSL support
++  --with-openssl-be-ciphers=STRING
++                          Replace the default list of server-supported ciphers
+   --with-selinux          build with SELinux support
+   --with-systemd          build with systemd support
+   --without-readline      do not use GNU Readline nor BSD Libedit for editing
+@@ -5740,6 +5743,35 @@ fi
+ $as_echo "$with_openssl" >&6; }
+ 
+ 
++
++
++
++# Check whether --with-openssl-be-ciphers was given.
++if test "${with_openssl_be_ciphers+set}" = set; then :
++  withval=$with_openssl_be_ciphers;
++  case $withval in
++    yes)
++      as_fn_error $? "argument required for --with-openssl-be-ciphers option" "$LINENO" 5
++      ;;
++    no)
++      as_fn_error $? "argument required for --with-openssl-be-ciphers option" "$LINENO" 5
++      ;;
++    *)
++
++cat >>confdefs.h <<_ACEOF
++#define PG_DEFAULT_SSL_CIPHERS "$with_openssl_be_ciphers"
++_ACEOF
++
++      ;;
++  esac
++
++fi
++
++
++
++{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to replace default OpenSSL cypher set" >&5
++$as_echo_n "checking whether to replace default OpenSSL cypher set... " >&6; }
++
+ #
+ # SELinux
+ #
+diff --git a/configure.in b/configure.in
+index 52e4e78..663cbee 100644
+--- a/configure.in
++++ b/configure.in
+@@ -717,6 +717,14 @@ PGAC_ARG_BOOL(with, openssl, no, [build with OpenSSL support],
+ AC_MSG_RESULT([$with_openssl])
+ AC_SUBST(with_openssl)
+ 
++PGAC_ARG_REQ(with, openssl-be-ciphers, [STRING],
++             [Replace the default list of server-supported ciphers],
++             [AC_DEFINE_UNQUOTED([PG_DEFAULT_SSL_CIPHERS],
++                                 ["$with_openssl_be_ciphers"],
++                                 [Re-define the default for server ssl_ciphers option])])
++
++AC_MSG_CHECKING([whether to replace default OpenSSL cypher set])
++
+ #
+ # SELinux
+ #
+diff --git a/src/backend/utils/misc/guc.c b/src/backend/utils/misc/guc.c
+index 4e2bd4c..c4a992e 100644
+--- a/src/backend/utils/misc/guc.c
++++ b/src/backend/utils/misc/guc.c
+@@ -3514,7 +3514,11 @@ static struct config_string ConfigureNamesString[] =
+ 		},
+ 		&SSLCipherSuites,
+ #ifdef USE_SSL
++#ifdef PG_DEFAULT_SSL_CIPHERS
++		PG_DEFAULT_SSL_CIPHERS,
++#else
+ 		"HIGH:MEDIUM:+3DES:!aNULL",
++#endif
+ #else
+ 		"none",
+ #endif
+diff --git a/src/include/pg_config.h.in b/src/include/pg_config.h.in
+index b9dfdd4..b3f9a5b 100644
+--- a/src/include/pg_config.h.in
++++ b/src/include/pg_config.h.in
+@@ -744,6 +744,9 @@
+ /* Define to the version of this package. */
+ #undef PACKAGE_VERSION
+ 
++/* Re-define the default for server ssl_ciphers option */
++#undef PG_DEFAULT_SSL_CIPHERS
++
+ /* Define to the name of a signed 128-bit integer type. */
+ #undef PG_INT128_TYPE
+ 
+-- 
+2.9.3
+
