@@ -72,9 +72,6 @@ License: PostgreSQL
 Group: Applications/Databases
 Url: http://www.postgresql.org/
 
-# This number must be NVR-greater than any PG version shipped in F15:
-%global first_systemd_version 0:9.0.99
-
 # This SRPM includes a copy of the previous major release, which is needed for
 # in-place upgrade of an old database.  In most cases it will not be critical
 # that this be kept up with the latest minor release of the previous series;
@@ -120,7 +117,7 @@ BuildRequires: perl(ExtUtils::Embed), perl-devel
 BuildRequires: perl-generators
 %endif
 BuildRequires: readline-devel zlib-devel
-BuildRequires: systemd-units util-linux
+BuildRequires: systemd util-linux
 BuildRequires: multilib-rpm-config
 
 # postgresql-setup build requires
@@ -209,16 +206,9 @@ Requires: %{name}%{?_isa} = %{version}-%{release}
 Requires: %{name}-libs%{?_isa} = %{version}-%{release}
 Requires(pre): /usr/sbin/useradd
 # We require this to be present for %%{_prefix}/lib/tmpfiles.d
-Requires: systemd-units
+Requires: systemd
 # Make sure it's there when scriptlets run, too
-Requires(post): systemd-units
-Requires(preun): systemd-units
-Requires(postun): systemd-units
-# This is actually needed for the %%triggerun script but Requires(triggerun)
-# is not valid.  We can use post because this particular %%triggerun script
-# should fire just after this package is installed.
-Requires(post): systemd-sysv
-Requires(post): chkconfig
+%{?systemd_requires}
 # Packages which provide postgresql plugins should build-require
 # postgresql-devel and require
 # postgresql-server(:MODULE_COMPAT_%%{postgresql_major}).
@@ -853,47 +843,15 @@ cat psql-%{majorversion}.lang >>main.lst
 	-c "PostgreSQL Server" -u 26 postgres >/dev/null 2>&1 || :
 
 %post server
-%if 0%{?systemd_post:1}
 %systemd_post %service_name
-%else
-if [ $1 -eq 1 ]; then
-    # Initial installation
-    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
-fi
-%endif
 
-# Run this when upgrading from SysV initscript to native systemd unit
-%triggerun server -- postgresql-server < %{first_systemd_version}
-# Save the current service runlevel info
-# User must manually run systemd-sysv-convert --apply postgresql
-# to migrate them to systemd targets
-/usr/bin/systemd-sysv-convert --save postgresql >/dev/null 2>&1 || :
-
-# Run these because the SysV package being removed won't do them
-/sbin/chkconfig --del postgresql >/dev/null 2>&1 || :
-/bin/systemctl try-restart %service_name >/dev/null 2>&1 || :
 
 %preun server
-%if 0%{?systemd_preun:1}
 %systemd_preun %service_name
-%else
-if [ $1 -eq 0 ]; then
-    # Package removal, not upgrade
-    /bin/systemctl --no-reload disable %service_name >/dev/null 2>&1 || :
-    /bin/systemctl stop %service_name >/dev/null 2>&1 || :
-fi
-%endif
+
 
 %postun server
-%if 0%{?systemd_postun_with_restart:1}
 %systemd_postun_with_restart %service_name
-%else
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :
-if [ $1 -ge 1 ]; then
-    # Package upgrade, not uninstall
-    /bin/systemctl try-restart %service_name >/dev/null 2>&1 || :
-fi
-%endif
 
 
 %check
@@ -1211,7 +1169,7 @@ make -C postgresql-setup-%{setup_version} check
 %endif
 
 %changelog
-* Fri Apr 07 2017 Pavel Raiskup <praiskup@redhat.com> - 9.6.2-3
+* Mon Apr 10 2017 Pavel Raiskup <praiskup@redhat.com> - 9.6.2-3
 - spring cleanup
 
 * Mon Mar 27 2017 Pavel Raiskup <praiskup@redhat.com> - 9.6.2-2
