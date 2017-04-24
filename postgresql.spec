@@ -29,6 +29,14 @@
 # The base package, the libs package, the devel package, and the server package
 # always get built.
 
+
+# Modularity hacks
+%if 0%{?_module_build}
+# systemtap-sdt-devel is not available in module world
+%{!?sdt:%global sdt 0}
+%endif
+
+
 %{!?beta:%global beta 0}
 %{?beta:%global __os_install_post /usr/lib/rpm/brp-compress}
 
@@ -1168,6 +1176,7 @@ make -C postgresql-setup-%{setup_version} check
 %changelog
 * Mon Apr 24 2017 Pavel Raiskup <praiskup@redhat.com> - 9.6.2-4
 - rebase to postgresql-setup 5.1
+- add module build hack for dtrace
 
 * Mon Apr 10 2017 Pavel Raiskup <praiskup@redhat.com> - 9.6.2-3
 - spring cleanup
