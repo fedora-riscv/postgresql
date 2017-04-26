@@ -36,6 +36,8 @@
 %{!?sdt:%global sdt 0}
 # elinks pulls in a whole perl universe
 %{!?elinks:%global elinks 0}
+%else
+%{!?elinks:%global elinks 1}
 %endif
 
 
@@ -134,6 +136,8 @@ BuildRequires: multilib-rpm-config
 BuildRequires: m4 docbook-utils help2man
 %if %elinks
 BuildRequires: elinks
+%else:
+BuildRequires: lynx
 %endif
 
 %if %plpython
@@ -1180,7 +1184,7 @@ make -C postgresql-setup-%{setup_version} check
 
 %changelog
 * Wed Apr 26 2017 Nils Philippsen <nils@redhat.com> - 9.6.2-5
-- add module build hack for elinks
+- add module build hack for lynx instead of elinks
 
 * Mon Apr 24 2017 Pavel Raiskup <praiskup@redhat.com> - 9.6.2-4
 - rebase to postgresql-setup 5.1
