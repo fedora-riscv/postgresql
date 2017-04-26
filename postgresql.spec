@@ -34,6 +34,8 @@
 %if 0%{?_module_build}
 # systemtap-sdt-devel is not available in module world
 %{!?sdt:%global sdt 0}
+# elinks pulls in a whole perl universe
+%{!?elinks:%global elinks 0}
 %endif
 
 
@@ -72,7 +74,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.6
 Version: 9.6.2
-Release: 4%{?dist}
+Release: 5%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -129,7 +131,10 @@ BuildRequires: systemd util-linux
 BuildRequires: multilib-rpm-config
 
 # postgresql-setup build requires
-BuildRequires: m4 elinks docbook-utils help2man
+BuildRequires: m4 docbook-utils help2man
+%if %elinks
+BuildRequires: elinks
+%endif
 
 %if %plpython
 BuildRequires: python-devel
@@ -1174,6 +1179,9 @@ make -C postgresql-setup-%{setup_version} check
 %endif
 
 %changelog
+* Wed Apr 26 2017 Nils Philippsen <nils@redhat.com> - 9.6.2-5
+- add module build hack for elinks
+
 * Mon Apr 24 2017 Pavel Raiskup <praiskup@redhat.com> - 9.6.2-4
 - rebase to postgresql-setup 5.1
 - add module build hack for dtrace
