@@ -8,6 +8,6 @@ while read line
 do
     base=`basename "$line"`
     echo " * handling $base"
-    md5sum "$base" >> sources
+    sha512sum --tag "$base" >> sources
     echo "/$base" >> .gitignore
 done
