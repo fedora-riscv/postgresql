@@ -18,7 +18,10 @@ set -e
 # Pass package version (e.g., 9.1.2) as argument
 VERSION=$1
 
+test -z "$VERSION" && VERSION=`awk '/^Version:/ { print $2; }' postgresql.spec`
+
 TARGETFILE=postgresql-$VERSION-US.pdf
+test -f "$TARGETFILE" && echo "$TARGETFILE exists" && exit 1
 
 echo Building $TARGETFILE ...
 

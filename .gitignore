@@ -1,4 +1,6 @@
-/postgresql-setup-*.tar.gz
-/postgresql-*-US.pdf
-/postgresql-*.tar.bz2
-/postgresql-*.tar.bz2.sha256
+/postgresql-9.4.12.tar.bz2
+/postgresql-9.4.12.tar.bz2.sha256
+/postgresql-9.5.7.tar.bz2
+/postgresql-9.5.7.tar.bz2.sha256
+/postgresql-setup-4.0.tar.gz
+/postgresql-9.5.7-US.pdf
