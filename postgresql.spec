@@ -63,7 +63,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.6
 Version: 9.6.5
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -78,7 +78,7 @@ Url: http://www.postgresql.org/
 %global prevversion 9.5.9
 %global prevmajorversion 9.5
 
-%global setup_version 5.1
+%global setup_version 6.0
 
 %global service_name postgresql.service
 Source0: https://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2
@@ -1088,8 +1088,10 @@ make -C postgresql-setup-%{setup_version} check
 %{_mandir}/man1/pg_resetxlog.*
 %{_mandir}/man1/pg_rewind.*
 %{_mandir}/man1/postgres.*
+%{_mandir}/man1/postgresql-new-systemd-unit.*
 %{_mandir}/man1/postgresql-setup.*
 %{_mandir}/man1/postmaster.*
+%{_sbindir}/postgresql-new-systemd-unit
 %{_tmpfilesdir}/postgresql.conf
 %{_unitdir}/*postgresql*.service
 %attr(700,postgres,postgres) %dir %{?_localstatedir}/lib/pgsql
@@ -1161,6 +1163,9 @@ make -C postgresql-setup-%{setup_version} check
 %endif
 
 %changelog
+* Wed Nov 08 2017 Pavel Raiskup <praiskup@redhat.com> - 9.6.5-2
+- rebase to new postgresql-setup 6.0 version, to fix CVE-2017-15097
+
 * Tue Aug 29 2017 Pavel Raiskup <praiskup@redhat.com> - 9.6.5-1
 - update to 9.6.5 per release notes:
   https://www.postgresql.org/docs/9.6/static/release-9-6-5.html
