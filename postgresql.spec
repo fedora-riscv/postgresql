@@ -63,7 +63,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.6
 Version: 9.6.10
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -251,6 +251,7 @@ included in the PostgreSQL distribution.
 Summary: PostgreSQL development header files and libraries
 Group: Development/Libraries
 Requires: %{name}-libs%{?_isa} = %{version}-%{release}
+Provides: libpq-devel = %{version}-%{release}
 
 %description devel
 The postgresql-devel package contains the header files and libraries
@@ -1163,6 +1164,9 @@ make -C postgresql-setup-%{setup_version} check
 %endif
 
 %changelog
+* Mon Aug 27 2018 Pavel Raiskup <praiskup@redhat.com> - 9.6.10-2
+- devel subpackage to provide libpq-devel (first step for rhbz#1618698)
+
 * Wed Aug 08 2018 Pavel Raiskup <praiskup@redhat.com> - 9.6.10-1
 - update to 9.6.10 per release notes:
   https://www.postgresql.org/docs/9.6/static/release-9-6-10.html
