@@ -59,7 +59,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 10
 Version: 10.5
-Release: 4%{?dist}
+Release: 5%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -478,9 +478,20 @@ export PYTHON=/usr/bin/python3
 	--with-python
 
 # Fortunately we don't need to build much except plpython itself.
-make %{?_smp_mflags} -C src/pl/plpython all
+%global python_subdirs       \\\
+	src/pl/plpython          \\\
+	contrib/hstore_plpython  \\\
+	contrib/ltree_plpython
+
+for dir in %python_subdirs; do
+	%make_build -C "$dir" all
+done
+
 # save built form in a directory that "make distclean" won't touch
-cp -a src/pl/plpython src/pl/plpython3
+for dir in %python_subdirs; do
+	rm -rf "${dir}3" # shouldn't exist, unless --short-circuit
+	cp -a "$dir" "${dir}3"
+done
 
 # must also save this version of Makefile.global for later
 cp src/Makefile.global src/Makefile.global.python3
@@ -499,7 +510,7 @@ PYTHON=/usr/bin/python2
 
 unset PYTHON
 
-make %{?_smp_mflags} world
+%make_build world
 
 # Have to hack makefile to put correct path into tutorial scripts
 sed "s|C=\`pwd\`;|C=%{_libdir}/pgsql/tutorial;|" < src/tutorial/Makefile > src/tutorial/GNUmakefile
@@ -539,17 +550,25 @@ test_failure=0
 	mv src/Makefile.global src/Makefile.global.save
 	cp src/Makefile.global.python3 src/Makefile.global
 	touch -r src/Makefile.global.save src/Makefile.global
-	# because "make check" does "make install" on the whole tree,
-	# we must temporarily install plpython3 as src/pl/plpython,
-	# since that is the subdirectory src/pl/Makefile knows about
-	mv src/pl/plpython src/pl/plpython2
-	mv src/pl/plpython3 src/pl/plpython
 
-	run_testsuite "src/pl/plpython"
+	for dir in %python_subdirs; do
+		# because "make check" does "make install" on the whole tree,
+		# we must temporarily install *plpython3 dir as *plpython,
+		# since that is the subdirectory src/pl/Makefile knows about
+		mv "$dir" "${dir}2"
+		mv "${dir}3" "$dir"
+	done
 
-	# and clean up our mess
-	mv src/pl/plpython src/pl/plpython3
-	mv src/pl/plpython2 src/pl/plpython
+	for dir in %python_subdirs; do
+		run_testsuite "$dir"
+	done
+
+	for dir in %python_subdirs; do
+		# and clean up our mess
+		mv "$dir" "${dir}3"
+		mv "${dir}2" "${dir}"
+	done
+
 	mv -f src/Makefile.global.save src/Makefile.global
 %endif
 	run_testsuite "contrib"
@@ -606,9 +625,14 @@ upgrade_configure ()
 %if %plpython3
 	export PYTHON=/usr/bin/python3
 	upgrade_configure --with-python
-	make %{?_smp_mflags} -C src/pl/plpython all
-	# save aside the only one file which we are interested here
-	cp src/pl/plpython/plpython3.so ./
+	for dir in %python_subdirs; do
+		# Previous version doesn't necessarily have this.
+		test -d "$dir" || continue
+		%make_build -C "$dir" all
+
+		# save aside the only one file which we are interested here
+		cp "$dir"/*plpython3.so ./
+	done
 	unset PYTHON
 	make distclean
 %endif
@@ -656,9 +680,9 @@ rm -r $RPM_BUILD_ROOT/%_includedir/pgsql/internal/
 	mv src/Makefile.global src/Makefile.global.save
 	cp src/Makefile.global.python3 src/Makefile.global
 	touch -r src/Makefile.global.save src/Makefile.global
-	pushd src/pl/plpython3
-	make DESTDIR=$RPM_BUILD_ROOT install
-	popd
+	for dir in %python_subdirs; do
+		%make_install -C "${dir}3"
+	done
 	mv -f src/Makefile.global.save src/Makefile.global
 %endif
 
@@ -705,8 +729,10 @@ rm $RPM_BUILD_ROOT/%{_datadir}/man/man1/ecpg.1
 	make DESTDIR=$RPM_BUILD_ROOT install
 	make -C contrib DESTDIR=$RPM_BUILD_ROOT install
 %if %plpython3
-	install -m 755 plpython3.so \
-		$RPM_BUILD_ROOT/%_libdir/pgsql/postgresql-%prevmajorversion/lib
+	for file in *plpython3.so; do
+		install -m 755 "$file" \
+			$RPM_BUILD_ROOT/%_libdir/pgsql/postgresql-%prevmajorversion/lib
+	done
 %endif
 	popd
 
@@ -962,12 +988,18 @@ make -C postgresql-setup-%{setup_version} check
 %if %plpython
 %{_libdir}/pgsql/hstore_plpython2.so
 %endif
+%if %plpython3
+%{_libdir}/pgsql/hstore_plpython3.so
+%endif
 %{_libdir}/pgsql/insert_username.so
 %{_libdir}/pgsql/isn.so
 %{_libdir}/pgsql/lo.so
 %{_libdir}/pgsql/ltree.so
 %if %plpython
 %{_libdir}/pgsql/ltree_plpython2.so
+%endif
+%if %plpython3
+%{_libdir}/pgsql/ltree_plpython3.so
 %endif
 %{_libdir}/pgsql/moddatetime.so
 %{_libdir}/pgsql/pageinspect.so
@@ -1158,6 +1190,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Fri Nov 09 2018 Pavel Raiskup <praiskup@redhat.com> - 10.5-5
+- build all python modules against both Python 2 and Python 3
+
 * Wed Sep 05 2018 Pavel Raiskup <praiskup@redhat.com> - 10.5-4
 - build without postgresql-libs; libraries moved to libpq and libecpg
 
