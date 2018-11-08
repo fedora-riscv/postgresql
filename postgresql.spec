@@ -58,8 +58,8 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 10
-Version: 10.5
-Release: 3%{?dist}
+Version: 10.6
+Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -71,7 +71,7 @@ Url: http://www.postgresql.org/
 # in-place upgrade of an old database.  In most cases it will not be critical
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
-%global prevversion 9.6.10
+%global prevversion 9.6.11
 %global prevmajorversion 9.6
 %global prev_prefix %{_libdir}/pgsql/postgresql-%{prevmajorversion}
 %global precise_version %{?epoch:%epoch:}%version-%release
@@ -1197,6 +1197,10 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Wed Nov 07 2018 Patrik Novotný <panovotn@redhat.com> - 10.6-1
+- Rebase to upstream version 10.6
+  https://www.postgresql.org/docs/10/release-10-6.html
+
 * Mon Aug 27 2018 Pavel Raiskup <praiskup@redhat.com> - 10.5-3
 - devel subpackage provides postgresql-server-devel and libecpg-devel
   (first step for rhbz#1618698)
