@@ -63,6 +63,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 10
 Version: 10.5
+%{?dirty_hack_epoch}
 Release: 6%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
