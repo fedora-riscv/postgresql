@@ -62,9 +62,9 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 10
-Version: 10.5
+Version: 10.6
 %{?dirty_hack_epoch}
-Release: 6%{?dist}
+Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -76,7 +76,7 @@ Url: http://www.postgresql.org/
 # in-place upgrade of an old database.  In most cases it will not be critical
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
-%global prevversion 9.6.10
+%global prevversion 9.6.11
 %global prevmajorversion 9.6
 %global prev_prefix %{_libdir}/pgsql/postgresql-%{prevmajorversion}
 %global precise_version %{?epoch:%epoch:}%version-%release
@@ -1260,6 +1260,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Tue Dec 11 2018 Pavel Raiskup <praiskup@redhat.com> - 10.6-1
+- rebase to 10.6
+
 * Fri Nov 09 2018 Pavel Raiskup <praiskup@redhat.com> - 10.5-6
 - modular server, both for Fedora >= 30 and Fedora < 29
 
