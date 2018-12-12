@@ -55,11 +55,16 @@
 # https://fedoraproject.org/wiki/Packaging:Guidelines#Packaging_of_Additional_RPM_Macros
 %global macrosdir %(d=%{_rpmconfigdir}/macros.d; [ -d $d ] || d=%{_sysconfdir}/rpm; echo $d)
 
+%if 0%{?fedora} > 29
+%global external_libs 1
+%endif
+
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 11
 Version: 11.1
-Release: 1%{?dist}
+%{?dirty_hack_epoch}
+Release: 2%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -170,6 +175,11 @@ BuildRequires: systemtap-sdt-devel
 BuildRequires: libselinux-devel
 %endif
 
+%if ! 0%{?external_libs}
+# main package requires -libs subpackage
+Requires: %{name}-libs%{?_isa} = %{version}-%{release}
+%endif
+
 # https://bugzilla.redhat.com/1464368
 %global __provides_exclude_from %{_libdir}/pgsql
 
@@ -183,17 +193,34 @@ over a network connection.  The PostgreSQL server can be found in the
 postgresql-server sub-package.
 
 
+%if ! 0%{?external_libs}
+%package libs
+Summary: The shared libraries required for any PostgreSQL clients
+Group: Applications/Databases
+Provides: libpq.so = %{version}-%{release}
+# for /sbin/ldconfig
+Requires(post): glibc
+Requires(postun): glibc
+
+%description libs
+The postgresql-libs package provides the essential shared libraries for any
+PostgreSQL client program or interface. You will need to install this package
+to use any other PostgreSQL package or any clients that need to connect to a
+PostgreSQL server.
+%endif
+
 %package server
 Summary: The programs needed to create and run a PostgreSQL server
 Group: Applications/Databases
 Requires: %{name}%{?_isa} = %precise_version
+%{!?external_libs:Requires: %{name}-libs%{?_isa} = %precise_version}
 Requires(pre): /usr/sbin/useradd
 # We require this to be present for %%{_prefix}/lib/tmpfiles.d
 Requires: systemd
 # Make sure it's there when scriptlets run, too
 %{?systemd_requires}
 # Packages which provide postgresql plugins should build-require
-# postgresql-server-devel and require
+# postgresql-(server-)devel and require
 # postgresql-server(:MODULE_COMPAT_%%{postgresql_major}).
 # This will automatically guard against incompatible server & plugin
 # installation (#1008939, #1007840)
@@ -224,19 +251,22 @@ and source files for the PostgreSQL tutorial.
 Summary: Extension modules distributed with PostgreSQL
 Group: Applications/Databases
 Requires: %{name}%{?_isa} = %precise_version
+%{!?external_libs:Requires: %{name}-libs%{?_isa} = %precise_version}
 
 %description contrib
 The postgresql-contrib package contains various extension modules that are
 included in the PostgreSQL distribution.
 
 
-%package server-devel
+%package %{?external_libs:server-}devel
 Summary: PostgreSQL development header files and libraries
 Group: Development/Libraries
+%{!?external_libs:Requires: %{name}-libs%{?_isa} = %precise_version}
 
-%description server-devel
-The postgresql-server-devel package contains the header files and configuration
-needed to compile PostgreSQL server extension.
+%description %{?external_libs:server-}devel
+Package contains the header files and configuration needed to compile PostgreSQL
+server extension.
+
 
 %package test-rpm-macros
 Summary: Convenience RPM macros for build-time testing against PostgreSQL server
@@ -249,7 +279,7 @@ that want to run build-time testsuite against running PostgreSQL server.
 
 %package static
 Summary: Statically linked PostgreSQL libraries
-Requires: %{name}-server-devel%{?_isa} = %precise_version
+Requires: %{name}-%{?external_libs:server-}devel%{?_isa} = %precise_version
 
 %description static
 Statically linked PostgreSQL libraries that do not have dynamically linked
@@ -261,6 +291,7 @@ counterparts.
 Summary: Support for upgrading from the previous major release of PostgreSQL
 Group: Applications/Databases
 Requires: %{name}-server%{?_isa} = %precise_version
+%{!?external_libs:Requires: %{name}-libs%{?_isa} = %precise_version}
 Provides: bundled(postgresql-server) = %prevversion
 
 %description upgrade
@@ -343,7 +374,7 @@ Install this if you want to write database functions in Tcl.
 Summary: The test suite distributed with PostgreSQL
 Group: Applications/Databases
 Requires: %{name}-server%{?_isa} = %precise_version
-Requires: %{name}-server-devel%{?_isa} = %precise_version
+Requires: %{name}-%{?external_libs:server-}devel%{?_isa} = %precise_version
 
 %description test
 The postgresql-test package contains files needed for various tests for the
@@ -365,8 +396,10 @@ benchmarks.
 %patch2 -p1
 %patch5 -p1
 %patch6 -p1
+%if 0%{?external_libs}
 %patch8 -p1
 %patch9 -p1
+%endif
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -670,12 +703,14 @@ EOF
 
 make DESTDIR=$RPM_BUILD_ROOT install-world
 
+%if 0%{?external_libs}
 # We ship pg_config through libpq-devel
 mv $RPM_BUILD_ROOT/%_mandir/man1/pg_{,server_}config.1
 rm $RPM_BUILD_ROOT/%_includedir/pg_config*.h
 rm $RPM_BUILD_ROOT/%_includedir/libpq/libpq-fs.h
 rm $RPM_BUILD_ROOT/%_includedir/postgres_ext.h
 rm -r $RPM_BUILD_ROOT/%_includedir/pgsql/internal/
+%endif
 
 %if %plpython3
 	mv src/Makefile.global src/Makefile.global.save
@@ -693,6 +728,11 @@ install -d -m 755 $RPM_BUILD_ROOT%{_datadir}/pgsql/extension
 
 # multilib header hack
 for header in \
+%if ! 0%{?external_libs}
+	%{_includedir}/pg_config.h \
+	%{_includedir}/pg_config_ext.h \
+	%{_includedir}/ecpg_config.h \
+%endif
 	%{_includedir}/pgsql/server/pg_config.h \
 	%{_includedir}/pgsql/server/pg_config_ext.h
 do
@@ -723,7 +763,7 @@ install -d -m 700 $RPM_BUILD_ROOT%{?_localstatedir}/lib/pgsql/backups
 # postgres' .bash_profile
 install -m 644 %{SOURCE11} $RPM_BUILD_ROOT%{?_localstatedir}/lib/pgsql/.bash_profile
 
-rm $RPM_BUILD_ROOT/%{_datadir}/man/man1/ecpg.1
+%{?external_libs:rm $RPM_BUILD_ROOT/%{_datadir}/man/man1/ecpg.1}
 
 %if %upgrade
 	pushd postgresql-%{prevversion}
@@ -802,7 +842,11 @@ mv $RPM_BUILD_ROOT%{_docdir}/pgsql/html doc
 rm -rf $RPM_BUILD_ROOT%{_docdir}/pgsql
 
 # remove files not to be packaged
+%if 0%{?external_libs}
 rm $RPM_BUILD_ROOT%{_libdir}/libpgfeutils.a
+%else
+rm $RPM_BUILD_ROOT%{_libdir}/lib{ecpg,pq,ecpg_compat,pgfeutils,pgtypes}.a
+%endif
 
 %if !%plperl
 rm -f $RPM_BUILD_ROOT%{_bindir}/pgsql/hstore_plperl.so
@@ -822,7 +866,8 @@ find_lang_bins ()
 		cat "$binary"-%{majorversion}.lang >>"$lstfile"
 	done
 }
-find_lang_bins devel.lst pg_server_config
+find_lang_bins devel.lst %{?external_libs:pg_server_config}%{?!external_libs:pg_config ecpg}
+%{!?external_libs:find_lang_bins libs.lst ecpglib6 libpq5}
 find_lang_bins server.lst \
 	initdb pg_basebackup pg_controldata pg_ctl pg_resetwal pg_rewind plpgsql \
 	postgres pg_verify_checksums
@@ -1066,6 +1111,16 @@ make -C postgresql-setup-%{setup_version} check
 %{_libdir}/pgsql/pgxml.so
 %endif
 
+%if ! 0%{?external_libs}
+%files libs -f libs.lst
+%doc COPYRIGHT
+%dir %{_libdir}/pgsql
+%{_libdir}/libecpg.so.*
+%{_libdir}/libecpg_compat.so.*
+%{_libdir}/libpgtypes.so.*
+%{_libdir}/libpq.so.*
+%endif
+
 %files server -f server.lst
 %{_bindir}/initdb
 %{_bindir}/pg_basebackup
@@ -1134,16 +1189,31 @@ make -C postgresql-setup-%{setup_version} check
 %endif
 
 
+%if 0%{?external_libs}
 %files server-devel -f devel.lst
 %{_bindir}/pg_server_config
-%dir %{_datadir}/pgsql
-%{_datadir}/pgsql/errcodes.txt
 %dir %{_includedir}/pgsql
 %{_includedir}/pgsql/server
 %{_libdir}/pgsql/pgxs/
 %{_mandir}/man1/pg_server_config.*
+%else
+%files devel -f devel.lst
+%{_bindir}/ecpg
+%{_bindir}/pg_config
+%{_includedir}/*
+%{_libdir}/libecpg.so
+%{_libdir}/libecpg_compat.so
+%{_libdir}/libpgtypes.so
+%{_libdir}/libpq.so
+%{_libdir}/pgsql/pgxs/
+%{_libdir}/pkgconfig/*.pc
+%{_mandir}/man1/ecpg.*
+%{_mandir}/man1/pg_config.*
+%endif
 %{_mandir}/man3/SPI_*
 %{macrosdir}/macros.%name
+%dir %{_datadir}/pgsql
+%{_datadir}/pgsql/errcodes.txt
 
 
 %files test-rpm-macros
@@ -1211,6 +1281,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Wed Dec 12 2018 Pavel Raiskup <praiskup@redhat.com> - 11.1-2
+- modularize into stream-postgresql-11 branch
+
 * Wed Nov 07 2018 Patrik Novotný <panovotn@redhat.com> - 11.1-1
 - Rebase to upstream release 11.1
   https://www.postgresql.org/docs/11/release-11-1.html
