@@ -6,7 +6,7 @@ in sync!
 Related: rhbz#1618698
 
 diff --git a/src/Makefile b/src/Makefile
-index febbced..9737b55 100644
+index 977f80b..3d3b679 100644
 --- a/src/Makefile
 +++ b/src/Makefile
 @@ -20,7 +20,6 @@ SUBDIRS = \
@@ -15,13 +15,13 @@ index febbced..9737b55 100644
  	include \
 -	interfaces \
  	backend/replication/libpqwalreceiver \
- 	backend/replication/pgoutput \
  	fe_utils \
+ 	bin \
 diff --git a/src/Makefile.global.in b/src/Makefile.global.in
-index 4ed5174..d0e0dae 100644
+index 2d51c83..2e61f43 100644
 --- a/src/Makefile.global.in
 +++ b/src/Makefile.global.in
-@@ -457,7 +457,7 @@ endif
+@@ -465,7 +465,7 @@ endif
  
  # This macro is for use by libraries linking to libpq.  (Because libpgport
  # isn't created with the same link flags as libpq, it can't be used.)
@@ -30,7 +30,7 @@ index 4ed5174..d0e0dae 100644
  
  # This macro is for use by client executables (not libraries) that use libpq.
  # We force clients to pull symbols from the non-shared libraries libpgport
-@@ -483,7 +483,6 @@ endif
+@@ -491,7 +491,6 @@ endif
  # Commonly used submake targets
  
  submake-libpq:

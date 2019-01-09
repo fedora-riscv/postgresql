@@ -61,8 +61,8 @@
 
 Summary: PostgreSQL client programs
 Name: postgresql
-%global majorversion 10
-Version: 10.6
+%global majorversion 9.6
+Version: 9.6.11
 %{?dirty_hack_epoch}
 Release: 1%{?dist}
 
@@ -76,8 +76,8 @@ Url: http://www.postgresql.org/
 # in-place upgrade of an old database.  In most cases it will not be critical
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
-%global prevversion 9.6.11
-%global prevmajorversion 9.6
+%global prevversion 9.5.15
+%global prevmajorversion 9.5
 %global prev_prefix %{_libdir}/pgsql/postgresql-%{prevmajorversion}
 %global precise_version %{?epoch:%epoch:}%version-%release
 
@@ -658,6 +658,9 @@ upgrade_configure ()
 %if %plpython3
 	export PYTHON=/usr/bin/python3
 	upgrade_configure --with-python
+
+	%make_build -C src/backend submake-errcodes
+
 	for dir in %python_subdirs; do
 		# Previous version doesn't necessarily have this.
 		test -d "$dir" || continue
@@ -791,7 +794,6 @@ install -m 644 %{SOURCE11} $RPM_BUILD_ROOT%{?_localstatedir}/lib/pgsql/.bash_pro
 	rm bin/pg_dump
 	rm bin/pg_dumpall
 	rm bin/pg_restore
-	rm bin/pgbench
 	rm bin/psql
 	rm bin/reindexdb
 	rm bin/vacuumdb
@@ -870,11 +872,9 @@ find_lang_bins ()
 find_lang_bins devel.lst %{?external_libs:pg_server_config}%{?!external_libs:pg_config ecpg}
 %{!?external_libs:find_lang_bins libs.lst ecpglib6 libpq5}
 find_lang_bins server.lst \
-	initdb pg_basebackup pg_controldata pg_ctl pg_resetwal pg_rewind plpgsql postgres
-find_lang_bins contrib.lst \
-	pg_archivecleanup pg_test_fsync pg_test_timing pg_waldump
+	initdb pg_basebackup pg_controldata pg_ctl pg_resetxlog pg_rewind plpgsql postgres
 find_lang_bins main.lst \
-	pg_dump pg_upgrade pgscripts psql
+	pg_dump pgscripts psql
 %if %plperl
 find_lang_bins plperl.lst plperl
 %endif
@@ -923,8 +923,10 @@ make -C postgresql-setup-%{setup_version} check
 %doc README.rpm-dist
 %{_bindir}/clusterdb
 %{_bindir}/createdb
+%{_bindir}/createlang
 %{_bindir}/createuser
 %{_bindir}/dropdb
+%{_bindir}/droplang
 %{_bindir}/dropuser
 %{_bindir}/pg_dump
 %{_bindir}/pg_dumpall
@@ -936,8 +938,10 @@ make -C postgresql-setup-%{setup_version} check
 %{_bindir}/vacuumdb
 %{_mandir}/man1/clusterdb.*
 %{_mandir}/man1/createdb.*
+%{_mandir}/man1/createlang.*
 %{_mandir}/man1/createuser.*
 %{_mandir}/man1/dropdb.*
+%{_mandir}/man1/droplang.*
 %{_mandir}/man1/dropuser.*
 %{_mandir}/man1/pg_dump.*
 %{_mandir}/man1/pg_dumpall.*
@@ -956,18 +960,17 @@ make -C postgresql-setup-%{setup_version} check
 %{_libdir}/pgsql/tutorial/
 
 
-%files contrib -f contrib.lst
+%files contrib
 %doc contrib/spi/*.example
 %{_bindir}/oid2name
 %{_bindir}/pg_archivecleanup
 %{_bindir}/pg_standby
 %{_bindir}/pg_test_fsync
 %{_bindir}/pg_test_timing
-%{_bindir}/pg_waldump
+%{_bindir}/pg_xlogdump
 %{_bindir}/pgbench
 %{_bindir}/vacuumlo
 %{_datadir}/pgsql/extension/adminpack*
-%{_datadir}/pgsql/extension/amcheck*
 %{_datadir}/pgsql/extension/autoinc*
 %{_datadir}/pgsql/extension/bloom*
 %{_datadir}/pgsql/extension/btree_gin*
@@ -1005,12 +1008,12 @@ make -C postgresql-setup-%{setup_version} check
 %{_datadir}/pgsql/extension/tablefunc*
 %{_datadir}/pgsql/extension/tcn*
 %{_datadir}/pgsql/extension/timetravel*
+%{_datadir}/pgsql/extension/tsearch2*
 %{_datadir}/pgsql/extension/tsm_system_rows*
 %{_datadir}/pgsql/extension/tsm_system_time*
 %{_datadir}/pgsql/extension/unaccent*
 %{_libdir}/pgsql/_int.so
 %{_libdir}/pgsql/adminpack.so
-%{_libdir}/pgsql/amcheck.so
 %{_libdir}/pgsql/auth_delay.so
 %{_libdir}/pgsql/auto_explain.so
 %{_libdir}/pgsql/autoinc.so
@@ -1064,6 +1067,7 @@ make -C postgresql-setup-%{setup_version} check
 %{_libdir}/pgsql/tcn.so
 %{_libdir}/pgsql/test_decoding.so
 %{_libdir}/pgsql/timetravel.so
+%{_libdir}/pgsql/tsearch2.so
 %{_libdir}/pgsql/tsm_system_rows.so
 %{_libdir}/pgsql/tsm_system_time.so
 %{_libdir}/pgsql/unaccent.so
@@ -1073,7 +1077,7 @@ make -C postgresql-setup-%{setup_version} check
 %{_mandir}/man1/pg_standby.*
 %{_mandir}/man1/pg_test_fsync.*
 %{_mandir}/man1/pg_test_timing.*
-%{_mandir}/man1/pg_waldump.*
+%{_mandir}/man1/pg_xlogdump.*
 %{_mandir}/man1/pgbench.*
 %{_mandir}/man1/vacuumlo.*
 %{_mandir}/man3/dblink*
@@ -1109,9 +1113,9 @@ make -C postgresql-setup-%{setup_version} check
 %{_bindir}/pg_basebackup
 %{_bindir}/pg_controldata
 %{_bindir}/pg_ctl
-%{_bindir}/pg_receivewal
+%{_bindir}/pg_receivexlog
 %{_bindir}/pg_recvlogical
-%{_bindir}/pg_resetwal
+%{_bindir}/pg_resetxlog
 %{_bindir}/pg_rewind
 %{_bindir}/postgres
 %{_bindir}/postgresql-setup
@@ -1138,7 +1142,6 @@ make -C postgresql-setup-%{setup_version} check
 %{_libdir}/pgsql/euc2004_sjis2004.so
 %{_libdir}/pgsql/libpqwalreceiver.so
 %{_libdir}/pgsql/pg_prewarm.so
-%{_libdir}/pgsql/pgoutput.so
 %{_libdir}/pgsql/plpgsql.so
 %dir %{_libexecdir}/initscripts/legacy-actions/postgresql
 %{_libexecdir}/initscripts/legacy-actions/postgresql/*
@@ -1150,8 +1153,8 @@ make -C postgresql-setup-%{setup_version} check
 %{_mandir}/man1/pg_basebackup.*
 %{_mandir}/man1/pg_controldata.*
 %{_mandir}/man1/pg_ctl.*
-%{_mandir}/man1/pg_receivewal.*
-%{_mandir}/man1/pg_resetwal.*
+%{_mandir}/man1/pg_receivexlog.*
+%{_mandir}/man1/pg_resetxlog.*
 %{_mandir}/man1/pg_rewind.*
 %{_mandir}/man1/postgres.*
 %{_mandir}/man1/postgresql-new-systemd-unit.*
@@ -1233,7 +1236,11 @@ make -C postgresql-setup-%{setup_version} check
 
 %if %pltcl
 %files pltcl -f pltcl.lst
+%{_bindir}/pltcl_delmod
+%{_bindir}/pltcl_listmod
+%{_bindir}/pltcl_loadmod
 %{_datadir}/pgsql/extension/pltcl*
+%{_datadir}/pgsql/unknown.pltcl
 %{_libdir}/pgsql/pltcl.so
 %endif
 
@@ -1260,122 +1267,23 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
-* Tue Dec 11 2018 Pavel Raiskup <praiskup@redhat.com> - 10.6-1
-- rebase to 10.6
+* Wed Jan 09 2019 Pavel Raiskup <praiskup@redhat.com> - 9.6.11-1
+- initial commit for 9.6 stream, intherit from stream-postgresql-10 branch
 
-* Fri Nov 09 2018 Pavel Raiskup <praiskup@redhat.com> - 10.5-6
-- modular server, both for Fedora >= 30 and Fedora < 29
+* Thu Mar 01 2018 Pavel Raiskup <praiskup@redhat.com> - 9.6.8-1
+- update to 9.6.8 per release notes:
+  https://www.postgresql.org/docs/9.6/static/release-9-6-8.html
 
-* Fri Nov 09 2018 Pavel Raiskup <praiskup@redhat.com> - 10.5-5
-- build all python modules against both Python 2 and Python 3
+* Thu Feb 08 2018 Petr Kubat <pkubat@redhat.com> - 9.6.7-1
+- update to 9.6.7 per release notes:
+  https://www.postgresql.org/docs/9.6/static/release-9-6-7.html
 
-* Wed Sep 05 2018 Pavel Raiskup <praiskup@redhat.com> - 10.5-4
-- build without postgresql-libs; libraries moved to libpq and libecpg
+* Wed Nov 08 2017 Pavel Raiskup <praiskup@redhat.com> - 9.6.6-1
+- update to 9.6.6 per release notes:
+  https://www.postgresql.org/docs/9.6/static/release-9-6-6.html
 
-* Mon Aug 27 2018 Pavel Raiskup <praiskup@redhat.com> - 10.5-3
-- devel subpackage provides postgresql-server-devel and libecpg-devel
-  (first step for rhbz#1618698)
-
-* Mon Aug 27 2018 Pavel Raiskup <praiskup@redhat.com> - 10.5-2
-- packaging cleanup
-- devel subpackage to provide libpq-devel (first step for rhbz#1618698)
-
-* Wed Aug 08 2018 Pavel Raiskup <praiskup@redhat.com> - 10.5-1
-- update to 10.5 per release notes:
-  https://www.postgresql.org/docs/10/static/release-10-5.html
-
-* Thu Aug 02 2018 Pavel Raiskup <praiskup@redhat.com> - 10.4-8
-- new postgresql-setup, the %%postgresql_tests* macros now start
-  the build-time server on random port number
-
-* Fri Jul 13 2018 Fedora Release Engineering <releng@fedoraproject.org> - 10.4-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
-
-* Thu Jul 12 2018 Pavel Raiskup <praiskup@redhat.com> - 10.4-6
-- drop ppc64 patch, gcc is already fixed (rhbz#1544349)
-- move pg_config*.mo files into devel subpackage
-
-* Mon Jul 09 2018 Pavel Raiskup <praiskup@redhat.com> - 10.4-5
-- re-enable -O3 for 64bit PPC boxes
-- explicitly set PYTHON=python2, /bin/python doesn't exist fc29+
-
-* Tue Jul 03 2018 Petr Pisar <ppisar@redhat.com> - 10.4-4
-- Perl 5.28 rebuild
-
-* Wed Jun 27 2018 Jitka Plesnikova <jplesnik@redhat.com> - 10.4-3
-- Perl 5.28 rebuild
-
-* Tue Jun 19 2018 Miro Hrončok <mhroncok@redhat.com> - 10.4-2
-- Rebuilt for Python 3.7
-
-* Wed May 09 2018 Pavel Raiskup <praiskup@redhat.com> - 10.4-1
-- update to 10.4 per release notes:
-  https://www.postgresql.org/docs/10/static/release-10-4.html
-
-* Thu Apr 26 2018 Pavel Raiskup <praiskup@redhat.com> - 10.3-5
-- pltcl: drop tcl-pltcl dependency (rhbz#1571181)
-
-* Thu Apr 19 2018 Pavel Raiskup <praiskup@redhat.com> - 10.3-4
-- upgrade: package plpython*.so modules
-
-* Mon Apr 16 2018 Pavel Raiskup <praiskup@redhat.com> - 10.3-3
-- upgrade: package plperl.so and pltcl.so
-- upgrade: package contrib modules
-- upgrade: drop dynamic libraries
-
-* Fri Apr 13 2018 Pavel Raiskup <praiskup@redhat.com> - 10.3-2
-- define %%precise_version helper macro
-- drop explicit libpq.so provide from *-libs
-- update postgresql-setup tarball
-- add postgresql-test-rpm-macros package
-
-* Thu Mar 01 2018 Pavel Raiskup <praiskup@redhat.com> - 10.3-1
-- update to 10.3 per release notes:
-  https://www.postgresql.org/docs/10/static/release-10-3.html
-
-* Thu Feb 08 2018 Petr Kubat <pkubat@redhat.com> - 10.2-1
-- update to 10.2 per release notes:
-  https://www.postgresql.org/docs/10/static/release-10-2.html
-
-* Sat Jan 20 2018 Björn Esser <besser82@fedoraproject.org> - 10.1-5
-- Rebuilt for switch to libxcrypt
-
-* Tue Dec 19 2017 Pavel Raiskup <praiskup@redhat.com> - 10.1-4
-- configure with --with-systemd (rhbz#1414314)
-- disable startup timeout of PostgreSQL service (rhbz#1525477)
-
-* Wed Dec 13 2017 Pavel Raiskup <praiskup@redhat.com> - 10.1-3
-- unify %%configure options for python2/python3 configure
-- drop --with-krb5 option, not supported since PostgreSQL 9.4
-- python packaging - requires/provides s/python/python2/
-
-* Tue Nov 14 2017 Pavel Raiskup <praiskup@redhat.com> - 10.1-2
-- postgresql-setup v7.0
-
-* Wed Nov 08 2017 Pavel Raiskup <praiskup@redhat.com> - 10.1-1
-- update to 10.1 per release notes:
-  https://www.postgresql.org/docs/10/static/release-10-1.html
-
-* Mon Nov 06 2017 Pavel Raiskup <praiskup@redhat.com> - 10.0-4
+* Wed Nov 08 2017 Pavel Raiskup <praiskup@redhat.com> - 9.6.5-2
 - rebase to new postgresql-setup 6.0 version, to fix CVE-2017-15097
-
-* Thu Oct 12 2017 Pavel Raiskup <praiskup@redhat.com> - 10.0-3
-- confess that we bundle setup scripts and previous version of ourseleves
-- provide %%postgresql_upgrade_prefix macro
-
-* Mon Oct 09 2017 Pavel Raiskup <praiskup@redhat.com> - 10.0-2
-- stricter separation of files in upgrade/upgrade-devel
-
-* Mon Oct 09 2017 Jozef Mlich <jmlich@redhat.com> - 10.0-2
-- support for upgrade with extenstions
-  i.e the postgresql-upgrade-devel subpackage was added (rhbz#1475177)
-
-* Fri Oct 06 2017 Pavel Raiskup <praiskup@redhat.com> - 10.0-1
-- update to 10.0 per release notes:
-  https://www.postgresql.org/docs/10/static/release-10.html
-
-* Tue Sep 05 2017 Pavel Raiskup <praiskup@redhat.com> - 9.6.5-2
-- move %%_libdir/pgsql into *-libs subpackage
 
 * Tue Aug 29 2017 Pavel Raiskup <praiskup@redhat.com> - 9.6.5-1
 - update to 9.6.5 per release notes:
