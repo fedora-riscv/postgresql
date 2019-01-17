@@ -64,7 +64,7 @@ Name: postgresql
 %global majorversion 11
 Version: 11.1
 %{?dirty_hack_epoch}
-Release: 2%{?dist}
+Release: 3%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -261,7 +261,12 @@ included in the PostgreSQL distribution.
 %package %{?external_libs:server-}devel
 Summary: PostgreSQL development header files and libraries
 Group: Development/Libraries
-%{!?external_libs:Requires: %{name}-libs%{?_isa} = %precise_version}
+%if 0%{!?external_libs:1}
+Requires: %{name}-libs%{?_isa} = %precise_version
+Provides: libpq-devel = %precise_version
+Provides: libecpg-devel = %precise_version
+Provides: postgresql-server-devel = %precise_version
+%endif
 
 %description %{?external_libs:server-}devel
 Package contains the header files and configuration needed to compile PostgreSQL
@@ -704,12 +709,15 @@ EOF
 make DESTDIR=$RPM_BUILD_ROOT install-world
 
 %if 0%{?external_libs}
-# We ship pg_config through libpq-devel
+# We ship pg_config in libpq-devel
 mv $RPM_BUILD_ROOT/%_mandir/man1/pg_{,server_}config.1
 rm $RPM_BUILD_ROOT/%_includedir/pg_config*.h
 rm $RPM_BUILD_ROOT/%_includedir/libpq/libpq-fs.h
 rm $RPM_BUILD_ROOT/%_includedir/postgres_ext.h
 rm -r $RPM_BUILD_ROOT/%_includedir/pgsql/internal/
+%else
+# We ship pg_config in postgresql-devel
+ln -s pg_config $RPM_BUILD_ROOT%_bindir/pg_server_config
 %endif
 
 %if %plpython3
@@ -1200,6 +1208,7 @@ make -C postgresql-setup-%{setup_version} check
 %files devel -f devel.lst
 %{_bindir}/ecpg
 %{_bindir}/pg_config
+%{_bindir}/pg_server_config
 %{_includedir}/*
 %{_libdir}/libecpg.so
 %{_libdir}/libecpg_compat.so
@@ -1281,6 +1290,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Thu Jan 17 2019 Pavel Raiskup <praiskup@redhat.com> - 11.1-3
+- provide postgresql-server-devel in postgresql-devel
+
 * Wed Dec 12 2018 Pavel Raiskup <praiskup@redhat.com> - 11.1-2
 - modularize into stream-postgresql-11 branch
 
