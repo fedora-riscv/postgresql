@@ -62,7 +62,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 11
-Version: 11.2
+Version: 11.3
 %{?dirty_hack_epoch}
 Release: 1%{?dist}
 
@@ -76,12 +76,12 @@ Url: http://www.postgresql.org/
 # in-place upgrade of an old database.  In most cases it will not be critical
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
-%global prevversion 10.7
+%global prevversion 10.8
 %global prevmajorversion 10
 %global prev_prefix %{_libdir}/pgsql/postgresql-%{prevmajorversion}
 %global precise_version %{?epoch:%epoch:}%version-%release
 
-%global setup_version 8.2
+%global setup_version 8.4
 
 %global service_name postgresql.service
 Source0: https://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2
@@ -200,7 +200,7 @@ Group: Applications/Databases
 Provides: libpq.so = %{version}-%{release}
 # for /sbin/ldconfig
 Requires(post): glibc
-Requires(postun): glibc
+requires(postun): glibc
 
 %description libs
 The postgresql-libs package provides the essential shared libraries for any
@@ -1290,6 +1290,11 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Thu May 09 2019 Patrik Novotný <panovotn@redhat.com> - 11.3-1
+- New postgresql-setup 8.4
+- New upstream release 11.3
+  https://www.postgresql.org/docs/11/release-11-3.html
+
 * Thu Feb 14 2019 Patrik Novotný <panovotn@redhat.com> - 11.2-1
 - Rebase to upstream release 11.2
   https://www.postgresql.org/docs/11/release-11-2.html
