@@ -1198,7 +1198,7 @@ make -C postgresql-setup-%{setup_version} check
 
 %changelog
 * Thu Feb 14 2019 Patrik Novotný <panovotn@redhat.com> - 10.7-1
-- Rebase to upstream version 10.6
+- Rebase to upstream version 10.7
   https://www.postgresql.org/docs/10/release-10-7.html
 
 * Wed Nov 07 2018 Patrik Novotný <panovotn@redhat.com> - 10.6-1
