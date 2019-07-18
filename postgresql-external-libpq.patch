@@ -18,19 +18,19 @@ index bcdbd95..4bea236 100644
  	backend/replication/pgoutput \
  	fe_utils \
 diff --git a/src/Makefile.global.in b/src/Makefile.global.in
-index 9a4a8a3..2bdfb77 100644
+index b9d86ac..29df69f 100644
 --- a/src/Makefile.global.in
 +++ b/src/Makefile.global.in
-@@ -513,7 +513,7 @@ endif
- 
- # This macro is for use by libraries linking to libpq.  (Because libpgport
- # isn't created with the same link flags as libpq, it can't be used.)
+@@ -549,7 +549,7 @@ endif
+ # How to link to libpq.  (This macro may be used as-is by backend extensions.
+ # Client-side code should go through libpq_pgport or libpq_pgport_shlib,
+ # instead.)
 -libpq = -L$(libpq_builddir) -lpq
 +libpq = -lpq
  
- # This macro is for use by client executables (not libraries) that use libpq.
+ # libpq_pgport is for use by client executables (not libraries) that use libpq.
  # We force clients to pull symbols from the non-shared libraries libpgport
-@@ -539,7 +539,6 @@ endif
+@@ -579,7 +579,6 @@ endif
  # Commonly used submake targets
  
  submake-libpq: | submake-generated-headers
@@ -38,3 +38,6 @@ index 9a4a8a3..2bdfb77 100644
  
  submake-libpgport: | submake-generated-headers
  	$(MAKE) -C $(top_builddir)/src/port all
+-- 
+2.21.0
+
