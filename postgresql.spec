@@ -97,7 +97,7 @@ Source12: https://github.com/devexp-db/postgresql-setup/releases/download/v%{set
 # Those here are just to enforce packagers check that the tarball was downloaded
 # correctly.  Also, this allows us check that packagers-only tarballs do not
 # differ with publicly released ones.
-Source16: https://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2.sha256
+Source16: https://ftp.postgresql.org/pub/source/v12beta2/postgresql-12beta2.tar.bz2.sha256
 Source17: https://ftp.postgresql.org/pub/source/v%{prevversion}/postgresql-%{prevversion}.tar.bz2.sha256
 
 # Comments for these patches are in the patch files.
