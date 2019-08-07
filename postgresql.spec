@@ -58,7 +58,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 10
-Version: 10.9
+Version: 10.10
 Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
@@ -71,7 +71,7 @@ Url: http://www.postgresql.org/
 # in-place upgrade of an old database.  In most cases it will not be critical
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
-%global prevversion 9.6.14
+%global prevversion 9.6.15
 %global prevmajorversion 9.6
 %global prev_prefix %{_libdir}/pgsql/postgresql-%{prevmajorversion}
 %global precise_version %{?epoch:%epoch:}%version-%release
@@ -1197,6 +1197,10 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Wed Aug 07 2019 Petr Kubat <pkubat@redhat.com> - 10.10-1
+- New upstream release 10.10
+  https://www.postgresql.org/docs/10/release-10-10.html
+
 * Thu Jul 11 2019 Petr Kubat <pkubat@redhat.com> - 10.9-1
 - New upstream release 10.9
   https://www.postgresql.org/docs/10/release-10-9.html
