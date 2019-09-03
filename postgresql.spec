@@ -60,7 +60,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 11
 Version: 11.5
-Release: 3%{?dist}
+Release: 4%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -304,6 +304,7 @@ Install this if you want to write database functions in Perl.
 Summary: The Python2 procedural language for PostgreSQL
 Requires: %{name}-server%{?_isa} = %precise_version
 Provides: %{name}-plpython = %precise_version
+Obsoletes: %{name}-plpython < %precise_version
 
 %description plpython2
 The postgresql-plpython package contains the PL/Python procedural language,
@@ -1210,6 +1211,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Tue Sep 03 2019 Patrik Novotný <panovotn@redhat.com> - 11.5-4
+- Add explicit obsoletes to plpython2 package
+
 * Mon Sep 02 2019 Patrik Novotný <panovotn@redhat.com> - 11.5-3
 - Rename plpython to plpython2 and provide plpython virtually.
 
