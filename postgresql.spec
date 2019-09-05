@@ -60,7 +60,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 11
 Version: 11.5
-Release: 4%{?dist}
+Release: 5%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -235,6 +235,9 @@ included in the PostgreSQL distribution.
 Summary: PostgreSQL development header files and libraries
 %if %icu
 Requires:	libicu-devel
+%endif
+%if %kerberos
+Requires: krb5-devel
 %endif
 
 %description server-devel
@@ -1211,6 +1214,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Thu Sep 05 2019 Patrik Novotný <panovotn@redhat.com> - 11.5-5
+- postgresql-server-devel requires krb5-devel
+
 * Tue Sep 03 2019 Patrik Novotný <panovotn@redhat.com> - 11.5-4
 - Add explicit obsoletes to plpython2 package
 
