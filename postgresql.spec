@@ -59,7 +59,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 12
-Version: 12.0
+Version: %{majorversion}.0
 Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
