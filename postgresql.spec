@@ -32,6 +32,7 @@
 %{!?beta:%global beta 0}
 
 %{!?test:%global test 1}
+%{!?llvmjit:%global llvmjit 1}
 %{!?upgrade:%global upgrade 1}
 %{!?plpython:%global plpython 1}
 %{!?plpython3:%global plpython3 1}
@@ -60,7 +61,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 12
 Version: %{majorversion}.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -352,6 +353,30 @@ PostgreSQL database management system, including regression tests and
 benchmarks.
 %endif
 
+%if %llvmjit
+%package llvmjit
+Summary:	Just-in-time compilation support for PostgreSQL
+Requires:	%{name}-server%{?_isa} = %{version}-%{release}
+%if 0%{?rhel} && 0%{?rhel} == 7
+Requires:	llvm5.0 >= 5.0
+%else
+Requires:	llvm => 5.0
+%endif
+Provides:	postgresql-llvmjit >= %{version}-%{release}
+
+%ifarch ppc64 ppc64le
+AutoReq:	0
+Requires:	advance-toolchain-%{atstring}-runtime
+%endif
+
+BuildRequires:	llvm-devel >= 5.0 clang-devel >= 5.0
+
+%description llvmjit
+The postgresql-llvmjit package contains support for
+just-in-time compiling parts of PostgreSQL queries. Using LLVM it
+compiles e.g. expressions and tuple deforming into native code, with the
+goal of accelerating analytics queries.
+%endif
 
 %prep
 (
@@ -470,6 +495,9 @@ common_configure_options='
 	--with-systemd
 %if %icu
 	--with-icu
+%endif
+%if %llvmjit
+	--with-llvm
 %endif
 '
 
@@ -906,6 +934,11 @@ make -C postgresql-setup-%{setup_version} check
 %{_mandir}/man1/reindexdb.*
 %{_mandir}/man1/vacuumdb.*
 %{_mandir}/man7/*
+%if %llvmjit
+# Install bitcode directory along with the main package,
+# so that extensions can use this dir.
+%dir %{_libdir}/pgsql/bitcode
+%endif
 
 
 %files docs
@@ -1177,6 +1210,13 @@ make -C postgresql-setup-%{setup_version} check
 %{macrosdir}/macros.%name-upgrade
 %endif
 
+%if %llvmjit
+%files llvmjit
+%defattr(-,root,root)
+%{_libdir}/pgsql/bitcode/*
+%{_libdir}/pgsql/llvmjit.so
+%{_libdir}/pgsql/llvmjit_types.bc
+%endif
 
 %if %plperl
 %files plperl -f plperl.lst
@@ -1214,6 +1254,10 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Wed Dec 11 2019 Patrik Novotný <panovotn@redhat.com> - 12.1-2
+- Just-in-Time Compilation (JIT)
+  https://www.postgresql.org/docs/12/jit.html
+
 * Mon Nov 25 2019 Patrik Novotný <panovotn@redhat.com> - 12.1-1
 - Rebase to upstream release 12.1
 
