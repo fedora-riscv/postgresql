@@ -1210,6 +1210,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Mon Feb 17 2020 Patrik Novotný <panovotn@redhat.com> - 11.7-1
+- Rebase to upstream release 11.7
+
 * Wed Nov 27 2019 Patrik Novotný <panovotn@redhat.com> - 11.6-1
 - New upstream version 11.6
 
