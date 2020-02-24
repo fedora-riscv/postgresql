@@ -62,7 +62,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 11
-Version: 11.6
+Version: %{majorversion}.7
 %{?dirty_hack_epoch}
 Release: 1%{?dist}
 
@@ -76,8 +76,8 @@ Url: http://www.postgresql.org/
 # in-place upgrade of an old database.  In most cases it will not be critical
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
-%global prevversion 10.11
 %global prevmajorversion 10
+%global prevversion %{prevmajorversion}.12
 %global prev_prefix %{_libdir}/pgsql/postgresql-%{prevmajorversion}
 %global precise_version %{?epoch:%epoch:}%version-%release
 
@@ -1290,6 +1290,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Mon Feb 24 2020 Patrik Novotný <panovotn@redhat.com> - 11.7-1
+- New upstream version 11.7
+
 * Mon Nov 25 2019 Patrik Novotný <panovotn@redhat.com> - 11.6-1
 - New upstream version 11.6
 
