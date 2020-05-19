@@ -104,7 +104,6 @@ Source17: https://ftp.postgresql.org/pub/source/v%{prevversion}/postgresql-%{pre
 Patch1: rpm-pgsql.patch
 Patch2: postgresql-logging.patch
 Patch5: postgresql-var-run-socket.patch
-Patch6: postgresql-man.patch
 Patch8: postgresql-external-libpq.patch
 Patch9: postgresql-server-pg_config.patch
 
@@ -365,7 +364,6 @@ benchmarks.
 %patch1 -p1
 %patch2 -p1
 %patch5 -p1
-%patch6 -p1
 %patch8 -p1
 %patch9 -p1
 
