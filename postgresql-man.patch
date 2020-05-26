@@ -6,18 +6,6 @@ RHBZ#948933).
 diff -up ./doc/src/sgml/man1/ecpg.1.man948933 ./doc/src/sgml/man1/ecpg.1
 --- ./doc/src/sgml/man1/ecpg.1.man948933	2014-12-16 02:13:15.000000000 +0100
 +++ ./doc/src/sgml/man1/ecpg.1	2014-12-23 11:26:37.883644047 +0100
-@@ -80,6 +80,11 @@ INFORMIX_SE\&.
- Define a C preprocessor symbol\&.
- .RE
- .PP
-+\fB\-h \fR
-+.RS 4
-+Parse a header file, this option includes option \fB\-c\fR\&.
-+.RE
-+.PP
- \fB\-i\fR
- .RS 4
- Parse system include files as well\&.
 @@ -128,6 +133,11 @@ Allow question mark as placeholder for c
  .RE
  .RE
