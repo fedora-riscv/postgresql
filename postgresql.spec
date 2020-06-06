@@ -121,6 +121,7 @@ BuildRequires: readline-devel zlib-devel
 BuildRequires: systemd systemd-devel util-linux
 BuildRequires: multilib-rpm-config
 BuildRequires: libpq-devel >= %version
+BuildRequires: docbook-style-xsl
 
 # postgresql-setup build requires
 BuildRequires: m4 elinks docbook-utils help2man
@@ -1266,6 +1267,7 @@ make -C postgresql-setup-%{setup_version} check
     CVE-2020-25695
     CVE-2020-25696
     CVE-2020-25694
+- add docbook-style-xsl to BuildRequires
 
 * Tue Aug 18 2020 Patrik Novotný <panovotn@redhat.com> - 12.4-1
 - Rebase to usptream release 12.4
