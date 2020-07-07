@@ -29,7 +29,7 @@
 # The base package, the libs package, the devel package, and the server package
 # always get built.
 
-%{!?beta:%global beta 0}
+%{!?beta:%global beta 1}
 
 %{!?test:%global test 1}
 %{!?llvmjit:%global llvmjit 1}
@@ -59,9 +59,9 @@
 
 Summary: PostgreSQL client programs
 Name: postgresql
-%global majorversion 12
-Version: %{majorversion}.3
-Release: 4%{?dist}
+%global majorversion 13
+Version: %{majorversion}beta2
+Release: 0.1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -72,8 +72,8 @@ Url: http://www.postgresql.org/
 # in-place upgrade of an old database.  In most cases it will not be critical
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
-%global prevmajorversion 11
-%global prevversion %{prevmajorversion}.8
+%global prevmajorversion 12
+%global prevversion %{prevmajorversion}.3
 %global prev_prefix %{_libdir}/pgsql/postgresql-%{prevmajorversion}
 %global precise_version %{?epoch:%epoch:}%version-%release
 
@@ -865,7 +865,7 @@ find_lang_bins ()
 find_lang_bins devel.lst pg_server_config
 find_lang_bins server.lst \
 	initdb pg_basebackup pg_controldata pg_ctl pg_resetwal pg_rewind plpgsql \
-	postgres pg_checksums
+	postgres pg_checksums pg_verifybackup
 find_lang_bins contrib.lst \
 	pg_archivecleanup pg_test_fsync pg_test_timing pg_waldump
 find_lang_bins main.lst \
@@ -922,6 +922,7 @@ make -C postgresql-setup-%{setup_version} check
 %{_bindir}/pg_isready
 %{_bindir}/pg_restore
 %{_bindir}/pg_upgrade
+%{_bindir}/pg_verifybackup
 %{_bindir}/psql
 %{_bindir}/reindexdb
 %{_bindir}/vacuumdb
@@ -935,6 +936,7 @@ make -C postgresql-setup-%{setup_version} check
 %{_mandir}/man1/pg_isready.*
 %{_mandir}/man1/pg_restore.*
 %{_mandir}/man1/pg_upgrade.*
+%{_mandir}/man1/pg_verifybackup.*
 %{_mandir}/man1/psql.*
 %{_mandir}/man1/reindexdb.*
 %{_mandir}/man1/vacuumdb.*
@@ -1125,8 +1127,6 @@ make -C postgresql-setup-%{setup_version} check
 %{_datadir}/pgsql/extension/plpgsql*
 %{_datadir}/pgsql/information_schema.sql
 %{_datadir}/pgsql/postgres.bki
-%{_datadir}/pgsql/postgres.description
-%{_datadir}/pgsql/postgres.shdescription
 %{_datadir}/pgsql/snowball_create.sql
 %{_datadir}/pgsql/sql_features.txt
 %{_datadir}/pgsql/system_views.sql
@@ -1226,7 +1226,9 @@ make -C postgresql-setup-%{setup_version} check
 %if %plperl
 %files plperl -f plperl.lst
 %{_datadir}/pgsql/extension/plperl*
+%{_datadir}/pgsql/extension/bool_plperl*
 %{_libdir}/pgsql/plperl.so
+%{_libdir}/pgsql/bool_plperl.so
 %endif
 
 
@@ -1259,6 +1261,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Wed Jul 01 2020 Patrik Novotný <panovotn@redhat.com> - 13.0-0.1
+- Rebase to upstream beta release 13beta2
+
 * Tue Jun 23 2020 Jitka Plesnikova <jplesnik@redhat.com> - 12.3-4
 - Perl 5.32 rebuild
 
