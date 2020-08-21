@@ -61,7 +61,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 12
 Version: %{majorversion}.4
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -413,10 +413,10 @@ find . -type f -name .gitignore | xargs rm
 
 
 %build
-
-# LTO is currently incompatible with systemtap/dtrace static probes
+# Avoid LTO on armv7hl as it runs out of memory
+%ifarch armv7hl s390x
 %define _lto_cflags %{nil}
-
+%endif
 # fail quickly and obviously if user tries to build as root
 %if %runselftest
 	if [ x"`id -u`" = x0 ]; then
@@ -1263,6 +1263,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Fri Aug 21 2020 Jeff Law <law@redhat.com> - 12.4-2
+- Re-enable LTO
+
 * Tue Aug 18 2020 Patrik Novotný <panovotn@redhat.com> - 12.4-1
 - Rebase to upstream release 12.4
 
