@@ -61,7 +61,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 12
 Version: %{majorversion}.3
-Release: 7%{?dist}
+Release: 6%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -414,10 +414,8 @@ find . -type f -name .gitignore | xargs rm
 
 %build
 
-# Avoid LTO on armv7hl as we run out of memory
-%ifarch armv7hl
+# LTO is currently incompatible with systemtap/dtrace static probes
 %define _lto_cflags %{nil}
-%endif
 
 # fail quickly and obviously if user tries to build as root
 %if %runselftest
@@ -1265,9 +1263,6 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
-* Fri Aug 21 2020 Jeff Law <law@redhat.com> - 12.3-7
-- Renable LTO except for armv7hl
-
 * Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 12.3-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
