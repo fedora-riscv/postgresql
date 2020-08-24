@@ -62,7 +62,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 9.6
-Version: %{majorversion}.18
+Version: %{majorversion}.19
 %{?dirty_hack_epoch}
 Release: 1%{?dist}
 
@@ -77,7 +77,7 @@ Url: http://www.postgresql.org/
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
 %global prevmajorversion 9.5
-%global prevversion %{prevmajorversion}.22
+%global prevversion %{prevmajorversion}.23
 %global prev_prefix %{_libdir}/pgsql/postgresql-%{prevmajorversion}
 %global precise_version %{?epoch:%epoch:}%version-%release
 
@@ -1267,6 +1267,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Mon Aug 24 2020 Honza Horak <hhorak@redhat.com> - 9.6.19-1
+- Rebase to upstream release 9.6.19
+
 * Tue May 19 2020 Patrik Novotný <panovotn@redhat.com> - 9.6.18-1
 - Rebase to upstream release 9.6.18
 
