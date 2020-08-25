@@ -123,6 +123,7 @@ BuildRequires: readline-devel zlib-devel
 BuildRequires: systemd systemd-devel util-linux
 BuildRequires: multilib-rpm-config
 BuildRequires: libpq-devel
+BuildRequires: docbook-style-xsl
 
 # postgresql-setup build requires
 BuildRequires: m4 elinks docbook-utils help2man
@@ -323,6 +324,7 @@ Summary: The Perl procedural language for PostgreSQL
 Group: Applications/Databases
 Requires: %{name}-server%{?_isa} = %precise_version
 Requires: perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
+BuildRequires: perl(Opcode)
 %if %runselftest
 BuildRequires: perl(Data::Dumper)
 %endif
@@ -537,7 +539,8 @@ cp src/Makefile.global src/Makefile.global.python3
 
 make distclean
 
-%endif # %%plpython3
+# %%plpython3
+%endif
 
 PYTHON=/usr/bin/python2
 
@@ -684,7 +687,8 @@ upgrade_configure ()
 	make %{?_smp_mflags} all
 	make -C contrib %{?_smp_mflags} all
 	popd
-%endif # %%upgrade
+# %%upgrade
+%endif
 
 
 %install
