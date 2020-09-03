@@ -62,7 +62,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 11
-Version: %{majorversion}.8
+Version: %{majorversion}.9
 %{?dirty_hack_epoch}
 Release: 1%{?dist}
 
@@ -77,7 +77,7 @@ Url: http://www.postgresql.org/
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
 %global prevmajorversion 10
-%global prevversion %{prevmajorversion}.13
+%global prevversion %{prevmajorversion}.14
 %global prev_prefix %{_libdir}/pgsql/postgresql-%{prevmajorversion}
 %global precise_version %{?epoch:%epoch:}%version-%release
 
@@ -1290,6 +1290,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Thu Sep 03 2020 Honza Horak <hhorak@redhat.com> - 11.9-1
+- Rebase to upstream release 11.9
+
 * Tue May 19 2020 Patrik Novotný <panovotn@redhat.com> - 11.8-1
 - Rebase to upstream release 11.8
 
