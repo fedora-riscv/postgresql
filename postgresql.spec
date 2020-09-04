@@ -59,12 +59,18 @@
 %global external_libs 1
 %endif
 
+# Turn off the LTO, it makes the build fail
+# https://bugzilla.redhat.com/show_bug.cgi?id=1875814
+%ifarch armv7hl
+%define _lto_cflags %{nil}
+%endif
+
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 11
 Version: %{majorversion}.9
 %{?dirty_hack_epoch}
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -1294,6 +1300,10 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Fri Sep 04 2020 Honza Horak <hhorak@redhat.com> - 11.9-2
+- Turn off LTO for armv7hl
+  Work-arounds: #1875814
+
 * Thu Sep 03 2020 Honza Horak <hhorak@redhat.com> - 11.9-1
 - Rebase to upstream release 11.9
 
