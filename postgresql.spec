@@ -61,7 +61,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 12
 Version: %{majorversion}.4
-Release: 2%{?dist}
+Release: 3%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -367,11 +367,6 @@ Requires:	llvm5.0 >= 5.0
 Requires:	llvm => 5.0
 %endif
 Provides:	postgresql-llvmjit >= %{version}-%{release}
-
-%ifarch ppc64 ppc64le
-AutoReq:	0
-Requires:	advance-toolchain-%{atstring}-runtime
-%endif
 
 BuildRequires:	llvm-devel >= 5.0 clang-devel >= 5.0
 
@@ -1263,6 +1258,10 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Fri Oct 09 2020 Honza Horak <hhorak@redhat.com> - 12.4-3
+- Removing problematic requirements on ppc64 arch
+  Resolves: #1882642
+
 * Fri Aug 21 2020 Jeff Law <law@redhat.com> - 12.4-2
 - Re-enable LTO
 
