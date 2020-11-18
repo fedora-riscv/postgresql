@@ -6,11 +6,10 @@ rhbz#1618698 change, rather provide pg_server_config binary, which int urn means
 that we'll have to fix only a minimal set of packages which really build
 PostgreSQL server modules.
 
-diff --git a/src/bin/pg_config/Makefile b/src/bin/pg_config/Makefile
-index 02e6f9d..f7c844f 100644
---- a/src/bin/pg_config/Makefile
-+++ b/src/bin/pg_config/Makefile
-@@ -11,28 +11,30 @@
+diff -up postgresql-13.1/src/bin/pg_config/Makefile.patch9 postgresql-13.1/src/bin/pg_config/Makefile
+--- postgresql-13.1/src/bin/pg_config/Makefile.patch9	2020-11-18 09:28:30.885453275 +0100
++++ postgresql-13.1/src/bin/pg_config/Makefile	2020-11-18 09:31:33.926325327 +0100
+@@ -11,6 +11,8 @@
  PGFILEDESC = "pg_config - report configuration information"
  PGAPPICON=win32
  
@@ -19,8 +18,9 @@ index 02e6f9d..f7c844f 100644
  subdir = src/bin/pg_config
  top_builddir = ../../..
  include $(top_builddir)/src/Makefile.global
- 
- OBJS=   pg_config.o $(WIN32RES)
+@@ -19,22 +21,22 @@ OBJS = \
+ 	$(WIN32RES) \
+ 	pg_config.o
  
 -all: pg_config
 +all: $(PG_CONFIG)
@@ -43,17 +43,16 @@ index 02e6f9d..f7c844f 100644
  
  clean distclean maintainer-clean:
 -	rm -f pg_config$(X) $(OBJS)
-+	rm -f $(PG_CONFIG)  $(OBJS)
++	rm -f $(PG_CONFIG) $(OBJS)
  	rm -rf tmp_check
  
  check:
-diff --git a/src/bin/pg_config/nls.mk b/src/bin/pg_config/nls.mk
-index 1d41f90..0f34f37 100644
---- a/src/bin/pg_config/nls.mk
-+++ b/src/bin/pg_config/nls.mk
+diff -up postgresql-13.1/src/bin/pg_config/nls.mk.patch9 postgresql-13.1/src/bin/pg_config/nls.mk
+--- postgresql-13.1/src/bin/pg_config/nls.mk.patch9	2020-11-18 09:28:30.885453275 +0100
++++ postgresql-13.1/src/bin/pg_config/nls.mk	2020-11-18 09:32:00.735599526 +0100
 @@ -1,4 +1,4 @@
  # src/bin/pg_config/nls.mk
 -CATALOG_NAME     = pg_config
 +CATALOG_NAME     = pg_server_config
- AVAIL_LANGUAGES  = cs de es fr he it ja ko pl pt_BR ro ru sv tr uk vi zh_CN zh_TW
+ AVAIL_LANGUAGES  = cs de es fr he it ja ko pl pt_BR ru sv tr uk vi zh_CN
  GETTEXT_FILES    = pg_config.c ../../common/config_info.c ../../common/exec.c

@@ -3,10 +3,10 @@ PostgreSQL ecpg/initdb manual page fixes
 This was generated based on automatic Red Hat manual page scan (private
 RHBZ#948933).
 
-diff -up ./doc/src/sgml/man1/ecpg.1.man948933 ./doc/src/sgml/man1/ecpg.1
---- ./doc/src/sgml/man1/ecpg.1.man948933	2014-12-16 02:13:15.000000000 +0100
-+++ ./doc/src/sgml/man1/ecpg.1	2014-12-23 11:26:37.883644047 +0100
-@@ -80,6 +80,11 @@ INFORMIX_SE\&.
+diff -up postgresql-13.1/doc/src/sgml/man1/ecpg.1.patch6 postgresql-13.1/doc/src/sgml/man1/ecpg.1
+--- postgresql-13.1/doc/src/sgml/man1/ecpg.1.patch6	2020-11-09 23:38:03.000000000 +0100
++++ postgresql-13.1/doc/src/sgml/man1/ecpg.1	2020-11-18 09:26:40.547324791 +0100
+@@ -81,6 +81,11 @@ ORACLE\&.
  Define a C preprocessor symbol\&.
  .RE
  .PP
@@ -15,10 +15,10 @@ diff -up ./doc/src/sgml/man1/ecpg.1.man948933 ./doc/src/sgml/man1/ecpg.1
 +Parse a header file, this option includes option \fB\-c\fR\&.
 +.RE
 +.PP
- \fB\-i\fR
+ \fB\-h\fR
  .RS 4
- Parse system include files as well\&.
-@@ -128,6 +133,11 @@ Allow question mark as placeholder for c
+ Process header files\&. When this option is specified, the output file extension becomes
+@@ -144,6 +149,11 @@ Allow question mark as placeholder for c
  .RE
  .RE
  .PP
@@ -30,10 +30,10 @@ diff -up ./doc/src/sgml/man1/ecpg.1.man948933 ./doc/src/sgml/man1/ecpg.1
  \fB\-t\fR
  .RS 4
  Turn on autocommit of transactions\&. In this mode, each SQL command is automatically committed unless it is inside an explicit transaction block\&. In the default mode, commands are committed only when
-diff -up ./doc/src/sgml/man1/initdb.1.man948933 ./doc/src/sgml/man1/initdb.1
---- ./doc/src/sgml/man1/initdb.1.man948933	2014-12-16 02:13:21.000000000 +0100
-+++ ./doc/src/sgml/man1/initdb.1	2014-12-23 11:26:37.883644047 +0100
-@@ -281,6 +281,13 @@ determines that an error prevented it fr
+diff -up postgresql-13.1/doc/src/sgml/man1/initdb.1.patch6 postgresql-13.1/doc/src/sgml/man1/initdb.1
+--- postgresql-13.1/doc/src/sgml/man1/initdb.1.patch6	2020-11-09 23:38:05.000000000 +0100
++++ postgresql-13.1/doc/src/sgml/man1/initdb.1	2020-11-18 09:25:05.082348424 +0100
+@@ -311,6 +311,13 @@ determines that an error prevented it fr
  .PP
  Other options:
  .PP
