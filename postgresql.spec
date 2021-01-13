@@ -108,6 +108,7 @@ Patch2: postgresql-logging.patch
 Patch5: postgresql-var-run-socket.patch
 Patch8: postgresql-external-libpq.patch
 Patch9: postgresql-server-pg_config.patch
+Patch10: postgresql-12.5-contrib-dblink-expected-out.patch
 
 BuildRequires: make
 BuildRequires: gcc
@@ -393,6 +394,7 @@ goal of accelerating analytics queries.
 %patch5 -p1
 %patch8 -p1
 %patch9 -p1
+%patch10 -p1
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
