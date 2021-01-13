@@ -60,7 +60,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 12
-Version: %{majorversion}.4
+Version: %{majorversion}.5
 Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
@@ -73,7 +73,7 @@ Url: http://www.postgresql.org/
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
 %global prevmajorversion 11
-%global prevversion %{prevmajorversion}.9
+%global prevversion %{prevmajorversion}.10
 %global prev_prefix %{_libdir}/pgsql/postgresql-%{prevmajorversion}
 %global precise_version %{?epoch:%epoch:}%version-%release
 
@@ -109,6 +109,7 @@ Patch5: postgresql-var-run-socket.patch
 Patch6: postgresql-man.patch
 Patch8: postgresql-external-libpq.patch
 Patch9: postgresql-server-pg_config.patch
+Patch10: postgresql-10.15-contrib-dblink-expected-out.patch
 
 BuildRequires: gcc
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
@@ -393,6 +394,9 @@ goal of accelerating analytics queries.
 %patch6 -p1
 %patch8 -p1
 %patch9 -p1
+%if 0%{?fedora} >= 34
+%patch10 -p1
+%endif
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -1254,6 +1258,15 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Wed Jan 13 2021 Honza Horak <hhorak@redhat.com> - 12.5-1
+- Update to 12.5
+  Also fixes:
+    CVE-2020-14349
+    CVE-2020-14350
+    CVE-2020-25695
+    CVE-2020-25696
+    CVE-2020-25694
+
 * Tue Aug 18 2020 Patrik Novotný <panovotn@redhat.com> - 12.4-1
 - Rebase to usptream release 12.4
 
