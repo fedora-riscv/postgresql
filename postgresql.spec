@@ -68,9 +68,9 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 11
-Version: %{majorversion}.9
+Version: %{majorversion}.10
 %{?dirty_hack_epoch}
-Release: 2%{?dist}
+Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -83,7 +83,7 @@ Url: http://www.postgresql.org/
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
 %global prevmajorversion 10
-%global prevversion %{prevmajorversion}.14
+%global prevversion %{prevmajorversion}.15
 %global prev_prefix %{_libdir}/pgsql/postgresql-%{prevmajorversion}
 %global precise_version %{?epoch:%epoch:}%version-%release
 
@@ -118,6 +118,7 @@ Patch5: postgresql-var-run-socket.patch
 Patch6: postgresql-man.patch
 Patch8: postgresql-external-libpq.patch
 Patch9: postgresql-server-pg_config.patch
+Patch10: postgresql-10.15-contrib-dblink-expected-out.patch
 
 BuildRequires: gcc
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
@@ -412,6 +413,9 @@ benchmarks.
 %if 0%{?external_libs}
 %patch8 -p1
 %patch9 -p1
+%endif
+%if 0%{?fedora} >= 34
+%patch10 -p1
 %endif
 
 # We used to run autoconf here, but there's no longer any real need to,
@@ -1300,6 +1304,15 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Wed Jan 13 2021 Honza Horak <hhorak@redhat.com> - 11.10-1
+- Update to 11.10
+  Also fixes:
+    CVE-2020-14349
+    CVE-2020-14350
+    CVE-2020-25695
+    CVE-2020-25696
+    CVE-2020-25694
+
 * Fri Sep 04 2020 Honza Horak <hhorak@redhat.com> - 11.9-2
 - Turn off LTO for armv7hl
   Work-arounds: #1875814
