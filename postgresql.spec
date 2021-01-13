@@ -62,7 +62,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 10
-Version: %{majorversion}.14
+Version: %{majorversion}.15
 %{?dirty_hack_epoch}
 Release: 1%{?dist}
 
@@ -77,7 +77,7 @@ Url: http://www.postgresql.org/
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
 %global prevmajorversion 9.6
-%global prevversion %{prevmajorversion}.19
+%global prevversion %{prevmajorversion}.20
 %global prev_prefix %{_libdir}/pgsql/postgresql-%{prevmajorversion}
 %global precise_version %{?epoch:%epoch:}%version-%release
 
@@ -112,6 +112,7 @@ Patch5: postgresql-var-run-socket.patch
 Patch6: postgresql-man.patch
 Patch8: postgresql-external-libpq.patch
 Patch9: postgresql-server-pg_config.patch
+Patch10: postgresql-10.15-contrib-dblink-expected-out.patch
 
 BuildRequires: gcc
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
@@ -401,6 +402,9 @@ benchmarks.
 %if 0%{?external_libs}
 %patch8 -p1
 %patch9 -p1
+%endif
+%if 0%{?fedora} >= 34
+%patch10 -p1
 %endif
 
 # We used to run autoconf here, but there's no longer any real need to,
@@ -1264,6 +1268,15 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Wed Jan 13 2021 Honza Horak <hhorak@redhat.com> - 10.15-1
+- Update to 10.15
+  Also fixes:
+    CVE-2020-14349
+    CVE-2020-14350
+    CVE-2020-25695
+    CVE-2020-25696
+    CVE-2020-25694
+
 * Thu Sep 03 2020 Honza Horak <hhorak@redhat.com> - 10.14-1
 - Rebase to upstream release 10.14
 
