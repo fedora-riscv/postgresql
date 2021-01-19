@@ -114,6 +114,7 @@ Patch10: postgresql-10.15-contrib-dblink-expected-out.patch
 BuildRequires: gcc
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
 BuildRequires: perl(ExtUtils::Embed), perl-devel
+BuildRequires: perl(Opcode)
 %if 0%{?fedora} || 0%{?rhel} > 7
 BuildRequires: perl-generators
 %endif
@@ -1268,6 +1269,7 @@ make -C postgresql-setup-%{setup_version} check
     CVE-2020-25696
     CVE-2020-25694
 - add docbook-style-xsl to BuildRequires
+- add Opcode perl dependency
 
 * Tue Aug 18 2020 Patrik Novotný <panovotn@redhat.com> - 12.4-1
 - Rebase to usptream release 12.4
