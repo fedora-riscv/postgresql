@@ -33,6 +33,7 @@
 
 %{!?test:%global test 1}
 %{!?llvmjit:%global llvmjit 1}
+%{!?external_libpq:%global external_libpq 0}
 %{!?upgrade:%global upgrade 1}
 %{!?plpython:%global plpython 1}
 %{!?plpython3:%global plpython3 1}
@@ -61,7 +62,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 13
 Version: %{majorversion}.1
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -109,6 +110,7 @@ Patch5: postgresql-var-run-socket.patch
 Patch6: postgresql-man.patch
 Patch8: postgresql-external-libpq.patch
 Patch9: postgresql-server-pg_config.patch
+Patch10: postgresql-no-libecpg.patch
 
 BuildRequires: gcc
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
@@ -119,7 +121,9 @@ BuildRequires: perl-generators
 BuildRequires: readline-devel zlib-devel
 BuildRequires: systemd systemd-devel util-linux
 BuildRequires: multilib-rpm-config
+%if %external_libpq
 BuildRequires: libpq-devel >= %version
+%endif
 BuildRequires: docbook-style-xsl
 
 # postgresql-setup build requires
@@ -393,13 +397,22 @@ goal of accelerating analytics queries.
 %patch2 -p1
 %patch5 -p1
 %patch6 -p1
+%if %external_libpq
 %patch8 -p1
+%else
+%patch10 -p1
+%endif
 %patch9 -p1
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
 
 cp -p %{SOURCE1} .
+
+%if ! %external_libpq
+%global private_soname private%{majorversion}
+find . -type f -name Makefile -exec sed -i -e "s/SO_MAJOR_VERSION=\s\?\([0-9]\+\)/SO_MAJOR_VERSION= %{private_soname}-\1/" {} \;
+%endif
 
 %if %upgrade
 tar xfj %{SOURCE3}
@@ -713,6 +726,13 @@ rm $RPM_BUILD_ROOT/%_includedir/pg_config*.h
 rm $RPM_BUILD_ROOT/%_includedir/libpq/libpq-fs.h
 rm $RPM_BUILD_ROOT/%_includedir/postgres_ext.h
 rm -r $RPM_BUILD_ROOT/%_includedir/pgsql/internal/
+%if ! %external_libpq
+rm $RPM_BUILD_ROOT/%_includedir/libpq-events.h
+rm $RPM_BUILD_ROOT/%_includedir/libpq-fe.h
+rm $RPM_BUILD_ROOT/%{_libdir}/pkgconfig/*.pc
+rm $RPM_BUILD_ROOT/%{_libdir}/libpq.so
+rm $RPM_BUILD_ROOT/%{_libdir}/libpq.a
+%endif
 
 %if %plpython3
 	mv src/Makefile.global src/Makefile.global.save
@@ -866,7 +886,10 @@ find_lang_bins server.lst \
 find_lang_bins contrib.lst \
 	pg_archivecleanup pg_test_fsync pg_test_timing pg_waldump
 find_lang_bins main.lst \
-	pg_dump pg_upgrade pgscripts psql
+	pg_dump pg_upgrade pgscripts psql \
+%if ! %external_libpq
+libpq%{private_soname}-5
+%endif
 %if %plperl
 find_lang_bins plperl.lst plperl
 %endif
@@ -941,7 +964,9 @@ make -C postgresql-setup-%{setup_version} check
 # so that extensions can use this dir.
 %dir %{_libdir}/pgsql/bitcode
 %endif
-
+%if ! %external_libpq
+%{_libdir}/libpq.so.*
+%endif
 
 %files docs
 %doc *-US.pdf
@@ -1260,6 +1285,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Wed Feb 03 2021 Honza Horak <hhorak@redhat.com> - 13.1-2
+- Build with a private libpq
+
 * Wed Nov 18 2020 Honza Horak <hhorak@redhat.com> - 13.1-1
 - Rebase to usptream release 13.1
 
