@@ -417,6 +417,12 @@ find . -type f -name Makefile -exec sed -i -e "s/SO_MAJOR_VERSION=\s\?\([0-9]\+\
 %if %upgrade
 tar xfj %{SOURCE3}
 
+# libpq from this upgrade-only build is dropped and the libpq from the main
+# version is used. Use the same major hack therefore.
+%if ! %external_libpq
+find . -type f -name Makefile -exec sed -i -e "s/SO_MAJOR_VERSION=\s\?\([0-9]\+\)/SO_MAJOR_VERSION= %{private_soname}-\1/" {} \;
+%endif
+
 # apply once SOURCE3 is extracted
 %endif
 
