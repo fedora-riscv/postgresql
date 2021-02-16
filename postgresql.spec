@@ -60,8 +60,8 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 12
-Version: %{majorversion}.4
-Release: 2%{?dist}
+Version: %{majorversion}.6
+Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -73,7 +73,7 @@ Url: http://www.postgresql.org/
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
 %global prevmajorversion 11
-%global prevversion %{prevmajorversion}.9
+%global prevversion %{prevmajorversion}.11
 %global prev_prefix %{_libdir}/pgsql/postgresql-%{prevmajorversion}
 %global precise_version %{?epoch:%epoch:}%version-%release
 
@@ -367,11 +367,6 @@ Requires:	llvm5.0 >= 5.0
 Requires:	llvm => 5.0
 %endif
 Provides:	postgresql-llvmjit >= %{version}-%{release}
-
-%ifarch ppc64 ppc64le
-AutoReq:	0
-Requires:	advance-toolchain-%{atstring}-runtime
-%endif
 
 BuildRequires:	llvm-devel >= 5.0 clang-devel >= 5.0
 
@@ -1263,6 +1258,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Tue Feb 16 2021 Honza Horak <hhorak@redhat.com> - 12.6-1
+- Update to 12.6
+
 * Fri Aug 21 2020 Jeff Law <law@redhat.com> - 12.4-2
 - Re-enable LTO
 
