@@ -35,7 +35,7 @@
 %{!?llvmjit:%global llvmjit 1}
 %{!?external_libpq:%global external_libpq 0}
 %{!?upgrade:%global upgrade 1}
-%{!?plpython:%global plpython 1}
+%{!?plpython:%global plpython 0}
 %{!?plpython3:%global plpython3 1}
 %{!?pltcl:%global pltcl 1}
 %{!?plperl:%global plperl 1}
@@ -62,7 +62,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 13
 Version: %{majorversion}.2
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -869,6 +869,8 @@ rm -f $RPM_BUILD_ROOT%{_bindir}/pgsql/hstore_plperl.so
 
 %if !%plpython
 rm -f $RPM_BUILD_ROOT%{_bindir}/pgsql/hstore_plpython2.so
+rm -f $RPM_BUILD_ROOT%{_datadir}/pgsql/extension/*_plpythonu*
+rm -f $RPM_BUILD_ROOT%{_datadir}/pgsql/extension/*_plpython2u*
 %endif
 
 %if %nls
@@ -1287,6 +1289,10 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Wed Feb 17 2021 Honza Horak <hhorak@redhat.com> - 13.2-2
+- Do not build plpython in the module build
+  Related: #1913681
+
 * Tue Feb 16 2021 Honza Horak <hhorak@redhat.com> - 13.2-1
 - Update to 13.2
 
