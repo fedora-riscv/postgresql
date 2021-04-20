@@ -34,7 +34,7 @@
 %{!?test:%global test 1}
 # Disable temporarily to be able to build the package
 # tracked in RHBZ#1940964
-%{!?llvmjit:%global llvmjit 0}
+%{!?llvmjit:%global llvmjit 1}
 %{!?upgrade:%global upgrade 1}
 %{!?plpython3:%global plpython3 1}
 %{!?pltcl:%global pltcl 1}
@@ -62,7 +62,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 13
 Version: %{majorversion}.2
-Release: 4%{?dist}
+Release: 5%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -699,6 +699,10 @@ rm $RPM_BUILD_ROOT/%{_datadir}/man/man1/ecpg.1
 EOF
 %endif
 
+# Let plugins use the same llvmjit settings as server has
+cat <<EOF >> $RPM_BUILD_ROOT%macrosdir/macros.%name
+%%postgresql_server_llvmjit %llvmjit
+EOF
 
 %if %test
 	# tests. There are many files included here that are unnecessary,
@@ -1121,6 +1125,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Tue Apr 20 2021 Honza Horak <hhorak@redhat.com> - 13.2-5
+- Add macro for llvmjit settings
+
 * Wed Feb 17 2021 Honza Horak <hhorak@redhat.com> - 13.2-4
 - Remove plpython2 entirely, same as upstream did
   Resolves: #1913681
