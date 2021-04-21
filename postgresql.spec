@@ -34,7 +34,7 @@
 %{!?test:%global test 1}
 # Disable temporarily to be able to build the package
 # tracked in RHBZ#1940964
-%{!?llvmjit:%global llvmjit 1}
+%{!?llvmjit:%global llvmjit 0}
 %{!?upgrade:%global upgrade 1}
 %{!?plpython3:%global plpython3 1}
 %{!?pltcl:%global pltcl 1}
