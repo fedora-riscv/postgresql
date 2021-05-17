@@ -59,8 +59,8 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 13
-Version: %{majorversion}.2
-Release: 6%{?dist}
+Version: %{majorversion}.3
+Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -72,7 +72,7 @@ Url: http://www.postgresql.org/
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
 %global prevmajorversion 12
-%global prevversion %{prevmajorversion}.6
+%global prevversion %{prevmajorversion}.7
 %global prev_prefix %{_libdir}/pgsql/postgresql-%{prevmajorversion}
 %global precise_version %{?epoch:%epoch:}%version-%release
 
@@ -1127,6 +1127,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Fri May 21 2021 Filip Januš <fjanus@redhat.com> - 13.3-1
+- Update to 13.3
+
 * Thu Apr 22 2021 Honza Horak <hhorak@redhat.com> - 13.2-6
 - Fix jit failure on s390x
   Thanks to Tom Stellard
@@ -1135,7 +1138,7 @@ make -C postgresql-setup-%{setup_version} check
 * Tue Apr 20 2021 Honza Horak <hhorak@redhat.com> - 13.2-5
 - Add macro for llvmjit settings
 
-* Wed Feb 17 2021 Honza Horak <hhorak@redhat.com> - 13.2-4
+* Wed Mar 17 2021 Honza Horak <hhorak@redhat.com> - 13.2-4
 - Remove plpython2 entirely, same as upstream did
   Resolves: #1913681
 - Disable llvmjit in order to build at all
@@ -1165,7 +1168,7 @@ make -C postgresql-setup-%{setup_version} check
   Fixes CVE-2020-25695
   Fixes CVE-2020-25696
 
-* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 12.4-5
+* Wed Jan 13 2021 Fedora Release Engineering <releng@fedoraproject.org> - 12.4-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
 
 * Mon Nov 16 2020 Honza Horak <hhorak@redhat.com> - 12.4-4
