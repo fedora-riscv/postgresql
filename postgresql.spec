@@ -60,7 +60,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 13
 Version: %{majorversion}.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -1127,6 +1127,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Wed May 26 2021 Tom Stellard <tstellar@redhat.com> - 13.3-2
+- Rebuild for LLVM 12.0.0-final
+
 * Fri May 21 2021 Filip Januš <fjanus@redhat.com> - 13.3-1
 - Update to 13.3
 
