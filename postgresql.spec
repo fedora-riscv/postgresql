@@ -634,15 +634,17 @@ make DESTDIR=$RPM_BUILD_ROOT install-world
 
 # We ship pg_config through libpq-devel
 mv $RPM_BUILD_ROOT/%_mandir/man1/pg_{,server_}config.1
+%if %external_libpq
 rm $RPM_BUILD_ROOT/%_includedir/pg_config*.h
 rm $RPM_BUILD_ROOT/%_includedir/libpq/libpq-fs.h
 rm $RPM_BUILD_ROOT/%_includedir/postgres_ext.h
 rm -r $RPM_BUILD_ROOT/%_includedir/pgsql/internal/
-%if ! %external_libpq
 rm $RPM_BUILD_ROOT/%_includedir/libpq-events.h
 rm $RPM_BUILD_ROOT/%_includedir/libpq-fe.h
 rm $RPM_BUILD_ROOT/%{_libdir}/pkgconfig/*.pc
 rm $RPM_BUILD_ROOT/%{_libdir}/libpq.so
+%else
+ln -s pg_server_config $RPM_BUILD_ROOT/%_bindir/pg_config
 rm $RPM_BUILD_ROOT/%{_libdir}/libpq.a
 %endif
 
@@ -1090,6 +1092,18 @@ make -C postgresql-setup-%{setup_version} check
 %{_mandir}/man1/pg_server_config.*
 %{_mandir}/man3/SPI_*
 %{macrosdir}/macros.%name
+%if ! %external_libpq
+%{_bindir}/pg_config
+%{_includedir}/libpq-events.h
+%{_includedir}/libpq-fe.h
+%{_includedir}/postgres_ext.h
+%{_includedir}/pgsql/internal/*.h
+%{_includedir}/pgsql/internal/libpq/pqcomm.h
+%{_includedir}/libpq/*.h
+%{_libdir}/pkgconfig/*.pc
+%{_libdir}/libpq.so
+%{_includedir}/pg_config*.h
+%endif
 
 
 %files test-rpm-macros
