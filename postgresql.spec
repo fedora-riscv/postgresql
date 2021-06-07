@@ -194,6 +194,35 @@ over a network connection.  The PostgreSQL server can be found in the
 postgresql-server sub-package.
 
 
+%if ! %external_libpq
+%package private-libs
+Summary: The shared libraries required only for this build of PostgreSQL server
+Group: Applications/Databases
+# for /sbin/ldconfig
+Requires(post): glibc
+Requires(postun): glibc
+
+%description private-libs
+The postgresql-private-libs package provides the shared libraries for this
+build of PostgreSQL server and plugins build with this version of server.
+For shared libraries used by client packages that need to connect to a
+PostgreSQL server, install libpq package instead.
+
+
+%package private-devel
+Summary: PostgreSQL development header files for this build of PostgreSQL server
+Group: Development/Libraries
+Requires: %{name}-private-libs%{?_isa} = %precise_version
+
+%description private-devel
+The postgresql-private-devel package contains the header files and libraries
+needed to compile C or C++ applications which will directly interact
+with a PostgreSQL database management server.
+You need to install this package if you want to develop applications which
+will interact with a PostgreSQL server.
+%endif
+
+
 %package server
 Summary: The programs needed to create and run a PostgreSQL server
 Requires: %{name}%{?_isa} = %precise_version
@@ -248,6 +277,9 @@ Requires: krb5-devel
 %endif
 %if %llvmjit
 Requires: clang-devel llvm-devel
+%endif
+%if ! %external_libpq
+Requires: %{name}-private-devel
 %endif
 
 %description server-devel
@@ -862,9 +894,13 @@ make -C postgresql-setup-%{setup_version} check
 # so that extensions can use this dir.
 %dir %{_libdir}/pgsql/bitcode
 %endif
+
+
 %if ! %external_libpq
+%files private-libs
 %{_libdir}/libpq.so.*
 %endif
+
 
 %files docs
 %doc *-US.pdf
@@ -1092,7 +1128,10 @@ make -C postgresql-setup-%{setup_version} check
 %{_mandir}/man1/pg_server_config.*
 %{_mandir}/man3/SPI_*
 %{macrosdir}/macros.%name
+
+
 %if ! %external_libpq
+%files private-devel
 %{_bindir}/pg_config
 %{_includedir}/libpq-events.h
 %{_includedir}/libpq-fe.h
