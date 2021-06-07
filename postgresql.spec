@@ -35,7 +35,6 @@
 %{!?llvmjit:%global llvmjit 1}
 %{!?external_libpq:%global external_libpq 0}
 %{!?upgrade:%global upgrade 1}
-%{!?plpython:%global plpython 0}
 %{!?plpython3:%global plpython3 1}
 %{!?pltcl:%global pltcl 1}
 %{!?plperl:%global plperl 1}
@@ -62,7 +61,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 13
 Version: %{majorversion}.3
-Release: 2%{?dist}
+Release: 3%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -107,15 +106,19 @@ Source17: https://ftp.postgresql.org/pub/source/v%{prevversion}/postgresql-%{pre
 Patch1: rpm-pgsql.patch
 Patch2: postgresql-logging.patch
 Patch5: postgresql-var-run-socket.patch
-Patch6: postgresql-man.patch
 Patch8: postgresql-external-libpq.patch
 Patch9: postgresql-server-pg_config.patch
-Patch10: postgresql-no-libecpg.patch
-Patch11: postgresql-datalayout-mismatch-on-s390.patch
+# Upstream bug #16971: https://www.postgresql.org/message-id/16971-5d004d34742a3d35%40postgresql.org
+# rhbz#1940964
+Patch10: postgresql-datalayout-mismatch-on-s390.patch
+Patch11: postgresql-subtransaction-test.patch
+Patch12: postgresql-no-libecpg.patch
 
+BuildRequires: make
 BuildRequires: gcc
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
 BuildRequires: perl(ExtUtils::Embed), perl-devel
+BuildRequires: perl(Opcode)
 %if 0%{?fedora} || 0%{?rhel} > 7
 BuildRequires: perl-generators
 %endif
@@ -129,10 +132,6 @@ BuildRequires: docbook-style-xsl
 
 # postgresql-setup build requires
 BuildRequires: m4 elinks docbook-utils help2man
-
-%if %plpython
-BuildRequires: python2-devel
-%endif
 
 %if %plpython3
 BuildRequires: python3-devel
@@ -195,6 +194,35 @@ over a network connection.  The PostgreSQL server can be found in the
 postgresql-server sub-package.
 
 
+%if ! %external_libpq
+%package private-libs
+Summary: The shared libraries required only for this build of PostgreSQL server
+Group: Applications/Databases
+# for /sbin/ldconfig
+Requires(post): glibc
+Requires(postun): glibc
+
+%description private-libs
+The postgresql-private-libs package provides the shared libraries for this
+build of PostgreSQL server and plugins build with this version of server.
+For shared libraries used by client packages that need to connect to a
+PostgreSQL server, install libpq package instead.
+
+
+%package private-devel
+Summary: PostgreSQL development header files for this build of PostgreSQL server
+Group: Development/Libraries
+Requires: %{name}-private-libs%{?_isa} = %precise_version
+
+%description private-devel
+The postgresql-private-devel package contains the header files and libraries
+needed to compile C or C++ applications which will directly interact
+with a PostgreSQL database management server.
+You need to install this package if you want to develop applications which
+will interact with a PostgreSQL server.
+%endif
+
+
 %package server
 Summary: The programs needed to create and run a PostgreSQL server
 Requires: %{name}%{?_isa} = %precise_version
@@ -245,7 +273,13 @@ Summary: PostgreSQL development header files and libraries
 Requires:	libicu-devel
 %endif
 %if %kerberos
-Requires:	krb5-devel
+Requires: krb5-devel
+%endif
+%if %llvmjit
+Requires: clang-devel llvm-devel
+%endif
+%if ! %external_libpq
+Requires: %{name}-private-devel
 %endif
 
 %description server-devel
@@ -311,19 +345,6 @@ Install this if you want to write database functions in Perl.
 %endif
 
 
-%if %plpython
-%package plpython
-Summary: The Python2 procedural language for PostgreSQL
-Requires: %{name}-server%{?_isa} = %precise_version
-Provides: %{name}-plpython2 = %precise_version
-
-%description plpython
-The postgresql-plpython package contains the PL/Python procedural language,
-which is an extension to the PostgreSQL database server.
-Install this if you want to write database functions in Python 2.
-%endif
-
-
 %if %plpython3
 %package plpython3
 Summary: The Python3 procedural language for PostgreSQL
@@ -371,11 +392,6 @@ Requires:	llvm => 5.0
 %endif
 Provides:	postgresql-llvmjit >= %{version}-%{release}
 
-%ifarch ppc64 ppc64le
-AutoReq:	0
-Requires:	advance-toolchain-%{atstring}-runtime
-%endif
-
 BuildRequires:	llvm-devel >= 5.0 clang-devel >= 5.0
 
 %description llvmjit
@@ -397,13 +413,13 @@ goal of accelerating analytics queries.
 %patch1 -p1
 %patch2 -p1
 %patch5 -p1
-%patch6 -p1
 %if %external_libpq
 %patch8 -p1
 %else
-%patch10 -p1
+%patch12 -p1
 %endif
 %patch9 -p1
+%patch10 -p1
 %patch11 -p1
 
 # We used to run autoconf here, but there's no longer any real need to,
@@ -433,6 +449,10 @@ find . -type f -name .gitignore | xargs rm
 
 
 %build
+# Avoid LTO on armv7hl as it runs out of memory
+%ifarch armv7hl s390x
+%define _lto_cflags %{nil}
+%endif
 # fail quickly and obviously if user tries to build as root
 %if %runselftest
 	if [ x"`id -u`" = x0 ]; then
@@ -463,11 +483,6 @@ CFLAGS="${CFLAGS:-%optflags}"
 CFLAGS=`echo $CFLAGS|xargs -n 1|grep -v ffast-math|xargs -n 100`
 export CFLAGS
 
-# plpython requires separate configure/build runs to build against python 2
-# versus python 3.  Our strategy is to do the python 3 run first, then make
-# distclean and do it again for the "normal" build.  Note that the installed
-# Makefile.global will reflect the python 2 build, which seems appropriate
-# since that's still considered the default plpython version.
 common_configure_options='
 	--disable-rpath
 %if %beta
@@ -518,49 +533,15 @@ common_configure_options='
 %if %llvmjit
 	--with-llvm
 %endif
-'
-
 %if %plpython3
+	--with-python
+%endif
+'
 
 export PYTHON=/usr/bin/python3
 
 # These configure options must match main build
-%configure $common_configure_options \
-	--with-python
-
-# Fortunately we don't need to build much except plpython itself.
-%global python_subdirs       \\\
-	src/pl/plpython          \\\
-	contrib/hstore_plpython  \\\
-	contrib/jsonb_plpython   \\\
-	contrib/ltree_plpython
-
-for dir in %python_subdirs; do
-	%make_build -C "$dir" all
-done
-
-# save built form in a directory that "make distclean" won't touch
-for dir in %python_subdirs; do
-	rm -rf "${dir}3" # shouldn't exist, unless --short-circuit
-	cp -a "$dir" "${dir}3"
-done
-
-# must also save this version of Makefile.global for later
-cp src/Makefile.global src/Makefile.global.python3
-
-make distclean
-
-%endif # %%plpython3
-
-PYTHON=/usr/bin/python2
-
-# Normal (python2) build begins here
-%configure $common_configure_options \
-%if %plpython
-	--with-python
-%endif
-
-unset PYTHON
+%configure $common_configure_options
 
 %make_build world
 
@@ -597,32 +578,6 @@ test_failure=0
 	run_testsuite "src/test/regress"
 	make clean -C "src/test/regress"
 	run_testsuite "src/pl"
-%if %plpython3
-	# must install Makefile.global that selects python3
-	mv src/Makefile.global src/Makefile.global.save
-	cp src/Makefile.global.python3 src/Makefile.global
-	touch -r src/Makefile.global.save src/Makefile.global
-
-	for dir in %python_subdirs; do
-		# because "make check" does "make install" on the whole tree,
-		# we must temporarily install *plpython3 dir as *plpython,
-		# since that is the subdirectory src/pl/Makefile knows about
-		mv "$dir" "${dir}2"
-		mv "${dir}3" "$dir"
-	done
-
-	for dir in %python_subdirs; do
-		run_testsuite "$dir"
-	done
-
-	for dir in %python_subdirs; do
-		# and clean up our mess
-		mv "$dir" "${dir}3"
-		mv "${dir}2" "${dir}"
-	done
-
-	mv -f src/Makefile.global.save src/Makefile.global
-%endif
 	run_testsuite "contrib"
 %endif
 
@@ -653,7 +608,6 @@ upgrade_configure ()
 	# its ideas about installation paths.
 
 	# The -fno-aggressive-loop-optimizations is hack for #993532
-	PYTHON="${PYTHON-/usr/bin/python2}" \
 	CFLAGS="$CFLAGS -fno-aggressive-loop-optimizations" ./configure \
 		--build=%{_build} \
 		--host=%{_host} \
@@ -672,35 +626,21 @@ upgrade_configure ()
 %if %pltcl
 		--with-tcl \
 %endif
+%if %plpython3
+		--with-python \
+%endif
 		--with-tclconfig=%_libdir \
 		--with-system-tzdata=/usr/share/zoneinfo \
 		"$@"
 }
 
-%if %plpython3
-	export PYTHON=/usr/bin/python3
-	upgrade_configure --with-python
-	for dir in %python_subdirs; do
-		# Previous version doesn't necessarily have this.
-		test -d "$dir" || continue
-		%make_build -C "$dir" all
-
-		# save aside the only one file which we are interested here
-		cp "$dir"/*plpython3.so ./
-	done
-	unset PYTHON
-	make distclean
-%endif
-
 	upgrade_configure \
-%if %plpython
-		--with-python
-%endif
 
 	make %{?_smp_mflags} all
 	make -C contrib %{?_smp_mflags} all
 	popd
-%endif # %%upgrade
+# endif upgrade
+%endif
 
 
 %install
@@ -726,26 +666,18 @@ make DESTDIR=$RPM_BUILD_ROOT install-world
 
 # We ship pg_config through libpq-devel
 mv $RPM_BUILD_ROOT/%_mandir/man1/pg_{,server_}config.1
+%if %external_libpq
 rm $RPM_BUILD_ROOT/%_includedir/pg_config*.h
 rm $RPM_BUILD_ROOT/%_includedir/libpq/libpq-fs.h
 rm $RPM_BUILD_ROOT/%_includedir/postgres_ext.h
 rm -r $RPM_BUILD_ROOT/%_includedir/pgsql/internal/
-%if ! %external_libpq
 rm $RPM_BUILD_ROOT/%_includedir/libpq-events.h
 rm $RPM_BUILD_ROOT/%_includedir/libpq-fe.h
 rm $RPM_BUILD_ROOT/%{_libdir}/pkgconfig/*.pc
 rm $RPM_BUILD_ROOT/%{_libdir}/libpq.so
+%else
+ln -s pg_server_config $RPM_BUILD_ROOT/%_bindir/pg_config
 rm $RPM_BUILD_ROOT/%{_libdir}/libpq.a
-%endif
-
-%if %plpython3
-	mv src/Makefile.global src/Makefile.global.save
-	cp src/Makefile.global.python3 src/Makefile.global
-	touch -r src/Makefile.global.save src/Makefile.global
-	for dir in %python_subdirs; do
-		%make_install -C "${dir}3"
-	done
-	mv -f src/Makefile.global.save src/Makefile.global
 %endif
 
 # make sure these directories exist even if we suppressed all contrib modules
@@ -790,12 +722,6 @@ rm $RPM_BUILD_ROOT/%{_datadir}/man/man1/ecpg.1
 	pushd postgresql-%{prevversion}
 	make DESTDIR=$RPM_BUILD_ROOT install
 	make -C contrib DESTDIR=$RPM_BUILD_ROOT install
-%if %plpython3
-	for file in *plpython3.so; do
-		install -m 755 "$file" \
-			$RPM_BUILD_ROOT/%_libdir/pgsql/postgresql-%prevmajorversion/lib
-	done
-%endif
 	popd
 
 	# remove stuff we don't actually need for upgrade purposes
@@ -837,6 +763,10 @@ rm $RPM_BUILD_ROOT/%{_datadir}/man/man1/ecpg.1
 EOF
 %endif
 
+# Let plugins use the same llvmjit settings as server has
+cat <<EOF >> $RPM_BUILD_ROOT%macrosdir/macros.%name
+%%postgresql_server_llvmjit %llvmjit
+EOF
 
 %if %test
 	# tests. There are many files included here that are unnecessary,
@@ -869,11 +799,9 @@ rm $RPM_BUILD_ROOT%{_libdir}/libpgfeutils.a
 rm -f $RPM_BUILD_ROOT%{_bindir}/pgsql/hstore_plperl.so
 %endif
 
-%if !%plpython
-rm -f $RPM_BUILD_ROOT%{_bindir}/pgsql/hstore_plpython2.so
+# no python2, yet installed, remove
 rm -f $RPM_BUILD_ROOT%{_datadir}/pgsql/extension/*_plpythonu*
 rm -f $RPM_BUILD_ROOT%{_datadir}/pgsql/extension/*_plpython2u*
-%endif
 
 %if %nls
 find_lang_bins ()
@@ -899,11 +827,7 @@ libpq%{private_soname}-5
 %if %plperl
 find_lang_bins plperl.lst plperl
 %endif
-%if %plpython
-find_lang_bins plpython.lst plpython
-%endif
 %if %plpython3
-# plpython3 shares message files with plpython
 find_lang_bins plpython3.lst plpython
 %endif
 %if %pltcl
@@ -970,9 +894,13 @@ make -C postgresql-setup-%{setup_version} check
 # so that extensions can use this dir.
 %dir %{_libdir}/pgsql/bitcode
 %endif
+
+
 %if ! %external_libpq
+%files private-libs
 %{_libdir}/libpq.so.*
 %endif
+
 
 %files docs
 %doc *-US.pdf
@@ -1011,10 +939,6 @@ make -C postgresql-setup-%{setup_version} check
 %{_datadir}/pgsql/extension/isn*
 %if %{plperl}
 %{_datadir}/pgsql/extension/jsonb_plperl*
-%endif
-%if %{plpython}
-%{_datadir}/pgsql/extension/jsonb_plpythonu*
-%{_datadir}/pgsql/extension/jsonb_plpython2u*
 %endif
 %if %{plpython3}
 %{_datadir}/pgsql/extension/jsonb_plpython3u*
@@ -1061,9 +985,6 @@ make -C postgresql-setup-%{setup_version} check
 %if %plperl
 %{_libdir}/pgsql/hstore_plperl.so
 %endif
-%if %plpython
-%{_libdir}/pgsql/hstore_plpython2.so
-%endif
 %if %plpython3
 %{_libdir}/pgsql/hstore_plpython3.so
 %endif
@@ -1072,17 +993,11 @@ make -C postgresql-setup-%{setup_version} check
 %if %plperl
 %{_libdir}/pgsql/jsonb_plperl.so
 %endif
-%if %plpython
-%{_libdir}/pgsql/jsonb_plpython2.so
-%endif
 %if %plpython3
 %{_libdir}/pgsql/jsonb_plpython3.so
 %endif
 %{_libdir}/pgsql/lo.so
 %{_libdir}/pgsql/ltree.so
-%if %plpython
-%{_libdir}/pgsql/ltree_plpython2.so
-%endif
 %if %plpython3
 %{_libdir}/pgsql/ltree_plpython3.so
 %endif
@@ -1215,6 +1130,21 @@ make -C postgresql-setup-%{setup_version} check
 %{macrosdir}/macros.%name
 
 
+%if ! %external_libpq
+%files private-devel
+%{_bindir}/pg_config
+%{_includedir}/libpq-events.h
+%{_includedir}/libpq-fe.h
+%{_includedir}/postgres_ext.h
+%{_includedir}/pgsql/internal/*.h
+%{_includedir}/pgsql/internal/libpq/pqcomm.h
+%{_includedir}/libpq/*.h
+%{_libdir}/pkgconfig/*.pc
+%{_libdir}/libpq.so
+%{_includedir}/pg_config*.h
+%endif
+
+
 %files test-rpm-macros
 %{_datadir}/postgresql-setup/postgresql_pkg_tests.sh
 %{macrosdir}/macros.%name-test
@@ -1269,14 +1199,6 @@ make -C postgresql-setup-%{setup_version} check
 %endif
 
 
-%if %plpython
-%files plpython -f plpython.lst
-%{_datadir}/pgsql/extension/plpython2*
-%{_datadir}/pgsql/extension/plpythonu*
-%{_libdir}/pgsql/plpython2.so
-%endif
-
-
 %if %plpython3
 %files plpython3 -f plpython3.lst
 %{_datadir}/pgsql/extension/plpython3*
@@ -1291,6 +1213,10 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Fri Jun 04 2021 Honza Horak <hhorak@redhat.com> - 13.3-3
+- Fix building with a private libpq
+- Pull other changes from main branch
+
 * Wed May 19 2021 Filip Januš <fjanus@redhat.com> - 13.3-2
 - Fix jit failure on s390x
 

@@ -1,0 +1,56 @@
+Fix subtransaction test for Python 3.10
+
+Starting with Python 3.10, the stacktrace looks differently:
+  -  PL/Python function "subtransaction_exit_subtransaction_in_with", line 3, in <module>
+  -    s.__exit__(None, None, None)
+  +  PL/Python function "subtransaction_exit_subtransaction_in_with", line 2, in <module>
+  +    with plpy.subtransaction() as s:
+Using try/except specifically makes the error look always the same.
+
+RHBZ: https://bugzilla.redhat.com/show_bug.cgi?id=1959080
+
+diff -up postgresql-13.2/src/pl/plpython/expected/plpython_subtransaction.out.patchnew postgresql-13.2/src/pl/plpython/expected/plpython_subtransaction.out
+--- postgresql-13.2/src/pl/plpython/expected/plpython_subtransaction.out.patchnew	2021-02-08 22:54:11.000000000 +0100
++++ postgresql-13.2/src/pl/plpython/expected/plpython_subtransaction.out	2021-05-11 21:04:25.085586012 +0200
+@@ -171,8 +171,11 @@ with plpy.subtransaction() as s:
+ $$ LANGUAGE plpythonu;
+ CREATE FUNCTION subtransaction_exit_subtransaction_in_with() RETURNS void
+ AS $$
+-with plpy.subtransaction() as s:
+-    s.__exit__(None, None, None)
++try:
++    with plpy.subtransaction() as s:
++        s.__exit__(None, None, None)
++except ValueError as e:
++    raise ValueError(e)
+ $$ LANGUAGE plpythonu;
+ SELECT subtransaction_exit_without_enter();
+ ERROR:  ValueError: this subtransaction has not been entered
+@@ -224,8 +227,8 @@ PL/Python function "subtransaction_enter
+ SELECT subtransaction_exit_subtransaction_in_with();
+ ERROR:  ValueError: this subtransaction has already been exited
+ CONTEXT:  Traceback (most recent call last):
+-  PL/Python function "subtransaction_exit_subtransaction_in_with", line 3, in <module>
+-    s.__exit__(None, None, None)
++  PL/Python function "subtransaction_exit_subtransaction_in_with", line 6, in <module>
++    raise ValueError(e)
+ PL/Python function "subtransaction_exit_subtransaction_in_with"
+ -- Make sure we don't get a "current transaction is aborted" error
+ SELECT 1 as test;
+diff -up postgresql-13.2/src/pl/plpython/sql/plpython_subtransaction.sql.patchnew postgresql-13.2/src/pl/plpython/sql/plpython_subtransaction.sql
+--- postgresql-13.2/src/pl/plpython/sql/plpython_subtransaction.sql.patchnew	2021-02-08 22:54:11.000000000 +0100
++++ postgresql-13.2/src/pl/plpython/sql/plpython_subtransaction.sql	2021-05-11 21:02:34.386415376 +0200
+@@ -121,8 +121,11 @@ $$ LANGUAGE plpythonu;
+ 
+ CREATE FUNCTION subtransaction_exit_subtransaction_in_with() RETURNS void
+ AS $$
+-with plpy.subtransaction() as s:
+-    s.__exit__(None, None, None)
++try:
++    with plpy.subtransaction() as s:
++        s.__exit__(None, None, None)
++except ValueError as e:
++    raise ValueError(e)
+ $$ LANGUAGE plpythonu;
+ 
+ SELECT subtransaction_exit_without_enter();
