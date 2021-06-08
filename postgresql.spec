@@ -671,10 +671,6 @@ rm $RPM_BUILD_ROOT/%_includedir/pg_config*.h
 rm $RPM_BUILD_ROOT/%_includedir/libpq/libpq-fs.h
 rm $RPM_BUILD_ROOT/%_includedir/postgres_ext.h
 rm -r $RPM_BUILD_ROOT/%_includedir/pgsql/internal/
-rm $RPM_BUILD_ROOT/%_includedir/libpq-events.h
-rm $RPM_BUILD_ROOT/%_includedir/libpq-fe.h
-rm $RPM_BUILD_ROOT/%{_libdir}/pkgconfig/*.pc
-rm $RPM_BUILD_ROOT/%{_libdir}/libpq.so
 %else
 ln -s pg_server_config $RPM_BUILD_ROOT/%_bindir/pg_config
 rm $RPM_BUILD_ROOT/%{_libdir}/libpq.a
@@ -824,6 +820,7 @@ find_lang_bins main.lst \
 %if ! %external_libpq
 libpq%{private_soname}-5
 %endif
+
 %if %plperl
 find_lang_bins plperl.lst plperl
 %endif
