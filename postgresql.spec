@@ -278,7 +278,12 @@ Requires: krb5-devel
 %if %llvmjit
 Requires: clang-devel llvm-devel
 %endif
-%if ! %external_libpq
+%if %external_libpq
+# Some extensions require libpq
+# Do not make them care about whether server uses private or system-wide
+# libpq, simply let the server pull the correct one
+Requires: libpq-devel
+%else
 Requires: %{name}-private-devel
 %endif
 
