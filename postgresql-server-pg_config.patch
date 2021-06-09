@@ -47,12 +47,12 @@ diff -up postgresql-13.1/src/bin/pg_config/Makefile.patch9 postgresql-13.1/src/b
  	rm -rf tmp_check
  
  check:
-diff -up postgresql-13.1/src/bin/pg_config/nls.mk.patch9 postgresql-13.1/src/bin/pg_config/nls.mk
---- postgresql-13.1/src/bin/pg_config/nls.mk.patch9	2020-11-18 09:28:30.885453275 +0100
-+++ postgresql-13.1/src/bin/pg_config/nls.mk	2020-11-18 09:32:00.735599526 +0100
+diff -ru postgresql-14beta1/src/bin/pg_config/nls.mk postgresql-14beta1_old/src/bin/pg_config/nls.mk
+--- postgresql-14beta1/src/bin/pg_config/nls.mk	2021-05-17 22:11:18.000000000 +0200
++++ postgresql-14beta1_old/src/bin/pg_config/nls.mk	2021-06-09 06:31:11.481443907 +0200
 @@ -1,4 +1,4 @@
  # src/bin/pg_config/nls.mk
 -CATALOG_NAME     = pg_config
 +CATALOG_NAME     = pg_server_config
- AVAIL_LANGUAGES  = cs de es fr he it ja ko pl pt_BR ru sv tr uk vi zh_CN
+ AVAIL_LANGUAGES  = cs de el es fr he it ja ko nb pl pt_BR ro ru sv ta tr uk vi zh_CN zh_TW
  GETTEXT_FILES    = pg_config.c ../../common/config_info.c ../../common/exec.c
