@@ -6,9 +6,9 @@ rhbz#1618698 change, rather provide pg_server_config binary, which int urn means
 that we'll have to fix only a minimal set of packages which really build
 PostgreSQL server modules.
 
-diff -up postgresql-13.1/src/bin/pg_config/Makefile.patch9 postgresql-13.1/src/bin/pg_config/Makefile
---- postgresql-13.1/src/bin/pg_config/Makefile.patch9	2020-11-18 09:28:30.885453275 +0100
-+++ postgresql-13.1/src/bin/pg_config/Makefile	2020-11-18 09:31:33.926325327 +0100
+diff -up postgresql-14beta2/src/bin/pg_config/Makefile.patch9 postgresql-14beta2/src/bin/pg_config/Makefile
+--- postgresql-14beta2/src/bin/pg_config/Makefile.patch9	2021-06-21 23:07:55.000000000 +0200
++++ postgresql-14beta2/src/bin/pg_config/Makefile	2021-06-25 19:38:30.386625028 +0200
 @@ -11,6 +11,8 @@
  PGFILEDESC = "pg_config - report configuration information"
  PGAPPICON=win32
@@ -47,12 +47,12 @@ diff -up postgresql-13.1/src/bin/pg_config/Makefile.patch9 postgresql-13.1/src/b
  	rm -rf tmp_check
  
  check:
-diff -up postgresql-13.1/src/bin/pg_config/nls.mk.patch9 postgresql-13.1/src/bin/pg_config/nls.mk
---- postgresql-13.1/src/bin/pg_config/nls.mk.patch9	2020-11-18 09:28:30.885453275 +0100
-+++ postgresql-13.1/src/bin/pg_config/nls.mk	2020-11-18 09:32:00.735599526 +0100
+diff -up postgresql-14beta2/src/bin/pg_config/nls.mk.patch9 postgresql-14beta2/src/bin/pg_config/nls.mk
+--- postgresql-14beta2/src/bin/pg_config/nls.mk.patch9	2021-06-25 19:38:30.386625028 +0200
++++ postgresql-14beta2/src/bin/pg_config/nls.mk	2021-06-25 19:39:21.891867538 +0200
 @@ -1,4 +1,4 @@
  # src/bin/pg_config/nls.mk
 -CATALOG_NAME     = pg_config
 +CATALOG_NAME     = pg_server_config
- AVAIL_LANGUAGES  = cs de es fr he it ja ko pl pt_BR ru sv tr uk vi zh_CN
+ AVAIL_LANGUAGES  = cs de el es fr he it ja ko nb pl pt_BR ro ru sv ta tr uk vi zh_CN zh_TW
  GETTEXT_FILES    = pg_config.c ../../common/config_info.c ../../common/exec.c
