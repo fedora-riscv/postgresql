@@ -61,7 +61,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 13
 Version: %{majorversion}.3
-Release: 3%{?dist}
+Release: 4%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -630,6 +630,31 @@ upgrade_configure ()
 %endif
 %if %pltcl
 		--with-tcl \
+%endif
+%if %ldap
+       --with-ldap \
+%endif
+%if %pam
+       --with-pam \
+%endif
+%if %kerberos
+       --with-gssapi \
+%endif
+%if %uuid
+       --with-ossp-uuid \
+%endif
+%if %xml
+       --with-libxml \
+       --with-libxslt \
+%endif
+%if %nls
+       --enable-nls \
+%endif
+%if %sdt
+       --enable-dtrace \
+%endif
+%if %selinux
+       --with-selinux \
 %endif
 %if %plpython3
 		--with-python \
@@ -1215,6 +1240,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Tue Jul 20 2021  Filip Januš <fjanus@redhat.com> - 13.3-4
+- Enable ssl and other features for upgrade server
+
 * Fri Jun 04 2021 Honza Horak <hhorak@redhat.com> - 13.3-3
 - Fix building with a private libpq
 - Pull other changes from main branch
