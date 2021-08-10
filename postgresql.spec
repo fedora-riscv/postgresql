@@ -59,8 +59,8 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 13
-Version: %{majorversion}.3
-Release: 2%{?dist}
+Version: %{majorversion}.4
+Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -72,7 +72,7 @@ Url: http://www.postgresql.org/
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
 %global prevmajorversion 12
-%global prevversion %{prevmajorversion}.7
+%global prevversion %{prevmajorversion}.8
 %global prev_prefix %{_libdir}/pgsql/postgresql-%{prevmajorversion}
 %global precise_version %{?epoch:%epoch:}%version-%release
 
@@ -1127,6 +1127,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Thu Aug 12 2021 Filip Januš <fjanus@redhat.com> - 13.4-1
+- Update to 13.4
+
 * Wed May 26 2021 Tom Stellard <tstellar@redhat.com> - 13.3-2
 - Rebuild for LLVM 12.0.0-final
 
