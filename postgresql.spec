@@ -68,7 +68,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 11
-Version: %{majorversion}.12
+Version: %{majorversion}.13
 %{?dirty_hack_epoch}
 Release: 1%{?dist}
 
@@ -83,7 +83,7 @@ Url: http://www.postgresql.org/
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
 %global prevmajorversion 10
-%global prevversion %{prevmajorversion}.17
+%global prevversion %{prevmajorversion}.18
 %global prev_prefix %{_libdir}/pgsql/postgresql-%{prevmajorversion}
 %global precise_version %{?epoch:%epoch:}%version-%release
 
@@ -1304,6 +1304,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Thu Aug 12 2021 Filip Januš <fjanus@redhat.com> - 11.13-1
+- Update to 11.13
+
 * Fri May 21 2021 Filip Januš <fjanus@redhat.com> - 11.12-1
 - Update to 11.12
 
