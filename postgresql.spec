@@ -60,8 +60,8 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 13
-Version: %{majorversion}.3
-Release: 5%{?dist}
+Version: %{majorversion}.4
+Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -73,7 +73,7 @@ Url: http://www.postgresql.org/
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
 %global prevmajorversion 12
-%global prevversion %{prevmajorversion}.7
+%global prevversion %{prevmajorversion}.8
 %global prev_prefix %{_libdir}/pgsql/postgresql-%{prevmajorversion}
 %global precise_version %{?epoch:%epoch:}%version-%release
 
@@ -111,7 +111,6 @@ Patch9: postgresql-server-pg_config.patch
 # Upstream bug #16971: https://www.postgresql.org/message-id/16971-5d004d34742a3d35%40postgresql.org
 # rhbz#1940964
 Patch10: postgresql-datalayout-mismatch-on-s390.patch
-Patch11: postgresql-subtransaction-test.patch
 Patch12: postgresql-no-libecpg.patch
 
 BuildRequires: make
@@ -427,7 +426,6 @@ goal of accelerating analytics queries.
 %endif
 %patch9 -p1
 %patch10 -p1
-%patch11 -p1
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -1242,6 +1240,11 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Thu Aug 12 2021 Filip Januš <fjanus@rehdat.com> - 13.4-1
+- Update to 13.4
+- Disable postgresql-subtransaction-test.patch
+  now succeeds without patch
+
 * Fri Jul 23 2021 Fedora Release Engineering <releng@fedoraproject.org> - 13.3-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
 
@@ -1306,7 +1309,7 @@ make -C postgresql-setup-%{setup_version} check
   Fixes CVE-2020-25695
   Fixes CVE-2020-25696
 
-* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 12.4-5
+* Wed Jan 07 2021 Fedora Release Engineering <releng@fedoraproject.org> - 12.4-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
 
 * Mon Nov 16 2020 Honza Horak <hhorak@redhat.com> - 12.4-4
