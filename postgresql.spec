@@ -110,6 +110,7 @@ Patch6: postgresql-man.patch
 Patch8: postgresql-external-libpq.patch
 Patch9: postgresql-server-pg_config.patch
 Patch10: postgresql-10.15-contrib-dblink-expected-out.patch
+Patch11: postgresql-datalayout-mismatch-on-s390.patch
 
 BuildRequires: gcc
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
@@ -399,6 +400,7 @@ goal of accelerating analytics queries.
 %if 0%{?fedora} >= 34
 %patch10 -p1
 %endif
+%patch11 -p1
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -1262,6 +1264,7 @@ make -C postgresql-setup-%{setup_version} check
 %changelog
 * Thu Aug 12 2021 Filip Januš <fjanus@redhat.com> - 12.8-1
 - Update to 12.8
+- Backport postgresql-datalayout-mismatch-on-s390.patch for PG12
 
 * Wed Jan 13 2021 Honza Horak <hhorak@redhat.com> - 12.5-1
 - Update to 12.5
