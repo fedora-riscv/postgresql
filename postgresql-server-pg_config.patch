@@ -6,9 +6,9 @@ rhbz#1618698 change, rather provide pg_server_config binary, which int urn means
 that we'll have to fix only a minimal set of packages which really build
 PostgreSQL server modules.
 
-diff -up postgresql-14beta2/src/bin/pg_config/Makefile.patch9 postgresql-14beta2/src/bin/pg_config/Makefile
---- postgresql-14beta2/src/bin/pg_config/Makefile.patch9	2021-06-21 23:07:55.000000000 +0200
-+++ postgresql-14beta2/src/bin/pg_config/Makefile	2021-06-25 19:38:30.386625028 +0200
+diff -ur postgresql-14rc1/src/bin/pg_config/Makefile pgsql14/src/bin/pg_config/Makefile
+--- postgresql-14rc1/src/bin/pg_config/Makefile	2021-09-20 23:33:01.000000000 +0200
++++ pgsql14/src/bin/pg_config/Makefile	2021-09-22 10:48:06.484093152 +0200
 @@ -11,6 +11,8 @@
  PGFILEDESC = "pg_config - report configuration information"
  PGAPPICON=win32
@@ -18,7 +18,7 @@ diff -up postgresql-14beta2/src/bin/pg_config/Makefile.patch9 postgresql-14beta2
  subdir = src/bin/pg_config
  top_builddir = ../../..
  include $(top_builddir)/src/Makefile.global
-@@ -19,22 +21,22 @@ OBJS = \
+@@ -19,22 +21,22 @@
  	$(WIN32RES) \
  	pg_config.o
  
@@ -47,12 +47,12 @@ diff -up postgresql-14beta2/src/bin/pg_config/Makefile.patch9 postgresql-14beta2
  	rm -rf tmp_check
  
  check:
-diff -up postgresql-14beta2/src/bin/pg_config/nls.mk.patch9 postgresql-14beta2/src/bin/pg_config/nls.mk
---- postgresql-14beta2/src/bin/pg_config/nls.mk.patch9	2021-06-25 19:38:30.386625028 +0200
-+++ postgresql-14beta2/src/bin/pg_config/nls.mk	2021-06-25 19:39:21.891867538 +0200
+diff -ur postgresql-14rc1/src/bin/pg_config/nls.mk pgsql14/src/bin/pg_config/nls.mk
+--- postgresql-14rc1/src/bin/pg_config/nls.mk	2021-09-20 23:33:01.000000000 +0200
++++ pgsql14/src/bin/pg_config/nls.mk	2021-09-22 10:48:51.492460567 +0200
 @@ -1,4 +1,4 @@
  # src/bin/pg_config/nls.mk
 -CATALOG_NAME     = pg_config
 +CATALOG_NAME     = pg_server_config
- AVAIL_LANGUAGES  = cs de el es fr he it ja ko nb pl pt_BR ro ru sv ta tr uk vi zh_CN zh_TW
+ AVAIL_LANGUAGES  = cs de el es fr he it ja ko pl pt_BR ru sv tr uk vi zh_CN
  GETTEXT_FILES    = pg_config.c ../../common/config_info.c ../../common/exec.c
