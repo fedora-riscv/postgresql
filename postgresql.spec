@@ -64,7 +64,7 @@ Name: postgresql
 %global majorversion 10
 Version: %{majorversion}.15
 %{?dirty_hack_epoch}
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -113,6 +113,10 @@ Patch6: postgresql-man.patch
 Patch8: postgresql-external-libpq.patch
 Patch9: postgresql-server-pg_config.patch
 Patch10: postgresql-10.15-contrib-dblink-expected-out.patch
+# Upstream patch - it's assumed removal of this patch with the next upstream release
+Patch13: postgresql-pgcrypto-openssl3-init.patch
+# This patch disables deprecated ciphers in the test suite
+Patch14: postgresql-pgcrypto-openssl3-tests.patch
 
 BuildRequires: gcc
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
@@ -406,7 +410,8 @@ benchmarks.
 %if 0%{?fedora} >= 34
 %patch10 -p1
 %endif
-
+%patch13 -p1
+%patch14 -p1
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
 
@@ -1268,6 +1273,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Mon Oct 18 2021 Marek Kulik <mkulik@redhat.com> - 10.15-2
+- Backporting commit (Fix openssl3 build issue): 21b8d7a
+
 * Wed Jan 13 2021 Honza Horak <hhorak@redhat.com> - 10.15-1
 - Update to 10.15
   Also fixes:
