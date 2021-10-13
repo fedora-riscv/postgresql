@@ -60,7 +60,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 14
-Version: %{majorversion}
+Version: %{majorversion}.0
 Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
@@ -1221,6 +1221,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Wed oct 13 2021 Filip Januš <fjanus@redhat.com> - 14.0-2
+- Fix typo in specfile
+
 * Fri Oct 01 2021 Filip Januš <fjanus@redhat.com> - 14.0-1
 - Update to released v14.0
 
