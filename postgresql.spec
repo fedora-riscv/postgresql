@@ -62,9 +62,9 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 10
-Version: %{majorversion}.15
+Version: %{majorversion}.18
 %{?dirty_hack_epoch}
-Release: 2%{?dist}
+Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -77,7 +77,7 @@ Url: http://www.postgresql.org/
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
 %global prevmajorversion 9.6
-%global prevversion %{prevmajorversion}.20
+%global prevversion %{prevmajorversion}.23
 %global prev_prefix %{_libdir}/pgsql/postgresql-%{prevmajorversion}
 %global precise_version %{?epoch:%epoch:}%version-%release
 
@@ -1273,6 +1273,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Mon Oct 18 2021 Marek Kulik <mkulik@redhat.com> - 10.18-1
+- Update to 10.18
+
 * Mon Oct 18 2021 Marek Kulik <mkulik@redhat.com> - 10.15-2
 - Backporting commit (Fix openssl3 build issue): 21b8d7a
 
