@@ -61,7 +61,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 12
 Version: %{majorversion}.8
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -1262,6 +1262,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Mon Oct 25 2021 Filip Januš <fjanus@redhat.com> - 12.8-2
+- Correct path to tmpfiles
+
 * Thu Aug 12 2021 Filip Januš <fjanus@redhat.com> - 12.8-1
 - Update to 12.8
 - Backport postgresql-datalayout-mismatch-on-s390.patch for PG12
