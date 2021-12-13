@@ -62,7 +62,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 10
-Version: %{majorversion}.18
+Version: %{majorversion}.19
 %{?dirty_hack_epoch}
 Release: 1%{?dist}
 
@@ -77,7 +77,7 @@ Url: http://www.postgresql.org/
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
 %global prevmajorversion 9.6
-%global prevversion %{prevmajorversion}.23
+%global prevversion %{prevmajorversion}.24
 %global prev_prefix %{_libdir}/pgsql/postgresql-%{prevmajorversion}
 %global precise_version %{?epoch:%epoch:}%version-%release
 
@@ -113,8 +113,6 @@ Patch6: postgresql-man.patch
 Patch8: postgresql-external-libpq.patch
 Patch9: postgresql-server-pg_config.patch
 Patch10: postgresql-10.15-contrib-dblink-expected-out.patch
-# Upstream patch - it's assumed removal of this patch with the next upstream release
-Patch13: postgresql-pgcrypto-openssl3-init.patch
 # This patch disables deprecated ciphers in the test suite
 Patch14: postgresql-pgcrypto-openssl3-tests.patch
 
@@ -410,7 +408,6 @@ benchmarks.
 %if 0%{?fedora} >= 34
 %patch10 -p1
 %endif
-%patch13 -p1
 %patch14 -p1
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -1273,6 +1270,12 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Mon Dec 13 2021 Marek Kulik <mkulik@redhat.com> - 10.19-1
+- Update to 10.19
+- Remove patch postgresql-pgcrypto-openssl3-init.patch - already in upstream
+  Fixes:
+    CVE-2021-23214
+
 * Mon Oct 18 2021 Marek Kulik <mkulik@redhat.com> - 10.18-1
 - Update to 10.18
 
