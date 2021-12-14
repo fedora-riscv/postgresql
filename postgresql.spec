@@ -60,7 +60,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 13
-Version: %{majorversion}.4
+Version: %{majorversion}.5
 Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
@@ -73,11 +73,11 @@ Url: http://www.postgresql.org/
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
 %global prevmajorversion 12
-%global prevversion %{prevmajorversion}.8
+%global prevversion %{prevmajorversion}.9
 %global prev_prefix %{_libdir}/pgsql/postgresql-%{prevmajorversion}
 %global precise_version %{?epoch:%epoch:}%version-%release
 
-%global setup_version 8.5
+%global setup_version 8.6
 
 %global service_name postgresql.service
 
@@ -1238,6 +1238,10 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Tue Dec 14 2021 Marek Kulik <mkulik@redhat.com> - 13.5-1
+- Update to 13.5
+- Update postgresql-setup to v8.6
+
 * Thu Aug 12 2021 Filip Januš <fjanus@redhat.com> - 13.4-1
 - Update to 13.4
 - Disable patch postgresql-subtransaction-test.patch
