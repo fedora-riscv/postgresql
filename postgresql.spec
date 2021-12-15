@@ -29,7 +29,7 @@
 # The base package, the libs package, the devel package, and the server package
 # always get built.
 
-%{!?beta:%global beta 1}
+%{!?beta:%global beta 0}
 
 %{!?test:%global test 1}
 %{!?llvmjit:%global llvmjit 1}
@@ -60,7 +60,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 14
-Version: %{majorversion}.0
+Version: %{majorversion}.1
 Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
@@ -73,11 +73,11 @@ Url: http://www.postgresql.org/
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
 %global prevmajorversion 13
-%global prevversion %{prevmajorversion}.3
+%global prevversion %{prevmajorversion}.5
 %global prev_prefix %{_libdir}/pgsql/postgresql-%{prevmajorversion}
 %global precise_version %{?epoch:%epoch:}%version-%release
 
-%global setup_version 8.5
+%global setup_version 8.7
 
 %global service_name postgresql.service
 
@@ -1221,6 +1221,10 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Tue Dec 14 2021 Marek Kulik <mkulik@redhat.com> - 14.1-1
+- Update postgresql to 14.1
+- Update postgresql-setup to 8.7
+
 * Wed oct 13 2021 Filip Januš <fjanus@redhat.com> - 14.0-2
 - Fix typo in specfile
 
