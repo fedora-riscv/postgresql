@@ -68,7 +68,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 11
-Version: %{majorversion}.14
+Version: %{majorversion}.15
 %{?dirty_hack_epoch}
 Release: 1%{?dist}
 
@@ -83,11 +83,11 @@ Url: http://www.postgresql.org/
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
 %global prevmajorversion 10
-%global prevversion %{prevmajorversion}.19
+%global prevversion %{prevmajorversion}.20
 %global prev_prefix %{_libdir}/pgsql/postgresql-%{prevmajorversion}
 %global precise_version %{?epoch:%epoch:}%version-%release
 
-%global setup_version 8.4
+%global setup_version 8.7
 
 %global service_name postgresql.service
 Source0: https://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2
@@ -1304,6 +1304,10 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Wed Feb 16 2022 Filip Janus <fjanus@redhat.com> - 11.15-1
+- Update to 11.15
+- Update to postgresql-setup v8.7
+
 * Thu Dec 14 2021 Marek Kulik <mkulik@redhat.com> - 11.14-1
 - Update to 11.14
 
