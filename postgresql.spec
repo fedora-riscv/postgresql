@@ -62,7 +62,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 10
-Version: %{majorversion}.19
+Version: %{majorversion}.20
 %{?dirty_hack_epoch}
 Release: 1%{?dist}
 
@@ -81,7 +81,7 @@ Url: http://www.postgresql.org/
 %global prev_prefix %{_libdir}/pgsql/postgresql-%{prevmajorversion}
 %global precise_version %{?epoch:%epoch:}%version-%release
 
-%global setup_version 8.4
+%global setup_version 8.7
 
 %global service_name postgresql.service
 Source0: https://ftp.postgresql.org/pub/source/v%{version}/postgresql-%{version}.tar.bz2
@@ -1270,6 +1270,10 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Wed Feb 16 2022 Filip Janus <fjanus@redhat.com> - 10.20-1
+- Update to 10.20
+- Update to postgresql-setup v8.7
+
 * Mon Dec 13 2021 Marek Kulik <mkulik@redhat.com> - 10.19-1
 - Update to 10.19
 - Remove patch postgresql-pgcrypto-openssl3-init.patch - already in upstream
