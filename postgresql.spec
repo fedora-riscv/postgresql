@@ -65,12 +65,16 @@
 %define _lto_cflags %{nil}
 %endif
 
+# Don't create note file, added package_note_flags to linker by redhat-rpm-config
+# will cause issue during extension build because it'll be inherited.
+%undefine _package_note_file
+
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 11
 Version: %{majorversion}.15
 %{?dirty_hack_epoch}
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -1306,6 +1310,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Wed Mar 02 2022 Filip Janus <fjanus@redhat.com> - 11.15-2
+- Disable package note generation due to extension build issue.
+
 * Wed Feb 16 2022 Filip Janus <fjanus@redhat.com> - 11.15-1
 - Update to 11.15
 - Update to postgresql-setup v8.7
