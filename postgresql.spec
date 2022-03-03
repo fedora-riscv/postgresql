@@ -57,11 +57,15 @@
 # https://fedoraproject.org/wiki/Packaging:Guidelines#Packaging_of_Additional_RPM_Macros
 %global macrosdir %(d=%{_rpmconfigdir}/macros.d; [ -d $d ] || d=%{_sysconfdir}/rpm; echo $d)
 
+# Don't create note file, added package_note_flags to linker by redhat-rpm-config
+# will cause issue during extension build because it'll be inherited.
+%undefine _package_note_file
+
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 12
 Version: %{majorversion}.10
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -1262,6 +1266,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Thu Mar 03 2022 Filip Janus <fjanus@redhat.com> - 12.10-2
+- Disable package note generation due to extension build issue.
+
 * Wed Feb 16 2022 Filip Janus <fjanus@redhat.com> - 12.10-1
 - Update to 12.10
 - Update to postgresql-setup v8.7
