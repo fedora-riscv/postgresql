@@ -62,7 +62,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 10
-Version: %{majorversion}.20
+Version: %{majorversion}.21
 %{?dirty_hack_epoch}
 Release: 1%{?dist}
 
@@ -1272,6 +1272,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Tue Jun 14 2022 Filip Janus <fjanus@redhat.com> - 10.21-1
+- Update to 10.21
+
 * Wed Feb 16 2022 Filip Janus <fjanus@redhat.com> - 10.20-1
 - Update to 10.20
 - Update to postgresql-setup v8.7
