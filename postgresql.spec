@@ -72,9 +72,9 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 11
-Version: %{majorversion}.15
+Version: %{majorversion}.16
 %{?dirty_hack_epoch}
-Release: 2%{?dist}
+Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -87,7 +87,7 @@ Url: http://www.postgresql.org/
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
 %global prevmajorversion 10
-%global prevversion %{prevmajorversion}.20
+%global prevversion %{prevmajorversion}.21
 %global prev_prefix %{_libdir}/pgsql/postgresql-%{prevmajorversion}
 %global precise_version %{?epoch:%epoch:}%version-%release
 
@@ -1310,6 +1310,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Tue Jun 14 2022 Filip Januš <fjanus@redhat.com> - 11.16-1
+- Rebase to 11.16
+
 * Wed Mar 02 2022 Filip Janus <fjanus@redhat.com> - 11.15-2
 - Disable package note generation due to extension build issue.
 
