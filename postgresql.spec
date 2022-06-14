@@ -60,8 +60,8 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 13
-Version: %{majorversion}.4
-Release: 3%{?dist}
+Version: %{majorversion}.7
+Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -73,7 +73,7 @@ Url: http://www.postgresql.org/
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
 %global prevmajorversion 12
-%global prevversion %{prevmajorversion}.8
+%global prevversion %{prevmajorversion}.11
 %global prev_prefix %{_libdir}/pgsql/postgresql-%{prevmajorversion}
 %global precise_version %{?epoch:%epoch:}%version-%release
 
@@ -1240,6 +1240,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Tue Jun 14 2022 Filip Januš <fjanus@redhat.com> - 13.7-1
+- Rebase to 13.7
+
 * Tue Jan 11 2022 Filip Janus <fjanus@redhat.com> - 13.4-3
 - Update postgresql-setup to version 8.7
 
