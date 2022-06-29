@@ -65,7 +65,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 12
 Version: %{majorversion}.11
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -1268,6 +1268,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Wed Jun 29 2022 Filip Januš <fjansu@redhat.com> - 12.11-2
+- Rebuild based on https://bugzilla.redhat.com/show_bug.cgi?id=2100813
+
 * Tue Jun 14 2022 Filip Januš <fjanus@redhat.com> - 12.11-1
 - Rebase to 12.11
 
