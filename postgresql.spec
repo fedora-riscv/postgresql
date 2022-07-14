@@ -116,12 +116,6 @@ Patch9: postgresql-server-pg_config.patch
 # rhbz#1940964
 Patch10: postgresql-datalayout-mismatch-on-s390.patch
 Patch12: postgresql-no-libecpg.patch
-# This patch disables deprecated ciphers in the test suite
-Patch14: postgresql-pgcrypto-openssl3-tests.patch
-# Fix compatibility with Python 3.11
-Patch15: postgresql-SPI-s-handling-of-errors-during-transaction-comm.patch
-# Fix compatibility with Perl 5.36
-Patch16: postgresql-pl-perl-test-case.patch
 
 BuildRequires: make
 BuildRequires: lz4-devel
@@ -439,9 +433,6 @@ goal of accelerating analytics queries.
 %endif
 %patch9 -p1
 %patch10 -p1
-##%patch14 -p1
-##%patch15 -p1
-##%patch16 -p1
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
 
@@ -1268,6 +1259,7 @@ make -C postgresql-setup-%{setup_version} check
 %changelog
 * Tue Jul 12 2022 Filip Janus <fjanus@redhat.com> - 15.beta2-1
 - Initilal build of postgresql 15
+- Remove obsolete patches
 
 * Thu Jul 07 2022 Filip Januš <fjanus@redhat.com> - 14.3-6
 - enable lz4
