@@ -63,9 +63,9 @@
 
 Summary: PostgreSQL client programs
 Name: postgresql
-%global majorversion 14
-Version: %{majorversion}.3
-Release: 6%{?dist}
+%global majorversion 15
+Version: %{majorversion}beta2
+Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -76,8 +76,8 @@ Url: http://www.postgresql.org/
 # in-place upgrade of an old database.  In most cases it will not be critical
 # that this be kept up with the latest minor release of the previous series;
 # but update when bugs affecting pg_dump output are fixed.
-%global prevmajorversion 13
-%global prevversion %{prevmajorversion}.7
+%global prevmajorversion 14
+%global prevversion %{prevmajorversion}.3
 %global prev_prefix %{_libdir}/pgsql/postgresql-%{prevmajorversion}
 %global precise_version %{?epoch:%epoch:}%version-%release
 
@@ -439,9 +439,9 @@ goal of accelerating analytics queries.
 %endif
 %patch9 -p1
 %patch10 -p1
-%patch14 -p1
-%patch15 -p1
-%patch16 -p1
+##%patch14 -p1
+##%patch15 -p1
+##%patch16 -p1
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
 
@@ -980,6 +980,7 @@ make -C postgresql-setup-%{setup_version} check
 %{_datadir}/pgsql/extension/intagg*
 %{_datadir}/pgsql/extension/intarray*
 %{_datadir}/pgsql/extension/isn*
+%{_datadir}/pgsql/extension/pg_walinspect*
 %if %{plperl}
 %{_datadir}/pgsql/extension/jsonb_plperl*
 %endif
@@ -1027,6 +1028,9 @@ make -C postgresql-setup-%{setup_version} check
 %{_libdir}/pgsql/file_fdw.so
 %{_libdir}/pgsql/fuzzystrmatch.so
 %{_libdir}/pgsql/hstore.so
+%{_libdir}/pgsql/pg_walinspect.so
+%{_libdir}/pgsql/basic_archive.so
+%{_libdir}/pgsql/basebackup_to_shell.so
 %if %plperl
 %{_libdir}/pgsql/hstore_plperl.so
 %endif
@@ -1262,6 +1266,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Tue Jul 12 2022 Filip Janus <fjanus@redhat.com> - 15.beta2-1
+- Initilal build of postgresql 15
+
 * Thu Jul 07 2022 Filip Januš <fjanus@redhat.com> - 14.3-6
 - enable lz4
 
