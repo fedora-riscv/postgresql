@@ -65,7 +65,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 12
 Version: %{majorversion}.11
-Release: 2%{?dist}
+Release: 3%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -115,6 +115,8 @@ Patch8: postgresql-external-libpq.patch
 Patch9: postgresql-server-pg_config.patch
 Patch10: postgresql-10.15-contrib-dblink-expected-out.patch
 Patch11: postgresql-datalayout-mismatch-on-s390.patch
+Patch12: postgresql-pl-perl-test-case.patch
+Patch13: postgresql-SPI-s-handling-of-errors-during-transaction-comm.patch
 
 BuildRequires: gcc
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
@@ -405,6 +407,9 @@ goal of accelerating analytics queries.
 %patch10 -p1
 %endif
 %patch11 -p1
+%patch12 -p1
+%patch13 -p1
+
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -1268,7 +1273,11 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
-* Wed Jun 29 2022 Filip Januš <fjansu@redhat.com> - 12.11-2
+* Tue Jul 19 2022 Filip Janus <fjanus@redhat.com> - 12.11-3
+- Fix handling of errors during transaction with Python 3.11
+- Fix compatibility with Perl 5.36
+
+* Wed Jun 29 2022 Filip Januš <fjanus@redhat.com> - 12.11-2
 - Rebuild based on https://bugzilla.redhat.com/show_bug.cgi?id=2100813
 
 * Tue Jun 14 2022 Filip Januš <fjanus@redhat.com> - 12.11-1
