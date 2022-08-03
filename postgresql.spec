@@ -61,7 +61,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 14
 Version: %{majorversion}.3
-Release: 2%{?dist}
+Release: 3%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -113,6 +113,8 @@ Patch9: postgresql-server-pg_config.patch
 Patch10: postgresql-datalayout-mismatch-on-s390.patch
 Patch12: postgresql-no-libecpg.patch
 Patch13: postgresql-pgcrypto-openssl3-tests.patch
+Patch14: postgresql-pl-perl-test-case.patch
+Patch15: postgresql-SPI-s-handling-of-errors-during-transaction-comm.patch
 
 BuildRequires: make
 BuildRequires: gcc
@@ -426,6 +428,8 @@ goal of accelerating analytics queries.
 %patch9 -p1
 %patch10 -p1
 %patch13 -p1
+%patch14 -p1
+%patch15 -p1
 
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
@@ -1221,6 +1225,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Wed Aug 03 2022 Filip Januš <fjanus@redhat.com> - 14.3-3
+- Fix compatibility with perl
+
 * Wed Jun 29 2022 Filip Januš <fjanus@redhat.com> - 14.3-2
 - Rebuild based on https://bugzilla.redhat.com/show_bug.cgi?id=2100813
 
