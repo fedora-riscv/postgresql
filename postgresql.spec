@@ -65,7 +65,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 14
 Version: %{majorversion}.3
-Release: 8%{?dist}
+Release: 9%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -122,6 +122,8 @@ Patch14: postgresql-pgcrypto-openssl3-tests.patch
 Patch15: postgresql-SPI-s-handling-of-errors-during-transaction-comm.patch
 # Fix compatibility with Perl 5.36
 Patch16: postgresql-pl-perl-test-case.patch
+# Fix compatibility with LLVM 15
+Patch17: postgresql-llvm-15-compat.patch
 
 BuildRequires: make
 BuildRequires: lz4-devel
@@ -129,6 +131,7 @@ BuildRequires: gcc
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
 BuildRequires: perl(ExtUtils::Embed), perl-devel
 BuildRequires: perl(Opcode)
+BuildRequires: perl(FindBin)
 %if 0%{?fedora} || 0%{?rhel} > 7
 BuildRequires: perl-generators
 %endif
@@ -442,6 +445,7 @@ goal of accelerating analytics queries.
 %patch14 -p1
 %patch15 -p1
 %patch16 -p1
+%patch17 -p1
 # We used to run autoconf here, but there's no longer any real need to,
 # since Postgres ships with a reasonably modern configure script.
 
@@ -1262,6 +1266,10 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Thu Oct 20 2022 Daan De Meyer <daan.j.demeyer@gmail.com> - 14.3.11
+- Backport commit to fix builds with LLVM 15
+- Add missing perl FindBin BuildRequires
+
 * Mon Aug 01 2022 Frantisek Zatloukal <fzatlouk@redhat.com> - 14.3-8
 - Rebuilt for ICU 71.1
 
