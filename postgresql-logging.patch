@@ -1,16 +1,16 @@
-diff -up postgresql-14beta2/src/backend/utils/misc/postgresql.conf.sample.patch2 postgresql-14beta2/src/backend/utils/misc/postgresql.conf.sample
---- postgresql-14beta2/src/backend/utils/misc/postgresql.conf.sample.patch2	2021-06-21 23:07:55.000000000 +0200
-+++ postgresql-14beta2/src/backend/utils/misc/postgresql.conf.sample	2021-06-25 19:37:21.868632721 +0200
-@@ -435,7 +435,7 @@
- 					# requires logging_collector to be on.
+diff -up postgresql-15.0_original/src/backend/utils/misc/postgresql.conf.sample postgresql-15.0/src/backend/utils/misc/postgresql.conf.sample
+--- postgresql-15.0_original/src/backend/utils/misc/postgresql.conf.sample	2022-09-27 16:57:00.652909198 +0200
++++ postgresql-15.0/src/backend/utils/misc/postgresql.conf.sample	2022-09-27 17:01:56.073606108 +0200
+@@ -449,7 +449,7 @@
+ 					# logging_collector to be on.
  
  # This is used when logging to stderr:
--#logging_collector = off		# Enable capturing of stderr and csvlog
-+logging_collector = on			# Enable capturing of stderr and csvlog
- 					# into log files. Required to be on for
- 					# csvlogs.
+-#logging_collector = off		# Enable capturing of stderr, jsonlog,
++logging_collector = on			# Enable capturing of stderr, jsonlog,
+ 					# and csvlog into log files. Required
+ 					# to be on for csvlogs and jsonlogs.
  					# (change requires restart)
-@@ -443,16 +443,16 @@
+@@ -457,16 +457,16 @@
  # These are only used if logging_collector is on:
  #log_directory = 'log'			# directory where log files are written,
  					# can be absolute or relative to PGDATA
@@ -22,8 +22,7 @@ diff -up postgresql-14beta2/src/backend/utils/misc/postgresql.conf.sample.patch2
 -#log_rotation_age = 1d			# Automatic rotation of logfiles will
 +log_rotation_age = 1d			# Automatic rotation of logfiles will
  					# happen after that time.  0 disables.
--#log_rotation_size = 10MB		# Automatic rotation of logfiles will
-+log_rotation_size = 0			# Automatic rotation of logfiles will
+ #log_rotation_size = 10MB		# Automatic rotation of logfiles will
  					# happen after that much log output.
  					# 0 disables.
 -#log_truncate_on_rotation = off		# If on, an existing log file with the

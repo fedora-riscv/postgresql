@@ -47,12 +47,12 @@ diff -ur postgresql-14rc1/src/bin/pg_config/Makefile pgsql14/src/bin/pg_config/M
  	rm -rf tmp_check
  
  check:
-diff -ur postgresql-14rc1/src/bin/pg_config/nls.mk pgsql14/src/bin/pg_config/nls.mk
---- postgresql-14rc1/src/bin/pg_config/nls.mk	2021-09-20 23:33:01.000000000 +0200
-+++ pgsql14/src/bin/pg_config/nls.mk	2021-09-22 10:48:51.492460567 +0200
+diff -ur postgresql-15.0_original/src/bin/pg_config/nls.mk postgresql-15.0/src/bin/pg_config/nls.mk
+--- postgresql-15.0_original/src/bin/pg_config/nls.mk        2022-09-05 23:12:45.000000000 +0200
++++ postgresql-15.0/src/bin/pg_config/nls.mk 2022-09-27 17:04:14.618932977 +0200
 @@ -1,4 +1,4 @@
  # src/bin/pg_config/nls.mk
 -CATALOG_NAME     = pg_config
 +CATALOG_NAME     = pg_server_config
- AVAIL_LANGUAGES  = cs de el es fr he it ja ko pl pt_BR ru sv tr uk vi zh_CN
+ AVAIL_LANGUAGES  = cs de el es fr he it ja ka ko pl pt_BR ru sv tr uk vi zh_CN
  GETTEXT_FILES    = pg_config.c ../../common/config_info.c ../../common/exec.c
