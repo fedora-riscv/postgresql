@@ -64,7 +64,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 15
-Version: %{majorversion}beta2
+Version: %{majorversion}.1
 Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
@@ -1257,6 +1257,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Mon Dec 05 2022 Filip Janus <fjanus@redhat.com> - 15.1-1
+- Update to 15.1
+
 * Tue Jul 12 2022 Filip Janus <fjanus@redhat.com> - 15.beta2-1
 - Initilal build of postgresql 15
 - Remove obsolete patches
