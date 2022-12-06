@@ -64,7 +64,7 @@
 Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 15
-Version: %{majorversion}.0
+Version: %{majorversion}.1
 Release: 1%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
@@ -116,10 +116,6 @@ Patch9: postgresql-server-pg_config.patch
 # rhbz#1940964
 Patch10: postgresql-datalayout-mismatch-on-s390.patch
 Patch12: postgresql-no-libecpg.patch
-# This patch disables deprecated ciphers in the test suite
-Patch14: postgresql-pgcrypto-openssl3-tests.patch
-# This patch enables to build PostgreSQL 15 with llvm 15
-Patch15: postgresql-15.0-llvm_pointer.patch
 
 BuildRequires: make
 BuildRequires: lz4-devel
@@ -441,10 +437,6 @@ goal of accelerating analytics queries.
 %endif
 %patch9 -p1
 %patch10 -p1
-%patch14 -p1
-%patch15 -p1
-# We used to run autoconf here, but there's no longer any real need to,
-# since Postgres ships with a reasonably modern configure script.
 
 cp -p %{SOURCE1} .
 
@@ -1267,26 +1259,14 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
-* Tue Sep 27 2022 Ondrej Sloup <osloup@redhat.com> - 15.1-1
+* Tue Dec 06 2022 Filip Janus <fjanus@redhat.com> - 15.1-1
+- Update to 15.1
+
+* Tue Sep 27 2022 Ondrej Sloup <osloup@redhat.com> - 15.0-1
 - Update to v15
 - Add llvm pointer patch
 - Add new build require for perl-FindBin
 - Resolves: https://fedoraproject.org/wiki/Changes/PostgreSQL_15
-
-* Thu Sep 01 2022 Ondrej Sloup <osloup@redhat.com> - 14.3-10
-- Add dependency on util-linux to make runuser available (rhbz#2071437)
-
-* Mon Aug 29 2022 Filip Janus <fjanus@redhat.com> - 14.3-9
-- Do not provide pkgconfig(libpq) to not trick packages that actually require
-  libpq-devel
-- Resolves: #1980992
-- Resolves: #2121696
-
-* Mon Aug 01 2022 Frantisek Zatloukal <fzatlouk@redhat.com> - 14.3-8
-- Rebuilt for ICU 71.1
-
-* Fri Jul 22 2022 Fedora Release Engineering <releng@fedoraproject.org> - 14.3-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
 
 * Thu Jul 07 2022 Filip Januš <fjanus@redhat.com> - 14.3-6
 - enable lz4
