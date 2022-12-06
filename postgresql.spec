@@ -123,6 +123,7 @@ BuildRequires: gcc
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
 BuildRequires: perl(ExtUtils::Embed), perl-devel
 BuildRequires: perl(Opcode)
+BuildRequires: perl-FindBin
 %if 0%{?fedora} || 0%{?rhel} > 7
 BuildRequires: perl-generators
 %endif
@@ -186,7 +187,8 @@ BuildRequires:	libicu-devel
 %endif
 
 # https://bugzilla.redhat.com/1464368
-%global __provides_exclude_from %{_libdir}/pgsql
+# and do not provide pkgconfig RPM provides (RHBZ#1980992) and #2121696
+%global __provides_exclude_from %{_libdir}/(pgsql|pkgconfig)
 
 %description
 PostgreSQL is an advanced Object-Relational database management system (DBMS).
@@ -237,6 +239,8 @@ Requires(pre): /usr/sbin/useradd
 Requires: systemd
 # Make sure it's there when scriptlets run, too
 %{?systemd_requires}
+# We require this to be present for /usr/sbin/runuser when using --initdb (rhbz#2071437)
+Requires: util-linux
 # postgresql setup requires runuser from util-linux package
 BuildRequires: util-linux
 # Packages which provide postgresql plugins should build-require
@@ -433,8 +437,6 @@ goal of accelerating analytics queries.
 %endif
 %patch9 -p1
 %patch10 -p1
-# We used to run autoconf here, but there's no longer any real need to,
-# since Postgres ships with a reasonably modern configure script.
 
 cp -p %{SOURCE1} .
 
@@ -971,7 +973,6 @@ make -C postgresql-setup-%{setup_version} check
 %{_datadir}/pgsql/extension/intagg*
 %{_datadir}/pgsql/extension/intarray*
 %{_datadir}/pgsql/extension/isn*
-%{_datadir}/pgsql/extension/pg_walinspect*
 %if %{plperl}
 %{_datadir}/pgsql/extension/jsonb_plperl*
 %endif
@@ -990,6 +991,7 @@ make -C postgresql-setup-%{setup_version} check
 %{_datadir}/pgsql/extension/pg_surgery*
 %{_datadir}/pgsql/extension/pg_trgm*
 %{_datadir}/pgsql/extension/pg_visibility*
+%{_datadir}/pgsql/extension/pg_walinspect*
 %{_datadir}/pgsql/extension/pgcrypto*
 %{_datadir}/pgsql/extension/pgrowlocks*
 %{_datadir}/pgsql/extension/pgstattuple*
@@ -1019,9 +1021,6 @@ make -C postgresql-setup-%{setup_version} check
 %{_libdir}/pgsql/file_fdw.so
 %{_libdir}/pgsql/fuzzystrmatch.so
 %{_libdir}/pgsql/hstore.so
-%{_libdir}/pgsql/pg_walinspect.so
-%{_libdir}/pgsql/basic_archive.so
-%{_libdir}/pgsql/basebackup_to_shell.so
 %if %plperl
 %{_libdir}/pgsql/hstore_plperl.so
 %endif
@@ -1051,6 +1050,9 @@ make -C postgresql-setup-%{setup_version} check
 %{_libdir}/pgsql/pg_surgery.so
 %{_libdir}/pgsql/pg_trgm.so
 %{_libdir}/pgsql/pg_visibility.so
+%{_libdir}/pgsql/basebackup_to_shell.so
+%{_libdir}/pgsql/basic_archive.so
+%{_libdir}/pgsql/pg_walinspect.so
 %{_libdir}/pgsql/pgcrypto.so
 %{_libdir}/pgsql/pgrowlocks.so
 %{_libdir}/pgsql/pgstattuple.so
@@ -1257,12 +1259,14 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
-* Mon Dec 05 2022 Filip Janus <fjanus@redhat.com> - 15.1-1
+* Tue Dec 06 2022 Filip Janus <fjanus@redhat.com> - 15.1-1
 - Update to 15.1
 
-* Tue Jul 12 2022 Filip Janus <fjanus@redhat.com> - 15.beta2-1
-- Initilal build of postgresql 15
-- Remove obsolete patches
+* Tue Sep 27 2022 Ondrej Sloup <osloup@redhat.com> - 15.0-1
+- Update to v15
+- Add llvm pointer patch
+- Add new build require for perl-FindBin
+- Resolves: https://fedoraproject.org/wiki/Changes/PostgreSQL_15
 
 * Thu Jul 07 2022 Filip Januš <fjanus@redhat.com> - 14.3-6
 - enable lz4

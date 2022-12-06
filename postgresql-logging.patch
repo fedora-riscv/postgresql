@@ -1,6 +1,6 @@
-diff -ur postgresql-15beta2/src/backend/utils/misc/postgresql.conf.sample patched/src/backend/utils/misc/postgresql.conf.sample
---- postgresql-15beta2/src/backend/utils/misc/postgresql.conf.sample	2022-06-27 22:11:56.000000000 +0200
-+++ patched/src/backend/utils/misc/postgresql.conf.sample	2022-07-12 12:19:31.000000000 +0200
+diff -up postgresql-15.0_original/src/backend/utils/misc/postgresql.conf.sample postgresql-15.0/src/backend/utils/misc/postgresql.conf.sample
+--- postgresql-15.0_original/src/backend/utils/misc/postgresql.conf.sample	2022-09-27 16:57:00.652909198 +0200
++++ postgresql-15.0/src/backend/utils/misc/postgresql.conf.sample	2022-09-27 17:01:56.073606108 +0200
 @@ -449,7 +449,7 @@
  					# logging_collector to be on.
  
@@ -22,8 +22,7 @@ diff -ur postgresql-15beta2/src/backend/utils/misc/postgresql.conf.sample patche
 -#log_rotation_age = 1d			# Automatic rotation of logfiles will
 +log_rotation_age = 1d			# Automatic rotation of logfiles will
  					# happen after that time.  0 disables.
--#log_rotation_size = 10MB		# Automatic rotation of logfiles will
-+log_rotation_size = 0			# Automatic rotation of logfiles will
+ #log_rotation_size = 10MB		# Automatic rotation of logfiles will
  					# happen after that much log output.
  					# 0 disables.
 -#log_truncate_on_rotation = off		# If on, an existing log file with the
