@@ -115,8 +115,6 @@ Patch8: postgresql-external-libpq.patch
 Patch9: postgresql-server-pg_config.patch
 Patch10: postgresql-10.15-contrib-dblink-expected-out.patch
 Patch11: postgresql-datalayout-mismatch-on-s390.patch
-Patch12: postgresql-pl-perl-test-case.patch
-Patch13: postgresql-SPI-s-handling-of-errors-during-transaction-comm.patch
 
 BuildRequires: gcc
 BuildRequires: perl(ExtUtils::MakeMaker) glibc-devel bison flex gawk
@@ -407,8 +405,6 @@ goal of accelerating analytics queries.
 %patch10 -p1
 %endif
 %patch11 -p1
-%patch12 -p1
-%patch13 -p1
 
 
 # We used to run autoconf here, but there's no longer any real need to,
