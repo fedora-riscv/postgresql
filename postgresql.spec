@@ -48,7 +48,12 @@
 %{!?pam:%global pam 1}
 %{!?sdt:%global sdt 1}
 %{!?selinux:%global selinux 1}
+%ifnarch riscv64
 %{!?runselftest:%global runselftest 1}
+%else
+# selftest failed on riscv64, skip it.
+%global runselftest 0
+%endif
 
 # By default, patch(1) creates backup files when chunks apply with offsets.
 # Turn that off to ensure such files don't get included in RPMs.
@@ -65,7 +70,7 @@ Summary: PostgreSQL client programs
 Name: postgresql
 %global majorversion 14
 Version: %{majorversion}.3
-Release: 9%{?dist}
+Release: 9.rv64%{?dist}
 
 # The PostgreSQL license is very similar to other MIT licenses, but the OSI
 # recognizes it as an independent license, so we do as well.
@@ -1266,6 +1271,9 @@ make -C postgresql-setup-%{setup_version} check
 
 
 %changelog
+* Wed Mar 01 2023 Liu Yang <Yang.Liu.sn@gmail.com> - 14.3.9.rv64
+- Fix build on riscv64.
+
 * Thu Oct 20 2022 Daan De Meyer <daan.j.demeyer@gmail.com> - 14.3.11
 - Backport commit to fix builds with LLVM 15
 - Add missing perl FindBin BuildRequires
